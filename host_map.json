@@ -1,0 +1,1018 @@
+{
+  "10.27.101.1": {
+    "name": "cc-main",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.2": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.3": {
+    "name": "waf-oasis",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.4": {
+    "name": "netflow testing (till 31MAY2026)",
+    "type": ""
+  },
+  "10.27.101.5": {
+    "name": "netflow testing  (till 31MAY2026)",
+    "type": ""
+  },
+  "10.27.101.6": {
+    "name": "",
+    "type": "Local Storage"
+  },
+  "10.27.101.7": {
+    "name": "netflow testing  (till 31MAY2026)",
+    "type": ""
+  },
+  "10.27.101.8": {
+    "name": "netflow testing  (till 31MAY2026)",
+    "type": ""
+  },
+  "10.27.101.9": {
+    "name": "web-portal",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.10": {
+    "name": "QNAP-20",
+    "type": "NAS"
+  },
+  "10.27.101.11": {
+    "name": "teedy-app",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.12": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.13": {
+    "name": "WAF - pconline",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.14": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.15": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.16": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.17": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.18": {
+    "name": "Web-Lib WP (libwp)",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.19": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.20": {
+    "name": "Multi-01 (APACHE GUACAMOLE)",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.21": {
+    "name": "TestLabs-21-101-200",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.22": {
+    "name": "Test-App-02 (os.muic.io)",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.23": {
+    "name": "Test-App-03 (teedy)",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.24": {
+    "name": "packetfence",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.25": {
+    "name": "Net-NPS-200 (unifi-controller)",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.26": {
+    "name": "netbox",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.27": {
+    "name": "IC-Payment-v2",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.28": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.29": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.30": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.31": {
+    "name": "ic-dnsmasq",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.32": {
+    "name": "Graylog",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.33": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.34": {
+    "name": "keycloak-200-1",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.35": {
+    "name": "minio",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.36": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.37": {
+    "name": "FinanceServer_v2 (finserver)",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.38": {
+    "name": "ED-WP (ed-wp)",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.39": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.40": {
+    "name": "DB-IC-199 (db-0)",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.41": {
+    "name": "waf-wiki",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.42": {
+    "name": "sky-ad.sky.local-11JUN2022",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.43": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.44": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.45": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.46": {
+    "name": "Airflow",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.47": {
+    "name": "EDX-App-251",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.48": {
+    "name": "VeeamBak-05",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.49": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.50": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.51": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.52": {
+    "name": "ic-db-200",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.53": {
+    "name": "waf-poc",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.54": {
+    "name": "VEEAM-11-03",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.55": {
+    "name": "QNAP-01",
+    "type": "NAS"
+  },
+  "10.27.101.56": {
+    "name": "QNAP-02",
+    "type": "NAS"
+  },
+  "10.27.101.57": {
+    "name": "QNAP-06",
+    "type": "NAS"
+  },
+  "10.27.101.58": {
+    "name": "QNAP-07",
+    "type": "NAS"
+  },
+  "10.27.101.59": {
+    "name": "QNAP-08",
+    "type": "NAS"
+  },
+  "10.27.101.60": {
+    "name": "QNAP-09-Lib",
+    "type": "NAS"
+  },
+  "10.27.101.61": {
+    "name": "legacy-nfs",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.62": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.63": {
+    "name": "VEEAM-11-04",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.64": {
+    "name": "QNAP-10",
+    "type": "NAS"
+  },
+  "10.27.101.65": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.66": {
+    "name": "waf-lib",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.67": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.68": {
+    "name": "QNAP-13",
+    "type": "NAS"
+  },
+  "10.27.101.69": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.70": {
+    "name": "QNAP-14",
+    "type": "NAS"
+  },
+  "10.27.101.71": {
+    "name": "kong-api",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.72": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.73": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.74": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.75": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.76": {
+    "name": "VEEAM-Backup-11",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.77": {
+    "name": "ubu-poc (Legacy-App-03)",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.78": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.79": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.80": {
+    "name": "QNAP-15",
+    "type": "NAS"
+  },
+  "10.27.101.81": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.82": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.83": {
+    "name": "Sci-Div-01v2 (cs.muic.mahidol.ac.th)",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.84": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.85": {
+    "name": "VEEAM-11-02",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.86": {
+    "name": "it-helpdesk",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.87": {
+    "name": "Kong-Legacy-199 (Routing)",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.88": {
+    "name": "QNAP-16",
+    "type": "NAS"
+  },
+  "10.27.101.89": {
+    "name": "HR Plus",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.90": {
+    "name": "QNAP-17",
+    "type": "NAS"
+  },
+  "10.27.101.91": {
+    "name": "it-helpdesk",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.92": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.93": {
+    "name": "dspace",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.94": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.95": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.96": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.97": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.98": {
+    "name": "muproxy-243",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.99": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.100": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.101": {
+    "name": "HP Proliant DL560 Gen 8 (SKY)",
+    "type": "Server"
+  },
+  "10.27.101.102": {
+    "name": "muic.ad.muic.io",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.103": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.104": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.105": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.106": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.107": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.108": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.109": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.110": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.111": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.112": {
+    "name": "gitlab-ic",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.113": {
+    "name": "apisix-demo",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.114": {
+    "name": "swarm-234",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.115": {
+    "name": "swarm-243",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.116": {
+    "name": "swarm-200",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.117": {
+    "name": "swarm-199",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.118": {
+    "name": "ic-elearning",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.119": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.120": {
+    "name": "HP Proliant DL560 Gen 8 (SKY)",
+    "type": "Server"
+  },
+  "10.27.101.121": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.122": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.123": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.124": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.125": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.126": {
+    "name": "HP Proliant DL380G7",
+    "type": "Server"
+  },
+  "10.27.101.127": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.128": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.129": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.130": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.131": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.132": {
+    "name": "k8s control",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.133": {
+    "name": "Cloud-sync.muic.io",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.134": {
+    "name": "HP Proliant DL560 Gen 8 (SKY)",
+    "type": "Server"
+  },
+  "10.27.101.135": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.136": {
+    "name": "Sky-IA-02",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.137": {
+    "name": "Sky-IA-01",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.138": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.139": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.140": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.141": {
+    "name": "k3s-node-01",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.142": {
+    "name": "k3s-node-02 (node-02)",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.143": {
+    "name": "k3s-node-03",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.144": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.145": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.146": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.147": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.148": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.149": {
+    "name": "DELL PowerEdge R610",
+    "type": "Server"
+  },
+  "10.27.101.150": {
+    "name": "WinDBTStart-01-134",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.151": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.152": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.153": {
+    "name": "keycloak-199",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.154": {
+    "name": "Wifi-DNSMASQ",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.155": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.156": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.157": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.158": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.159": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.160": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.161": {
+    "name": "PR-Notification",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.162": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.163": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.164": {
+    "name": "iforgot (https://accounts.muic.io/)",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.165": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.166": {
+    "name": "Web-Dspace-126 Rev03",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.167": {
+    "name": "Zabbix",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.168": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.169": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.170": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.171": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.172": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.173": {
+    "name": "PC-Rewrite-Test",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.174": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.175": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.176": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.177": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.178": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.179": {
+    "name": "ป.โท",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.180": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.181": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.182": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.183": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.184": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.185": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.186": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.187": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.188": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.189": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.190": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.191": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.192": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.193": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.194": {
+    "name": "Ubuntu-Prometheus",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.195": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.196": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.197": {
+    "name": "Ubuntu-For Testing",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.198": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.199": {
+    "name": "DELL PowerEdge R750",
+    "type": "Server"
+  },
+  "10.27.101.200": {
+    "name": "DELL PowerEdge R750",
+    "type": "Server"
+  },
+  "10.27.101.201": {
+    "name": "DELL PowerEdge R610",
+    "type": "Server"
+  },
+  "10.27.101.202": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.203": {
+    "name": "k3s-Control",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.204": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.205": {
+    "name": "DELL PowerEdge R610",
+    "type": "Server"
+  },
+  "10.27.101.206": {
+    "name": "ic-data",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.207": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.208": {
+    "name": "HP ProLiant DL360p Gen8",
+    "type": "Server"
+  },
+  "10.27.101.209": {
+    "name": "GLPI",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.210": {
+    "name": "sky-Grad-Portal",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.211": {
+    "name": "Wazuh-munet",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.212": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.213": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.214": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.215": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.216": {
+    "name": "swarm-NFS-199 (web-enroll)",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.217": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.218": {
+    "name": "sky-ad.sky.local (สนามเด็กเล่นของวา)",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.219": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.220": {
+    "name": "DELL PowerEdge 630",
+    "type": "Server"
+  },
+  "10.27.101.221": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.222": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.223": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.224": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.225": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.226": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.227": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.228": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.229": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.230": {
+    "name": "DELL PowerEdge 630",
+    "type": "Server"
+  },
+  "10.27.101.231": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.232": {
+    "name": "KeystoneApp-Prod-01 (kapp01)",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.233": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.234": {
+    "name": "DELL PowerEdge 640 (SKY+)",
+    "type": "Server"
+  },
+  "10.27.101.235": {
+    "name": "KeystoneApp-UAT",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.236": {
+    "name": "ks-nfs",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.237": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.238": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.239": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.240": {
+    "name": "DELL PowerEdge 630",
+    "type": "Server"
+  },
+  "10.27.101.241": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.242": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.243": {
+    "name": "DELL PowerEdge 640 (SKY+)",
+    "type": "Server"
+  },
+  "10.27.101.244": {
+    "name": "Keystone-DB-01",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.245": {
+    "name": "Keystone-DB-02",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.246": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.247": {
+    "name": "mail-relay",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.248": {
+    "name": "mail-relay-ED-200",
+    "type": "Virtual Machine"
+  },
+  "10.27.101.249": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.250": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.251": {
+    "name": "DELL PowerEdge R610",
+    "type": "Server"
+  },
+  "10.27.101.252": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.253": {
+    "name": "",
+    "type": ""
+  },
+  "10.27.101.254": {
+    "name": "Default gateway",
+    "type": ""
+  }
+}

@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Intelligence Dashboard | Enterprise Traffic Analysis</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg: #09090b;
+            --sidebar: #111114;
+            --surface: #18181b;
+            --surface-hover: #27272a;
+            --border: #3f3f46;
+            --text-main: #f4f4f5;
+            --text-muted: #a1a1aa;
+            --primary: #3b82f6;
+            --primary-glow: rgba(59, 130, 246, 0.4);
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --sidebar-width: 260px;
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--sidebar);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            z-index: 100;
+        }
+        .sidebar-header {
+            padding: 2rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .sidebar-header h1 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: -0.01em;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .sidebar-nav {
+            flex: 1;
+            padding: 1.5rem 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .nav-item {
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .nav-item:hover {
+            color: var(--text-main);
+            background: var(--surface-hover);
+        }
+        .nav-item.active {
+            color: var(--text-main);
+            background: var(--surface);
+            box-shadow: inset 0 0 0 1px var(--border);
+            border-left: 3px solid var(--primary);
+        }
+        .sidebar-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--border);
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .header-bar {
+            padding: 1.5rem 2rem;
+            background: rgba(9, 9, 11, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 90;
+        }
+        .header-title h2 { margin: 0; font-size: 1.25rem; font-weight: 600; }
+        .header-title p { margin: 0.25rem 0 0 0; font-size: 0.85rem; color: var(--text-muted); }
+
+        .content-body {
+            padding: 2rem;
+            max-width: 1600px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Dashboard Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 1.5rem;
+        }
+        .span-12 { grid-column: span 12; }
+        .span-8 { grid-column: span 8; }
+        .span-6 { grid-column: span 6; }
+        .span-4 { grid-column: span 4; }
+        .span-3 { grid-column: span 3; }
+
+        /* Cards */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.25rem;
+        }
+        .card-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        /* Stats */
+        .stat-value {
+            font-size: 2.25rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+            color: var(--primary);
+        }
+        .stat-label { font-size: 0.85rem; color: var(--text-muted); }
+
+        /* Chart Wrappers */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        /* Tables */
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        th, td {
+            text-align: left;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        th { background: #111114; color: var(--text-muted); font-weight: 600; }
+        tr:hover td { background: rgba(255,255,255,0.02); }
+        .mono { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; }
+
+        /* Tabs (used in PoC) */
+        .tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+        .tab-btn {
+            background: transparent; border: none; color: var(--text-muted);
+            padding: 0.5rem 1rem; cursor: pointer; border-radius: 6px; font-weight: 500; transition: all 0.2s;
+        }
+        .tab-btn:hover { background: var(--surface-hover); color: var(--text-main); }
+        .tab-btn.active { color: var(--primary); background: rgba(59, 130, 246, 0.1); }
+
+        /* Drop Zone Styles */
+        #loader {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--bg); display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 1000; transition: opacity 0.5s ease;
+        }
+        .drop-zone {
+            border: 2px dashed var(--border); border-radius: 20px; padding: 4rem; text-align: center;
+            background: rgba(255,255,255,0.02); cursor: pointer; transition: all 0.3s ease; max-width: 600px; width: 90%;
+        }
+        .drop-zone:hover { border-color: var(--primary); background: rgba(59, 130, 246, 0.05); }
+        
+        /* PoC Demo Styling */
+        .demo-container { background: #000; border-radius: 8px; padding: 1.5rem; max-height: 500px; overflow-y: auto; }
+        .mapping-row { display: flex; gap: 1rem; margin-bottom: 1rem; align-items: center; }
+        .demo-panel { flex: 1; padding: 1rem; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; border: 1px solid var(--border); }
+        .demo-panel.json { border-left: 3px solid var(--primary); color: var(--text-muted); }
+        .demo-panel.acl { border-left: 3px solid var(--success); color: var(--success); }
+        .json-key { color: #38bdf8; } .json-string { color: #a78bfa; } .json-number { color: #fbbf24; }
+
+        .badge { padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; }
+        .badge-tcp { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+        .badge-udp { background: rgba(167, 139, 250, 0.2); color: #a78bfa; }
+        .badge-icmp { background: rgba(244, 63, 94, 0.2); color: #f43f5e; }
+    </style>
+</head>
+<body>
+
+    <!-- Data Import Overlay -->
+    <div id="loader">
+        <div class="drop-zone" id="dropZone">
+            <h2 style="font-size: 1.5rem; margin-bottom: 1rem;">Network Intelligence Engine</h2>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">Drag and drop your <code>notlike101_traffic_combined.json</code> <br> to begin technical analysis.</p>
+            <button style="background: var(--primary); color: white; border: none; padding: 0.8rem 2rem; border-radius: 8px; font-weight: 600; cursor: pointer;" onclick="document.getElementById('fileInput').click()">Select Data File</button>
+            <input type="file" id="fileInput" accept=".json" style="display:none;">
+        </div>
+        <div id="loadingStatus" style="display: none; margin-top: 2rem; color: var(--primary); font-weight: 500;">
+            Aggregating Flow Telemetry...
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+            <h1><span style="color:var(--text-main)">Net</span>Observe</h1>
+        <nav class="sidebar-nav">
+            <a class="nav-item active" onclick="switchPage('overview', this)">
+                <span>📊</span> Overview
+            </a>
+            <a class="nav-item" onclick="switchPage('analytics', this)">
+                <span>📡</span> Traffic Analytics
+            </a>
+            <a class="nav-item" onclick="switchPage('hosts', this)">
+                <span>🖥️</span> Host Intelligence
+            </a>
+            <a class="nav-item" onclick="switchPage('security', this)">
+                <span>🛡️</span> Security & ACL PoC
+            </a>
+            <a class="nav-item" onclick="switchPage('hygiene', this)">
+                <span>🧹</span> Network Hygiene
+            </a>
+            <a class="nav-item" onclick="switchPage('logs', this)">
+                <span>📋</span> Raw Flow Logs
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            v2.4.0-technical-build<br>
+            Target: 10.27.101.0/24
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <header class="header-bar">
+            <div class="header-title">
+                <h2 id="pageTitle">Network Overview</h2>
+                <p id="pageSubtitle">Executive summary of network behavior and traffic baseline.</p>
+            </div>
+            <div id="currentDate" style="color: var(--text-muted); font-size: 0.9rem;"></div>
+        </header>
+
+        <div class="content-body">
+            
+            <!-- PAGE: OVERVIEW -->
+            <section id="page-overview" class="page-section">
+                <div class="grid">
+                    <div class="card span-4">
+                        <div class="stat-label">Total Unique Flows</div>
+                        <div class="stat-value" id="stat-flows">0</div>
+                        <div style="font-size: 0.8rem; color: var(--success);">↑ Analysis Complete</div>
+                    </div>
+                    <div class="card span-4">
+                        <div class="stat-label">Data Volume (Gb)</div>
+                        <div class="stat-value" id="stat-gb">0</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">Summed Inbound/Outbound</div>
+                    </div>
+                    <div class="card span-4">
+                        <div class="stat-label">Identified Services</div>
+                        <div class="stat-value" id="stat-services">0</div>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">TCP/UDP Endpoints</div>
+                    </div>
+
+                    <div class="card span-12">
+                        <h3 class="card-title">Strategic Network Baseline</h3>
+                        <p style="line-height: 1.8; margin-top: 0;">
+                            Technical analysis of the <code>10.27.101.0/24</code> subnet reveals a structured baseline of business-critical traffic. 
+                            The majority of flows are centralized around core infrastructure hosts, predominantly using encrypted web and management protocols. 
+                            This data-driven approach identifies exactly which external and internal entities require access, enabling a true **Zero-Trust** posture.
+                        </p>
+                    </div>
+
+                    <div class="card span-6">
+                        <h3 class="card-title">Protocol Distribution</h3>
+                        <div class="chart-container">
+                            <canvas id="chart-proto"></canvas>
+                        </div>
+                    </div>
+                    <div class="card span-6">
+                        <h3 class="card-title">Source Zones & Definitions</h3>
+                        <div class="chart-container" style="height: 200px;">
+                            <canvas id="chart-zones"></canvas>
+                        </div>
+                        <div style="margin-top: 1.5rem; font-size: 0.85rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+                            <div style="margin-bottom: 0.75rem;">
+                                <strong style="color: var(--success);">Internal (Private):</strong> Sources within your private address space (e.g., <code>10.x.x.x</code>). 
+                                <br><span style="color: var(--text-muted);">Example: Office WiFi, Local Servers.</span>
+                            </div>
+                            <div>
+                                <strong style="color: var(--warning);">External (Public):</strong> Sources originating from the Internet. 
+                                <br><span style="color: var(--text-muted);">Example: Cloud APIs, External Partners.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PAGE: ANALYTICS -->
+            <section id="page-analytics" class="page-section" style="display:none">
+                <div class="grid">
+                    <div class="card span-8">
+                        <h3 class="card-title">Top Targeted Destination Ports</h3>
+                        <div class="chart-container">
+                            <canvas id="chart-ports"></canvas>
+                        </div>
+                    </div>
+                    <div class="card span-4">
+                        <h3 class="card-title">Service Type Baseline</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted);">Categorized by well-known port mapping.</p>
+                        <div id="service-list" style="margin-top: 1rem;">
+                            <!-- Dynamic list -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PAGE: HOSTS -->
+            <section id="page-hosts" class="page-section" style="display:none">
+                <div class="grid">
+                    <div class="card span-12">
+                        <h3 class="card-title">Top 10 Internal Hosts by Traffic</h3>
+                        <div class="chart-container" style="height: 400px;">
+                            <canvas id="chart-hosts"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="card span-12" style="margin-top: 1.5rem;">
+                        <h3 class="card-title">Host Lookup & Service Identity</h3>
+                        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:1rem;">Search specific 10.27.101.x hosts to see their identity and technical profile.</p>
+                        <div style="display:flex; gap:10px; margin-bottom: 1.5rem;">
+                            <input type="text" id="hostSearchInput" placeholder="Enter IP (e.g. 10.27.101.47)" style="flex:1; background:var(--bg); color:white; border:1px solid var(--border); padding: 0.6rem 1rem; border-radius: 6px; outline:none;">
+                            <button style="background:var(--primary); color:white; border:none; padding: 0.6rem 1.5rem; border-radius: 6px; cursor:pointer; font-weight:600;" onclick="searchHostDetails()">Lookup Host</button>
+                        </div>
+                        <div id="hostDetailsResult" style="padding:1.5rem; background:rgba(0,0,0,0.2); border-radius:8px; border:1px solid var(--border);">
+                            <p style="color:var(--text-muted); font-style:italic; text-align:center; margin:0;">Enter an internal IP to see its traffic profile and service identity from host_map.json</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- PAGE: SECURITY -->
+            <section id="page-security" class="page-section" style="display:none">
+                <div class="card">
+                    <h3 class="card-title">Automated Policy Translation (PoC)</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+                        Transforming empirical NetFlow observations into production-ready security policies.
+                    </p>
+                    <div class="tabs">
+                        <button class="tab-btn active" onclick="setAclFormat('cisco', this)">Cisco IOS</button>
+                        <button class="tab-btn" onclick="setAclFormat('mikrotik', this)">MikroTik</button>
+                        <button class="tab-btn" onclick="setAclFormat('pfsense', this)">pfSense</button>
+                    </div>
+                    <div class="demo-container" id="security-poc-output">
+                        <!-- Dynamic output -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- PAGE: HYGIENE -->
+            <section id="page-hygiene" class="page-section" style="display:none">
+                <div class="grid">
+                    <div class="card span-6">
+                        <h3 class="card-title">Management Traffic Detection</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted);">Identification of SSH, RDP, and Telnet protocols.</p>
+                        <div id="mgmt-traffic-stats" style="margin-top: 1rem;"></div>
+                    </div>
+                    <div class="card span-6">
+                        <h3 class="card-title">Clear-text vs Encrypted</h3>
+                        <p style="font-size: 0.85rem; color: var(--text-muted);">Ratio of HTTP (Port 80) vs HTTPS (Port 443).</p>
+                        <div class="chart-container" style="height: 200px;">
+                            <canvas id="chart-hygiene"></canvas>
+                        </div>
+                    </div>
+                    <div class="card span-12">
+                        <h3 class="card-title">Top 10 Most Active Source IPs</h3>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr><th>Source IP</th><th>Total Flows</th><th>Distinct Dest Ports</th><th>Zone</th></tr>
+                                </thead>
+                                <tbody id="topSourcesBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <section id="page-logs" class="page-section" style="display:none">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Full Flow Telemetry Log</h3>
+                        <input type="text" id="logSearch" placeholder="Filter by IP, Port..." style="padding: 0.4rem 0.8rem; border-radius: 6px; background: var(--bg); border: 1px solid var(--border); color: white; width: 250px;">
+                    </div>
+                    <div class="table-container">
+                        <table id="logsTable">
+                            <thead>
+                                <tr>
+                                    <th>Proto</th>
+                                    <th>Source IP</th>
+                                    <th>Destination IP</th>
+                                    <th>Port</th>
+                                    <th>Flows</th>
+                                    <th>Traffic</th>
+                                </tr>
+                            </thead>
+                            <tbody id="logsTableBody">
+                                <!-- Dynamic rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <script>
+        document.getElementById('currentDate').innerText = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+        // Global State
+        let rawData = null;
+        let hostMap = {};
+        let activeAclFormat = 'cisco';
+        let charts = {};
+
+        // Switch Dashboard Pages
+        function switchPage(pageId, element) {
+            document.querySelectorAll('.page-section').forEach(p => p.style.display = 'none');
+            document.getElementById('page-' + pageId).style.display = 'block';
+            
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            element.classList.add('active');
+
+            // Update Header
+            const titles = {
+                overview: { t: 'Network Overview', s: 'Strategic summary of network behavior.' },
+                analytics: { t: 'Traffic Analytics', s: 'Deep dive into protocols, ports, and services.' },
+                hosts: { t: 'Host Intelligence', s: 'Identification and analysis of specific internal nodes.' },
+                hygiene: { t: 'Network Hygiene', s: 'Security-focused analysis of protocols and traffic patterns.' },
+                security: { t: 'Security & ACL PoC', s: 'Automated translation of flows into firewall rules.' },
+                logs: { t: 'Raw Flow Logs', s: 'Searchable database of all identified network connections.' }
+            };
+            document.getElementById('pageTitle').innerText = titles[pageId].t;
+            document.getElementById('pageSubtitle').innerText = titles[pageId].s;
+        }
+
+        // Data Processing
+        function processData(data) {
+            rawData = data.hits || [];
+            
+            // Stats
+            document.getElementById('stat-flows').innerText = rawData.length.toLocaleString();
+            let totalGb = 0;
+            const uniquePorts = new Set();
+            rawData.forEach(h => {
+                totalGb += (h.total_gb || 0);
+                if (h.dst_port) uniquePorts.add(h.dst_port);
+            });
+            document.getElementById('stat-gb').innerText = (totalGb * 8).toLocaleString(); // Gigabits
+            document.getElementById('stat-services').innerText = uniquePorts.size.toLocaleString();
+
+            renderOverviewCharts();
+            renderAnalyticsCharts();
+            renderHostCharts();
+            renderHygieneCharts();
+            renderSecurityPoc();
+            renderLogsTable();
+        }
+
+        function renderOverviewCharts() {
+            // Protocol Donut
+            const protos = {};
+            rawData.forEach(h => {
+                const p = (h.proto || 'Other').toUpperCase();
+                protos[p] = (protos[p] || 0) + 1;
+            });
+
+            if (charts.proto) charts.proto.destroy();
+            charts.proto = new Chart(document.getElementById('chart-proto'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(protos),
+                    datasets: [{
+                        data: Object.values(protos),
+                        backgroundColor: ['#3b82f6', '#a78bfa', '#f43f5e', '#10b981'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
+
+            // Source Zones (Internal vs External)
+            let internal = 0, external = 0;
+            rawData.forEach(h => {
+                if (h.src_addr && h.src_addr.startsWith('10.')) internal++;
+                else external++;
+            });
+
+            if (charts.zones) charts.zones.destroy();
+            charts.zones = new Chart(document.getElementById('chart-zones'), {
+                type: 'bar',
+                data: {
+                    labels: ['Internal (Private)', 'External (Public)'],
+                    datasets: [{
+                        label: 'Flow Count',
+                        data: [internal, external],
+                        backgroundColor: ['#10b981', '#f59e0b'],
+                        borderRadius: 6
+                    }]
+                },
+                options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+        }
+
+        function renderAnalyticsCharts() {
+            // Top Ports
+            const ports = {};
+            rawData.forEach(h => {
+                if (h.dst_port) ports[h.dst_port] = (ports[h.dst_port] || 0) + (h.total_flows || 1);
+            });
+            const topPorts = Object.entries(ports).sort((a,b) => b[1] - a[1]).slice(0, 10);
+
+            if (charts.ports) charts.ports.destroy();
+            charts.ports = new Chart(document.getElementById('chart-ports'), {
+                type: 'bar',
+                data: {
+                    labels: topPorts.map(p => 'Port ' + p[0]),
+                    datasets: [{
+                        data: topPorts.map(p => p[1]),
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 6
+                    }]
+                },
+                options: { indexAxis: 'y', maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+
+            // Service List
+            const serviceMap = { 80: 'HTTP', 443: 'HTTPS', 22: 'SSH', 53: 'DNS', 3389: 'RDP', 445: 'SMB', 3306: 'MySQL', 5432: 'PostgreSQL' };
+            let html = '';
+            topPorts.slice(0, 5).forEach(p => {
+                const name = serviceMap[p[0]] || 'Unknown Service';
+                html += `
+                    <div style="display:flex; justify-content:space-between; padding:0.75rem 0; border-bottom:1px solid var(--border);">
+                        <span>Port ${p[0]} (${name})</span>
+                        <span style="color:var(--primary)">${p[1].toLocaleString()} flows</span>
+                    </div>
+                `;
+            });
+            document.getElementById('service-list').innerHTML = html;
+        }
+
+        function renderHostCharts() {
+            const hostTraffic = {};
+            rawData.forEach(h => {
+                const ip = h.dst_addr;
+                if (ip && ip.startsWith('10.27.101.')) {
+                    hostTraffic[ip] = (hostTraffic[ip] || 0) + (h.total_gb || 0);
+                }
+            });
+            const topHosts = Object.entries(hostTraffic).sort((a,b) => b[1] - a[1]).slice(0, 10);
+
+            if (charts.hosts) charts.hosts.destroy();
+            charts.hosts = new Chart(document.getElementById('chart-hosts'), {
+                type: 'bar',
+                data: {
+                    labels: topHosts.map(h => (hostMap[h[0]]?.name ? `${h[0]} (${hostMap[h[0]].name})` : h[0])),
+                    datasets: [{
+                        label: 'Total Traffic (GB)',
+                        data: topHosts.map(h => h[1]),
+                        backgroundColor: '#10b981',
+                        borderRadius: 8
+                    }]
+                },
+                options: { maintainAspectRatio: false, plugins: { legend: { display: false } } }
+            });
+        }
+
+        function searchHostDetails() {
+            const ip = document.getElementById('hostSearchInput').value.trim();
+            const resultDiv = document.getElementById('hostDetailsResult');
+            
+            if (!ip) return;
+            
+            const hostInfo = hostMap[ip] || { name: 'Unknown Host', type: 'Not Specified' };
+            const traffic = rawData.filter(h => h.dst_addr === ip);
+            
+            if (traffic.length === 0) {
+                resultDiv.innerHTML = `<p style="color:var(--danger); text-align:center;">No traffic data found for ${ip} in the current dataset.</p>`;
+                return;
+            }
+            
+            let totalGb = 0;
+            const sources = new Set();
+            const ports = {};
+            
+            traffic.forEach(h => {
+                totalGb += (h.total_gb || 0);
+                sources.add(h.src_addr);
+                if (h.dst_port) ports[h.dst_port] = (ports[h.dst_port] || 0) + (h.total_flows || 1);
+            });
+            
+            const sortedPorts = Object.entries(ports).sort((a,b) => b[1] - a[1]);
+            
+            let html = `
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                    <div>
+                        <h4 style="color:var(--primary); margin: 0 0 1rem 0; border-bottom:1px solid var(--border); padding-bottom:0.5rem;">Host Identity</h4>
+                        <p style="margin:0.5rem 0;"><span style="color:var(--text-muted)">Hostname:</span> <strong style="color:white">${hostInfo.name || 'Unknown'}</strong></p>
+                        <p style="margin:0.5rem 0;"><span style="color:var(--text-muted)">Category:</span> <strong style="color:white">${hostInfo.type || 'N/A'}</strong></p>
+                        <p style="margin:0.5rem 0;"><span style="color:var(--text-muted)">IP Address:</span> <strong style="color:white">${ip}</strong></p>
+                    </div>
+                    <div>
+                        <h4 style="color:var(--success); margin: 0 0 1rem 0; border-bottom:1px solid var(--border); padding-bottom:0.5rem;">Technical Metrics</h4>
+                        <p style="margin:0.5rem 0;"><span style="color:var(--text-muted)">Total Data Volume:</span> <strong style="color:var(--success)">${(totalGb * 8).toFixed(2)} Gb</strong></p>
+                        <p style="margin:0.5rem 0;"><span style="color:var(--text-muted)">Concurrent Sources:</span> <strong style="color:white">${sources.size.toLocaleString()} IPs</strong></p>
+                        <p style="margin:0.5rem 0;"><span style="color:var(--text-muted)">Active Services:</span> <strong style="color:var(--warning)">${sortedPorts.length} unique ports</strong></p>
+                    </div>
+                </div>
+                <div style="margin-top: 1.5rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+                    <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0.5rem;">Top Ports for this Host:</p>
+                    <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                        ${sortedPorts.slice(0, 8).map(p => `<span class="badge badge-tcp">Port ${p[0]}</span>`).join('')}
+                    </div>
+                </div>
+            `;
+            resultDiv.innerHTML = html;
+        }
+
+        function renderHygieneCharts() {
+            // Management Traffic Stats
+            const mgmtPorts = { 22: 'SSH', 3389: 'RDP', 23: 'Telnet', 5900: 'VNC' };
+            const mgmtStats = {};
+            rawData.forEach(h => {
+                if (mgmtPorts[h.dst_port]) {
+                    mgmtStats[h.dst_port] = (mgmtStats[h.dst_port] || 0) + (h.total_flows || 1);
+                }
+            });
+
+            let mgmtHtml = '';
+            Object.entries(mgmtPorts).forEach(([port, name]) => {
+                const flows = mgmtStats[port] || 0;
+                mgmtHtml += `
+                    <div style="display:flex; justify-content:space-between; padding:0.5rem 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+                        <span>${name} (Port ${port})</span>
+                        <span style="color:${flows > 0 ? 'var(--warning)' : 'var(--text-muted)'}">${flows.toLocaleString()} flows</span>
+                    </div>
+                `;
+            });
+            document.getElementById('mgmt-traffic-stats').innerHTML = mgmtHtml;
+
+            // Clear-text vs Encrypted (Port 80 vs 443)
+            let http = 0, https = 0;
+            rawData.forEach(h => {
+                if (h.dst_port === 80) http += (h.total_flows || 1);
+                if (h.dst_port === 443) https += (h.total_flows || 1);
+            });
+
+            if (charts.hygiene) charts.hygiene.destroy();
+            charts.hygiene = new Chart(document.getElementById('chart-hygiene'), {
+                type: 'pie',
+                data: {
+                    labels: ['HTTP (Clear-text)', 'HTTPS (Encrypted)'],
+                    datasets: [{
+                        data: [http, https],
+                        backgroundColor: ['#ef4444', '#10b981'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+            });
+
+            // Top Source IPs
+            const sources = {};
+            rawData.forEach(h => {
+                if (!sources[h.src_addr]) sources[h.src_addr] = { flows: 0, ports: new Set() };
+                sources[h.src_addr].flows += (h.total_flows || 1);
+                sources[h.src_addr].ports.add(h.dst_port);
+            });
+
+            const topSources = Object.entries(sources).sort((a,b) => b[1].flows - a[1].flows).slice(0, 10);
+            let sourcesHtml = '';
+            topSources.forEach(([ip, stats]) => {
+                const isInternal = ip.startsWith('10.');
+                sourcesHtml += `
+                    <tr>
+                        <td class="mono">${ip}</td>
+                        <td>${stats.flows.toLocaleString()}</td>
+                        <td>${stats.ports.size}</td>
+                        <td><span class="badge ${isInternal ? 'badge-tcp' : 'badge-udp'}">${isInternal ? 'Internal' : 'External'}</span></td>
+                    </tr>
+                `;
+            });
+            document.getElementById('topSourcesBody').innerHTML = sourcesHtml;
+        }
+
+        function setAclFormat(format, el) {
+            activeAclFormat = format;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+            renderSecurityPoc();
+        }
+
+        function renderSecurityPoc() {
+            const sample = rawData.slice(0, 10);
+            let html = '';
+            
+            sample.forEach((h, i) => {
+                let acl = '';
+                const proto = (h.proto || 'tcp').toLowerCase();
+                const port = h.dst_port ? ` eq ${h.dst_port}` : '';
+                
+                if (activeAclFormat === 'cisco') {
+                    acl = `permit ${proto} host ${h.src_addr} host ${h.dst_addr}${port}`;
+                } else if (activeAclFormat === 'mikrotik') {
+                    acl = `/ip firewall filter add chain=forward action=accept protocol=${proto} src-address=${h.src_addr} dst-address=${h.dst_addr}${h.dst_port ? ' dst-port='+h.dst_port : ''}`;
+                } else {
+                    acl = `pass in quick on em0 proto ${proto} from ${h.src_addr} to ${h.dst_addr}${h.dst_port ? ' port '+h.dst_port : ''}`;
+                }
+
+                html += `
+                    <div class="mapping-row">
+                        <div class="demo-panel json">
+                            <span class="json-key">"src"</span>: "${h.src_addr}",<br>
+                            <span class="json-key">"dst"</span>: "${h.dst_addr}" (${hostMap[h.dst_addr]?.name || 'Unknown'})
+                        </div>
+                        <div style="color:var(--text-muted)">→</div>
+                        <div class="demo-panel acl">${acl}</div>
+                    </div>
+                `;
+            });
+            document.getElementById('security-poc-output').innerHTML = html;
+        }
+
+        function renderLogsTable() {
+            const filter = document.getElementById('logSearch').value.toLowerCase();
+            const filtered = rawData.filter(h => 
+                (h.src_addr && h.src_addr.toLowerCase().includes(filter)) ||
+                (h.dst_addr && h.dst_addr.toLowerCase().includes(filter)) ||
+                (h.dst_port && String(h.dst_port).includes(filter))
+            ).slice(0, 100);
+
+            let html = '';
+            filtered.forEach(h => {
+                const protoClass = `badge-${(h.proto || 'tcp').toLowerCase()}`;
+                html += `
+                    <tr>
+                        <td><span class="badge ${protoClass}">${h.proto || 'TCP'}</span></td>
+                        <td class="mono">${h.src_addr}</td>
+                        <td class="mono">${h.dst_addr} <span style="color:var(--text-muted); font-size:0.7rem;">(${hostMap[h.dst_addr]?.name || '?'})</span></td>
+                        <td class="mono">${h.dst_port || '-'}</td>
+                        <td>${(h.total_flows || 0).toLocaleString()}</td>
+                        <td style="color:var(--warning)">${(h.total_gb || 0).toFixed(2)} GB</td>
+                    </tr>
+                `;
+            });
+            document.getElementById('logsTableBody').innerHTML = html;
+        }
+
+        document.getElementById('logSearch').addEventListener('input', renderLogsTable);
+
+        // File Loading Logic
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const loader = document.getElementById('loader');
+
+        function handleFile(file) {
+            document.getElementById('loadingStatus').style.display = 'block';
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    processData(data);
+                    setTimeout(() => {
+                        loader.style.opacity = '0';
+                        setTimeout(() => loader.style.display = 'none', 500);
+                    }, 800);
+                } catch (err) {
+                    alert('Invalid JSON file format.');
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.borderColor = '#3b82f6'; });
+        dropZone.addEventListener('dragleave', e => { dropZone.style.borderColor = 'var(--border)'; });
+        dropZone.addEventListener('drop', e => { e.preventDefault(); handleFile(e.dataTransfer.files[0]); });
+        fileInput.addEventListener('change', e => { if (e.target.files.length) handleFile(e.target.files[0]); });
+
+        // Initial Data Attempt
+        Promise.all([
+            fetch('host_map.json').then(r => r.json()).catch(() => ({})),
+            fetch('notlike101_traffic_combined.json').then(r => r.json()).catch(() => null)
+        ]).then(([hMap, traffic]) => {
+            hostMap = hMap;
+            if (traffic) {
+                processData(traffic);
+                loader.style.display = 'none';
+            }
+        });
+
+        // Chart.js Default Config
+        Chart.defaults.color = '#a1a1aa';
+        Chart.defaults.font.family = 'Inter';
+        Chart.defaults.borderColor = '#3f3f46';
+
+    </script>
+</body>
+</html>
