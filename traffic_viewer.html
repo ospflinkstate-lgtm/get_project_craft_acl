@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Traffic Analyzer V2 | Drag & Drop</title>
+    <title>Traffic Analyzer Pro | Dropdown Filter & Pagination</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -29,7 +29,7 @@
             padding: 2rem;
         }
 
-        .container { max-width: 1300px; margin: 0 auto; }
+        .container { max-width: 1400px; margin: 0 auto; }
         
         header { 
             display: flex; 
@@ -42,11 +42,10 @@
 
         h1 { font-weight: 600; font-size: 1.5rem; color: var(--primary); }
 
-        /* Drop Zone Styles */
         #drop-zone {
             border: 2px dashed #334155;
             border-radius: 12px;
-            padding: 2rem;
+            padding: 1.5rem;
             text-align: center;
             background: #1e293b55;
             margin-bottom: 2rem;
@@ -68,35 +67,76 @@
 
         .stat-card {
             background: var(--card-bg);
-            padding: 1.5rem;
+            padding: 1.2rem;
             border-radius: 12px;
             border: 1px solid #334155;
             text-align: center;
         }
 
-        .stat-value { font-size: 2rem; font-weight: 600; display: block; }
-        .stat-label { color: var(--text-dim); font-size: 0.875rem; }
+        .stat-value { font-size: 1.8rem; font-weight: 600; display: block; }
+        .stat-label { color: var(--text-dim); font-size: 0.8rem; }
 
-        .controls {
+        .controls-container {
+            background: var(--card-bg);
+            padding: 1.2rem;
+            border-radius: 12px;
+            border: 1px solid #334155;
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
             display: flex;
             gap: 1rem;
-            margin-bottom: 1.5rem;
-            flex-wrap: wrap;
             align-items: center;
         }
 
-        button {
-            background: var(--card-bg);
-            color: var(--text);
+        .select-input {
+            background: #0f172a;
             border: 1px solid #334155;
+            color: var(--text);
             padding: 0.5rem 1rem;
             border-radius: 8px;
+            font-family: inherit;
             cursor: pointer;
+            outline: none;
+        }
+
+        .select-input:focus { border-color: var(--primary); }
+
+        .search-box {
+            background: #0f172a;
+            border: 1px solid #334155;
+            color: var(--text);
+            padding: 0.6rem 1rem;
+            border-radius: 8px;
+            width: 300px;
+            font-family: inherit;
+        }
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        button {
+            background: #0f172a;
+            color: var(--text);
+            border: 1px solid #334155;
+            padding: 0.4rem 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
             transition: all 0.2s;
         }
 
-        button:hover { border-color: var(--primary); }
-        button.active { background: var(--primary); border-color: var(--primary); }
+        button:hover:not(:disabled) { border-color: var(--primary); background: #1e293b; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
 
         .table-container {
             background: var(--card-bg);
@@ -108,8 +148,8 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.875rem;
-            min-width: 800px;
+            font-size: 0.85rem;
+            min-width: 900px;
         }
 
         th {
@@ -118,18 +158,19 @@
             padding: 1rem;
             color: var(--text-dim);
             font-weight: 400;
-            border-bottom: 1px solid #334155;
+            border-bottom: 2px solid #334155;
         }
 
-        td { padding: 1rem; border-bottom: 1px solid #334155; }
+        td { padding: 0.8rem 1rem; border-bottom: 1px solid #334155; }
         tr:hover { background: #33415555; }
 
         .badge {
-            padding: 0.25rem 0.5rem;
+            padding: 0.2rem 0.5rem;
             border-radius: 4px;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 600;
             text-transform: uppercase;
+            white-space: nowrap;
         }
 
         .badge-internal { background: #0c4a6e; color: #38bdf8; }
@@ -137,31 +178,24 @@
         .badge-cdn { background: #3b0764; color: #c084fc; }
 
         .domain-name { color: var(--success); font-weight: 600; }
-        .hits-count { font-family: monospace; font-weight: 600; }
-
-        .loading {
-            padding: 3rem;
-            text-align: center;
-            color: var(--text-dim);
-        }
-
+        .hits-count { font-family: monospace; font-weight: 600; color: var(--warning); }
+        
         .targets-list {
             font-size: 0.75rem;
             color: var(--text-dim);
-            max-width: 300px;
+            max-width: 350px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
 
-        .search-box {
-            background: var(--card-bg);
-            border: 1px solid #334155;
-            color: var(--text);
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            width: 300px;
+        .loading-overlay {
+            padding: 5rem;
+            text-align: center;
+            color: var(--text-dim);
         }
+
+        .page-info { font-size: 0.8rem; color: var(--text-dim); }
     </style>
 </head>
 <body>
@@ -169,181 +203,183 @@
 <div class="container">
     <header>
         <div>
-            <h1>Traffic Analyzer V2</h1>
-            <p style="color: var(--text-dim); font-size: 0.875rem;">วิเคราะห์ทราฟฟิกขาเข้าวง 10.27.101.0/24</p>
+            <h1>Traffic Analyzer Pro</h1>
+            <p style="color: var(--text-dim); font-size: 0.8rem;">Monitoring Subnet 10.27.101.0/24</p>
         </div>
-        <div id="file-info" style="font-size: 0.75rem; color: var(--text-dim);">
-            พร้อมวิเคราะห์ไฟล์ JSON
+        <div id="file-info" style="font-size: 0.75rem; color: var(--text-dim); text-align: right;">
+            Version 2.2 | Dropdown Filters<br>Ready for JSON Data
         </div>
     </header>
 
-    <!-- Drop Zone -->
     <div id="drop-zone" onclick="document.getElementById('file-input').click()">
-        <p id="drop-text">ลากไฟล์ .json มาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์</p>
+        <p id="drop-text">Drag & Drop <b>incoming_101_summary.json</b> here or click to browse</p>
         <input type="file" id="file-input" style="display: none" accept=".json">
     </div>
 
     <div class="stats-grid">
-        <div class="stat-card">
-            <span class="stat-value" id="total-ips">-</span>
-            <span class="stat-label">Total Unique IPs</span>
-        </div>
-        <div class="stat-card">
-            <span class="stat-value" id="ext-ips" style="color: var(--external);">-</span>
-            <span class="stat-label">External/CDN IPs</span>
-        </div>
-        <div class="stat-card">
-            <span class="stat-value" id="int-ips" style="color: var(--internal);">-</span>
-            <span class="stat-label">Internal IPs</span>
-        </div>
-        <div class="stat-card">
-            <span class="stat-value" id="total-hits">-</span>
-            <span class="stat-label">Total Hits (101 Zone)</span>
-        </div>
+        <div class="stat-card"><span class="stat-value" id="total-ips">-</span><span class="stat-label">Total IPs</span></div>
+        <div class="stat-card"><span class="stat-value" id="ext-ips" style="color: var(--external);">-</span><span class="stat-label">External/CDN</span></div>
+        <div class="stat-card"><span class="stat-value" id="int-ips" style="color: var(--internal);">-</span><span class="stat-label">Internal</span></div>
+        <div class="stat-card"><span class="stat-value" id="total-hits" style="color: var(--warning);">-</span><span class="stat-label">Total Flows</span></div>
     </div>
 
-    <div class="controls">
-        <button class="active" onclick="filterData('all', this)">All</button>
-        <button onclick="filterData('external', this)">External Only</button>
-        <button onclick="filterData('internal', this)">Internal Only</button>
-        <input type="text" id="search-input" class="search-box" placeholder="ค้นหา IP หรือ Domain..." oninput="handleSearch()">
+    <div class="controls-container">
+        <div class="filter-group">
+            <label style="font-size: 0.85rem; color: var(--text-dim);">Network Type:</label>
+            <select id="type-select" class="select-input" onchange="updateView(true)">
+                <option value="all">All Networks</option>
+                <option value="internal">Internal Network</option>
+                <option value="external">External (Other)</option>
+                <!-- Dynamic categories will be added here -->
+            </select>
+        </div>
+        
+        <input type="text" id="search-input" class="search-box" placeholder="Search IP or Domain..." oninput="updateView(true)">
+        
+        <div class="pagination">
+            <span class="page-info" id="page-display">Page 1 of 1</span>
+            <button onclick="changePage(-1)" id="prev-btn">Previous</button>
+            <button onclick="changePage(1)" id="next-btn">Next</button>
+        </div>
     </div>
 
     <div class="table-container">
-        <table id="traffic-table">
+        <table>
             <thead>
                 <tr>
                     <th>Source IP</th>
-                    <th>Domain / Hostname</th>
-                    <th>Type</th>
+                    <th>Domain / Identity</th>
+                    <th>Network Type</th>
                     <th style="text-align: right;">Hits</th>
-                    <th style="text-align: right;">Total Flow</th>
-                    <th>Targets (.101)</th>
+                    <th style="text-align: right;">Flows</th>
+                    <th>Targets (.101 Zone)</th>
                 </tr>
             </thead>
             <tbody id="table-body">
-                <tr>
-                    <td colspan="6" class="loading">กรุณาลากไฟล์ JSON มาวางเพื่อเริ่มการวิเคราะห์</td>
-                </tr>
+                <tr><td colspan="6" class="loading-overlay">Please drop a JSON file to start analysis.</td></tr>
             </tbody>
         </table>
     </div>
 </div>
 
 <script>
-    let allData = [];
-    let filteredData = [];
+    let rawData = [];
+    let currentFiltered = [];
+    let currentPage = 1;
+    const pageSize = 100;
 
     const dropZone = document.getElementById('drop-zone');
     const fileInput = document.getElementById('file-input');
 
-    // Drag & Drop Handlers
+    // File Handling
     dropZone.ondragover = (e) => { e.preventDefault(); dropZone.classList.add('dragover'); };
     dropZone.ondragleave = () => dropZone.classList.remove('dragover');
     dropZone.ondrop = (e) => {
         e.preventDefault();
         dropZone.classList.remove('dragover');
-        const file = e.dataTransfer.files[0];
-        if (file) handleFile(file);
+        if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
     };
-
-    fileInput.onchange = (e) => {
-        const file = e.target.files[0];
-        if (file) handleFile(file);
-    };
+    fileInput.onchange = (e) => { if (e.target.files[0]) handleFile(e.target.files[0]); };
 
     function handleFile(file) {
-        if (!file.name.endsWith('.json')) {
-            alert('กรุณาเลือกไฟล์ .json เท่านั้น');
-            return;
-        }
-
-        document.getElementById('drop-text').textContent = `กำลังวิเคราะห์ไฟล์: ${file.name}...`;
-        
         const reader = new FileReader();
         reader.onload = (e) => {
             try {
-                allData = JSON.parse(e.target.result);
-                filteredData = allData;
-                document.getElementById('drop-text').textContent = `โหลดสำเร็จ: ${file.name} (${allData.length} IPs)`;
-                renderStats(allData);
-                renderTable(allData);
-            } catch (err) {
-                alert('ไฟล์ JSON ไม่ถูกต้อง หรือโครงสร้างไม่ตรงตามกำหนด');
-                console.error(err);
-            }
+                rawData = JSON.parse(e.target.result);
+                document.getElementById('drop-text').innerHTML = `<b>Loaded:</b> ${file.name} (${rawData.length.toLocaleString()} IPs)`;
+                initTypeDropdown();
+                updateStats(rawData);
+                updateView(true);
+            } catch (err) { alert('Invalid JSON file structure.'); }
         };
         reader.readAsText(file);
     }
 
-    function renderStats(data) {
-        const total = data.length;
-        const ext = data.filter(d => !d.is_internal).length;
-        const int = data.filter(d => d.is_internal).length;
-        const hits = data.reduce((sum, d) => sum + d.hits, 0);
-
-        document.getElementById('total-ips').textContent = total.toLocaleString();
-        document.getElementById('ext-ips').textContent = ext.toLocaleString();
-        document.getElementById('int-ips').textContent = int.toLocaleString();
-        document.getElementById('total-hits').textContent = hits.toLocaleString();
+    function initTypeDropdown() {
+        const types = [...new Set(rawData.map(d => d.type))].filter(t => t);
+        const select = document.getElementById('type-select');
+        
+        // Reset dynamic options
+        while (select.options.length > 3) select.remove(3);
+        
+        types.forEach(t => {
+            if (t !== "Internal Network" && t !== "External (Other)") {
+                const opt = document.createElement('option');
+                opt.value = t;
+                opt.textContent = t.replace('CDN/Cloud ', '');
+                select.appendChild(opt);
+            }
+        });
     }
 
-    function renderTable(data) {
-        const tbody = document.getElementById('table-body');
-        tbody.innerHTML = '';
+    function updateStats(data) {
+        document.getElementById('total-ips').textContent = data.length.toLocaleString();
+        document.getElementById('ext-ips').textContent = data.filter(d => !d.is_internal).length.toLocaleString();
+        document.getElementById('int-ips').textContent = data.filter(d => d.is_internal).length.toLocaleString();
+        document.getElementById('total-hits').textContent = data.reduce((s, d) => s + (d.total_flows || 0), 0).toLocaleString();
+    }
 
-        if (data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="loading">ไม่พบข้อมูลที่ค้นหา</td></tr>';
-            return;
+    function updateView(resetPage = false) {
+        if (resetPage) currentPage = 1;
+        
+        const searchQuery = document.getElementById('search-input').value.toLowerCase();
+        const selectedType = document.getElementById('type-select').value;
+        
+        // Filter logic
+        let data = rawData;
+        if (selectedType === 'internal') data = data.filter(d => d.is_internal);
+        else if (selectedType === 'external') data = data.filter(d => !d.is_internal);
+        else if (selectedType !== 'all') data = data.filter(d => d.type === selectedType);
+
+        if (searchQuery) {
+            data = data.filter(d => 
+                d.source_ip.toLowerCase().includes(searchQuery) || 
+                (d.domain && d.domain.toLowerCase().includes(searchQuery)) ||
+                (d.type && d.type.toLowerCase().includes(searchQuery))
+            );
         }
 
-        data.forEach(row => {
-            const tr = document.createElement('tr');
-            
-            let typeBadge = '';
-            if (row.is_internal) {
-                typeBadge = '<span class="badge badge-internal">Internal</span>';
-            } else if (row.type.includes('CDN')) {
-                typeBadge = '<span class="badge badge-cdn">CDN/Cloud</span>';
-            } else {
-                typeBadge = '<span class="badge badge-external">External</span>';
-            }
+        currentFiltered = data;
+        renderTable();
+    }
 
-            const domainDisplay = !row.domain || row.domain === 'Unknown' || row.domain === 'N/A (Too many hits)' 
-                ? `<span style="color: var(--text-dim)">${row.domain || 'N/A'}</span>` 
-                : `<span class="domain-name">${row.domain}</span>`;
+    function renderTable() {
+        const tbody = document.getElementById('table-body');
+        const start = (currentPage - 1) * pageSize;
+        const end = start + pageSize;
+        const pageData = currentFiltered.slice(start, end);
+
+        tbody.innerHTML = '';
+        if (pageData.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="loading-overlay">No matching data found.</td></tr>';
+        }
+
+        pageData.forEach(row => {
+            const tr = document.createElement('tr');
+            const typeClass = row.is_internal ? 'badge-internal' : (row.type.includes('CDN') ? 'badge-cdn' : 'badge-external');
+            const domainColor = (row.domain && row.domain !== 'Unknown' && row.domain !== 'N/A (Too many hits)') ? 'domain-name' : '';
 
             tr.innerHTML = `
-                <td>${row.source_ip}</td>
-                <td>${domainDisplay}<br><small style="color: var(--text-dim)">${row.type}</small></td>
-                <td>${typeBadge}</td>
-                <td style="text-align: right;" class="hits-count">${row.hits.toLocaleString()}</td>
+                <td><b>${row.source_ip}</b></td>
+                <td><span class="${domainColor}">${row.domain || 'Unknown'}</span><br><small style="color: var(--text-dim)">${row.type}</small></td>
+                <td><span class="badge ${typeClass}">${row.is_internal ? 'Internal' : 'External'}</span></td>
+                <td style="text-align: right;" class="hits-count">${(row.hits || 0).toLocaleString()}</td>
                 <td style="text-align: right;" class="hits-count">${(row.total_flows || 0).toLocaleString()}</td>
                 <td class="targets-list" title="${row.targets.join(', ')}">${row.targets.join(', ')}</td>
             `;
             tbody.appendChild(tr);
         });
+
+        const totalPages = Math.ceil(currentFiltered.length / pageSize) || 1;
+        document.getElementById('page-display').textContent = `Page ${currentPage} of ${totalPages} (${currentFiltered.length.toLocaleString()} total)`;
+        document.getElementById('prev-btn').disabled = currentPage === 1;
+        document.getElementById('next-btn').disabled = currentPage === totalPages;
     }
 
-    function filterData(type, btn) {
-        document.querySelectorAll('.controls button').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-
-        if (type === 'all') filteredData = allData;
-        else if (type === 'external') filteredData = allData.filter(d => !d.is_internal);
-        else if (type === 'internal') filteredData = allData.filter(d => d.is_internal);
-        
-        handleSearch(); // Re-apply search filter
-    }
-
-    function handleSearch() {
-        const query = document.getElementById('search-input').value.toLowerCase();
-        const finalData = filteredData.filter(d => 
-            d.source_ip.toLowerCase().includes(query) || 
-            (d.domain && d.domain.toLowerCase().includes(query)) ||
-            (d.type && d.type.toLowerCase().includes(query))
-        );
-        renderTable(finalData);
+    function changePage(dir) {
+        currentPage += dir;
+        renderTable();
+        window.scrollTo(0, 0);
     }
 </script>
 
