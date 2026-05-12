@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ACL Commander Pro | Expert Analysis V3.1</title>
+    <title>ACL Commander Pro | Expert Analysis V3.4</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -17,8 +17,7 @@
             --success: #34d399;
             --danger: #f87171;
             --warning: #fbbf24;
-            --internal: #38bdf8;
-            --external: #fb7185;
+            --info: #38bdf8;
             --glass: rgba(255, 255, 255, 0.03);
         }
 
@@ -32,22 +31,13 @@
             overflow-x: hidden;
         }
 
-        .glass-panel {
-            background: var(--card);
-            backdrop-filter: blur(12px);
-            border: 1px solid var(--border);
-            border-radius: 20px;
-            padding: 2rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-        }
-
-        .container { max-width: 1700px; margin: 0 auto; position: relative; }
+        .container { max-width: 1750px; margin: 0 auto; position: relative; }
 
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 2.5rem;
+            margin-bottom: 2rem;
         }
 
         .logo-area h1 {
@@ -62,63 +52,54 @@
         #drop-zone {
             border: 2px dashed var(--border);
             border-radius: 20px;
-            padding: 1.5rem;
+            padding: 1.2rem;
             text-align: center;
             background: var(--glass);
-            margin-bottom: 2rem;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 1.5rem;
+            transition: all 0.4s;
             cursor: pointer;
         }
-        #drop-zone:hover { border-color: var(--primary); background: var(--primary-glow); transform: translateY(-2px); }
+        #drop-zone:hover { border-color: var(--primary); background: var(--primary-glow); }
 
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+            gap: 1.2rem;
+            margin-bottom: 1.5rem;
         }
         .stat-card {
             background: var(--glass);
-            padding: 1.2rem;
+            padding: 1rem;
             border-radius: 16px;
             border: 1px solid var(--border);
-            text-align: left;
             position: relative;
-            overflow: hidden;
         }
-        .stat-card::before {
-            content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
-            background: var(--primary); opacity: 0.5;
-        }
-        .stat-val { font-size: 1.6rem; font-weight: 700; display: block; margin-bottom: 0.2rem; }
-        .stat-lbl { color: var(--text-dim); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-val { font-size: 1.5rem; font-weight: 700; display: block; }
+        .stat-lbl { color: var(--text-dim); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; }
 
         .toolbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
             gap: 1rem;
         }
         .search-input {
             background: rgba(0,0,0,0.3);
             border: 1px solid var(--border);
             color: white;
-            padding: 0.8rem 1.2rem;
+            padding: 0.7rem 1.2rem;
             border-radius: 12px;
-            width: 450px;
+            width: 400px;
             outline: none;
-            transition: all 0.3s;
         }
-        .search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-glow); }
 
         select {
             background: rgba(0,0,0,0.3);
             border: 1px solid var(--border);
             color: white;
-            padding: 0.8rem 1.2rem;
+            padding: 0.7rem 1rem;
             border-radius: 12px;
-            cursor: pointer;
         }
 
         .table-container {
@@ -126,104 +107,80 @@
             overflow: hidden;
             border: 1px solid var(--border);
             background: rgba(0,0,0,0.2);
+            margin-bottom: 2rem;
         }
         table { width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed; }
         th {
-            padding: 1rem;
-            background: rgba(31, 41, 55, 0.8);
+            padding: 0.8rem 0.5rem;
+            background: rgba(31, 41, 55, 0.9);
             color: var(--text-dim);
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             text-transform: uppercase;
             letter-spacing: 1px;
             cursor: pointer;
-            transition: background 0.3s;
             position: relative;
         }
-        th:hover { background: rgba(55, 65, 81, 1); color: white; }
+        th:hover { background: #374151; color: white; }
         th.sort-active { color: var(--primary); }
-        th.sort-active::after { content: ' ↓'; position: absolute; margin-left: 4px; }
+        th.sort-active::after { content: ' ↓'; position: absolute; }
         th.sort-asc::after { content: ' ↑'; }
 
-        td { padding: 0.8rem 1rem; border-bottom: 1px solid var(--border); vertical-align: top; overflow: hidden; }
+        td { padding: 0.7rem 0.5rem; border-bottom: 1px solid var(--border); vertical-align: top; font-size: 0.8rem; }
         tr:hover { background: rgba(255,255,255,0.03); }
 
-        #action-bar {
-            position: fixed;
-            bottom: -100px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--primary);
-            color: white;
-            padding: 1rem 2.5rem;
-            border-radius: 50px;
-            display: flex;
-            align-items: center;
+        .badge { padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; }
+        .bg-internal { background: rgba(56, 189, 248, 0.1); color: var(--info); border: 1px solid var(--info); }
+        .bg-external { background: rgba(251, 113, 133, 0.1); color: var(--external); border: 1px solid var(--external); }
+        
+        .ip-list { font-size: 0.7rem; color: var(--text-dim); display: flex; flex-wrap: wrap; gap: 2px; }
+        .ip-item { background: rgba(255,255,255,0.05); padding: 1px 3px; border-radius: 3px; }
+
+        /* Guide Section */
+        .guide-section {
+            background: var(--card);
+            backdrop-filter: blur(12px);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            margin-top: 2rem;
+        }
+        .guide-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 2rem;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 1000;
+            margin-top: 1rem;
+        }
+        .guide-item h4 { color: var(--primary); margin-bottom: 0.5rem; font-weight: 600; }
+        .guide-item p { font-size: 0.85rem; color: var(--text-dim); line-height: 1.5; }
+
+        #action-bar {
+            position: fixed; bottom: -100px; left: 50%; transform: translateX(-50%);
+            background: var(--primary); color: white; padding: 0.8rem 2rem;
+            border-radius: 50px; display: flex; align-items: center; gap: 2rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5); transition: all 0.4s; z-index: 1000;
         }
         #action-bar.visible { bottom: 30px; }
-        .btn-gen {
-            background: white;
-            color: var(--primary);
-            border: none;
-            padding: 0.6rem 1.5rem;
-            border-radius: 25px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .btn-gen:hover { transform: scale(1.05); }
+        .btn-gen { background: white; color: var(--primary); border: none; padding: 0.5rem 1.2rem; border-radius: 25px; font-weight: 700; cursor: pointer; }
 
         .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
-            display: none; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center;
             z-index: 2000; backdrop-filter: blur(10px);
         }
         .modal-content {
-            background: #111827;
-            width: 90%; max-width: 900px;
-            border-radius: 24px;
-            padding: 2.5rem;
-            border: 1px solid var(--primary);
-            max-height: 85vh; overflow-y: auto;
+            background: #111827; width: 90%; max-width: 900px;
+            border-radius: 20px; padding: 2rem; border: 1px solid var(--primary);
         }
-        pre {
-            background: #000;
-            padding: 1.5rem;
-            border-radius: 12px;
-            color: #10b981;
-            font-family: 'Fira Code', monospace;
-            font-size: 0.85rem;
-            overflow-x: auto;
-            border: 1px solid #334155;
-            line-height: 1.5;
-        }
-
-        .badge { padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; }
-        .bg-internal { background: rgba(56, 189, 248, 0.1); color: var(--internal); border: 1px solid var(--internal); }
-        .bg-external { background: rgba(251, 113, 133, 0.1); color: var(--external); border: 1px solid var(--external); }
-        
-        .intensity-pill { padding: 1px 6px; border-radius: 8px; font-size: 0.7rem; font-weight: 700; }
-
-        input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary); }
-
-        .pagination { display: flex; gap: 0.5rem; align-items: center; }
-        .btn-page { background: var(--glass); border: 1px solid var(--border); color: white; padding: 0.4rem 0.8rem; border-radius: 8px; cursor: pointer; font-size: 0.8rem; }
-        .btn-page:disabled { opacity: 0.3; cursor: not-allowed; }
-
-        .ip-list { font-size: 0.7rem; color: var(--text-dim); line-height: 1.3; }
-        .ip-item { background: rgba(255,255,255,0.05); padding: 2px 4px; border-radius: 4px; display: inline-block; margin: 1px; }
+        pre { background: #000; padding: 1rem; border-radius: 10px; color: #10b981; font-family: 'Fira Code', monospace; font-size: 0.8rem; overflow-x: auto; }
 
         /* Column Widths */
-        .col-check { width: 50px; }
+        .col-check { width: 40px; text-align: center; }
         .col-source { width: 220px; }
-        .col-type { width: 150px; }
-        .col-stats { width: 100px; text-align: right; }
-        .col-intensity { width: 100px; text-align: right; }
-        .col-ports { width: 120px; }
+        .col-type { width: 140px; }
+        .col-num { width: 100px; text-align: right; }
+        .col-targets { width: 80px; text-align: right; }
+        .col-intensity { width: 90px; text-align: right; }
+        .col-ports { width: 130px; }
         .col-dest { width: auto; }
     </style>
 </head>
@@ -232,35 +189,36 @@
 <div class="container">
     <header>
         <div class="logo-area">
-            <h1>ACL COMMANDER PRO <small style="font-size: 0.7rem; color: var(--success); vertical-align: middle;">V3.1</small></h1>
-            <p style="color: var(--text-dim); font-size: 0.8rem; margin-top: 0.2rem;">Expert Network Security Analysis & ACL Generation</p>
+            <h1>ACL COMMANDER PRO <small style="font-size: 0.7rem; color: var(--success);">V3.4</small></h1>
         </div>
-        <div class="pagination">
-            <span id="page-info" style="font-size: 0.8rem; color: var(--text-dim); margin-right: 1rem;"></span>
-            <button class="btn-page" id="prev-btn" onclick="changePage(-1)">PREV</button>
-            <button class="btn-page" id="next-btn" onclick="changePage(1)">NEXT</button>
+        <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <span id="page-info" style="font-size: 0.75rem; color: var(--text-dim);"></span>
+            <button class="btn-gen" style="font-size: 0.75rem; padding: 0.3rem 0.8rem;" onclick="changePage(-1)">PREV</button>
+            <button class="btn-gen" style="font-size: 0.75rem; padding: 0.3rem 0.8rem;" onclick="changePage(1)">NEXT</button>
         </div>
     </header>
 
     <div id="drop-zone" onclick="document.getElementById('file-input').click()">
-        <h3 id="drop-text" style="font-weight: 500;">Drop <b>incoming_101_summary.json</b> to begin analysis</h3>
+        <p id="drop-text">Drag & Drop <b>incoming_101_summary.json</b> to run Expert Analysis</p>
         <input type="file" id="file-input" style="display: none" accept=".json">
     </div>
 
     <div class="stats-grid">
-        <div class="stat-card"><span class="stat-lbl">Identified Identities</span><span class="stat-val" id="total-ips">-</span></div>
-        <div class="stat-card"><span class="stat-lbl">External Entities</span><span class="stat-val" id="ext-ips" style="color: var(--external);">-</span></div>
-        <div class="stat-card"><span class="stat-lbl">Internal Nodes</span><span class="stat-val" id="int-ips" style="color: var(--internal);">-</span></div>
-        <div class="stat-card"><span class="stat-lbl">Traffic Summary</span><span class="stat-val" id="total-hits" style="color: var(--warning);">-</span></div>
+        <div class="stat-card"><span class="stat-lbl">Identities</span><span class="stat-val" id="total-ips">-</span></div>
+        <div class="stat-card"><span class="stat-lbl">External</span><span class="stat-val" id="ext-ips" style="color: var(--external);">-</span></div>
+        <div class="stat-card"><span class="stat-lbl">Internal</span><span class="stat-val" id="int-ips" style="color: var(--info);">-</span></div>
+        <div class="stat-card"><span class="stat-lbl">Total Hits</span><span class="stat-val" id="total-hits" style="color: var(--warning);">-</span></div>
     </div>
 
     <div class="toolbar">
-        <input type="text" id="search-input" class="search-input" placeholder="Search by IP, Domain, or Type..." oninput="updateView(true)">
-        <select id="type-select" onchange="updateView(true)">
-            <option value="all">Filter: All Networks</option>
-            <option value="internal">Filter: Internal Only</option>
-            <option value="external">Filter: External Only</option>
-        </select>
+        <div style="display: flex; gap: 0.5rem;">
+            <input type="text" id="search-input" class="search-input" placeholder="Search IP, Domain, Port or Target..." oninput="updateView(true)">
+            <select id="type-select" onchange="updateView(true)">
+                <option value="all">Filter: All Networks</option>
+                <option value="internal">Filter: Internal Only</option>
+                <option value="external">Filter: External Only</option>
+            </select>
+        </div>
     </div>
 
     <div class="table-container">
@@ -268,25 +226,49 @@
             <thead>
                 <tr>
                     <th class="col-check"><input type="checkbox" id="select-all" onclick="toggleAll(this)"></th>
-                    <th class="col-source" onclick="handleSort('source_ip')">Source IP / Identity</th>
+                    <th class="col-source" onclick="handleSort('source_ip')">Source Identity</th>
                     <th class="col-type" onclick="handleSort('type')">Type</th>
-                    <th class="col-stats" onclick="handleSort('hits')" style="text-align: right;">Hits</th>
-                    <th class="col-stats" onclick="handleSort('total_flows')" style="text-align: right;">Flows</th>
-                    <th class="col-intensity" onclick="handleSort('intensity')" style="text-align: right;">Intens.</th>
-                    <th class="col-ports">Ports</th>
-                    <th class="col-dest">Destination IPs (Target Servers)</th>
+                    <th class="col-num" onclick="handleSort('hits')">Hits</th>
+                    <th class="col-num" onclick="handleSort('total_flows')">Volume</th>
+                    <th class="col-targets" onclick="handleSort('target_count')">Targets</th>
+                    <th class="col-intensity" onclick="handleSort('intensity')">Intens.</th>
+                    <th class="col-ports">Dst Ports</th>
+                    <th class="col-dest">Target Destination List (.101 Zone)</th>
                 </tr>
             </thead>
             <tbody id="table-body">
-                <tr><td colspan="8" style="text-align: center; padding: 4rem; color: var(--text-dim);">Ready for data ingestion...</td></tr>
+                <tr><td colspan="9" style="text-align: center; padding: 4rem; color: var(--text-dim);">Ready for Expert Analysis...</td></tr>
             </tbody>
         </table>
+    </div>
+
+    <div class="guide-section">
+        <h3 style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+            📘 Network Classification Logic (เกณฑ์การแยกประเภท)
+        </h3>
+        <div class="guide-grid">
+            <div class="guide-item">
+                <h4>🏠 Internal Network</h4>
+                <p><b>Logic:</b> IP ที่ขึ้นต้นด้วย 10.x, 172.16.x หรือ 192.168.x<br>
+                <b>Note:</b> เป็นทราฟฟิกจากอุปกรณ์ภายในองค์กร หรือเครื่องใน Subnet อื่นที่เชื่อมต่อเข้ามาทาง Internal Link</p>
+            </div>
+            <div class="guide-item">
+                <h4>☁️ CDN / Cloud Nodes</h4>
+                <p><b>Logic:</b> ตรวจสอบจาก IP Prefix ของผู้ให้บริการ (เช่น Cloudflare, Google, AWS) และการทำ Reverse DNS หา Hostname ที่มีคำว่า cache หรือ mirror<br>
+                <b>Note:</b> ทราฟฟิกกลุ่มนี้มักเป็นบริการอัปเดตไฟล์ หรือบริการเว็บยอดนิยม</p>
+            </div>
+            <div class="guide-item">
+                <h4>🌍 External (Other)</h4>
+                <p><b>Logic:</b> IP สาธารณะทั่วไปที่ไม่ตรงกับฐานข้อมูล CDN หรือ ISP Node ที่ระบุไว้<br>
+                <b>Note:</b> ควรตรวจสอบ IP กลุ่มนี้เป็นพิเศษ หากมีค่า Intensity สูงแต่ไม่มีชื่อ Domain ระบุไว้</p>
+            </div>
+        </div>
     </div>
 </div>
 
 <div id="action-bar">
-    <span id="selected-count">0 items selected</span>
-    <div style="display: flex; gap: 0.8rem;">
+    <span id="selected-count">0 Selected</span>
+    <div style="display: flex; gap: 0.5rem;">
         <button class="btn-gen" onclick="generateACL('permit')" style="background: var(--success); color: white;">PERMIT ACL</button>
         <button class="btn-gen" onclick="generateACL('deny')" style="background: var(--danger); color: white;">DENY ACL</button>
     </div>
@@ -294,13 +276,11 @@
 
 <div id="acl-modal" class="modal" onclick="closeModal()">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <h2 style="margin-bottom: 1.5rem; display: flex; justify-content: space-between;">
-            Cisco IOS Configuration Preview
-            <button onclick="closeModal()" style="background: none; border: none; color: white; cursor: pointer; font-size: 1.5rem;">×</button>
-        </h2>
+        <h2 style="margin-bottom: 1rem;">Cisco IOS Policy Generator</h2>
         <pre id="acl-output"></pre>
         <div style="margin-top: 1.5rem; text-align: right;">
-            <button class="btn-gen" onclick="copyACL()" style="background: var(--primary); color: white;">COPY TO CLIPBOARD</button>
+            <button class="btn-gen" onclick="copyACL()" style="background: var(--primary); color: white;">COPY CLIPBOARD</button>
+            <button class="btn-gen" onclick="closeModal()" style="background: #374151; color: white;">CLOSE</button>
         </div>
     </div>
 </div>
@@ -325,7 +305,7 @@
         reader.onload = (e) => {
             rawData = JSON.parse(e.target.result);
             rawData.forEach(d => { d.intensity = d.hits > 0 ? (d.total_flows / d.hits) : 0; });
-            document.getElementById('drop-text').textContent = `DB Engaged: ${file.name}`;
+            document.getElementById('drop-text').innerHTML = `<b>Database Loaded:</b> ${file.name}`;
             initTypeDropdown();
             updateStats();
             updateView(true);
@@ -348,7 +328,7 @@
         document.getElementById('total-ips').textContent = rawData.length.toLocaleString();
         document.getElementById('ext-ips').textContent = rawData.filter(d => !d.is_internal).length.toLocaleString();
         document.getElementById('int-ips').textContent = rawData.filter(d => d.is_internal).length.toLocaleString();
-        document.getElementById('total-hits').textContent = rawData.reduce((s,d) => s + (d.hits || 0), 0).toLocaleString() + ' Hits';
+        document.getElementById('total-hits').textContent = rawData.reduce((s,d) => s + (d.hits || 0), 0).toLocaleString();
     }
 
     function updateView(resetPage = false) {
@@ -361,7 +341,9 @@
                             type === 'internal' ? d.is_internal : 
                             type === 'external' ? !d.is_internal : d.type === type;
             const matchSearch = d.source_ip.toLowerCase().includes(search) || 
-                              (d.domain && d.domain.toLowerCase().includes(search));
+                              (d.domain && d.domain.toLowerCase().includes(search)) ||
+                              (d.targets.join(',').includes(search)) ||
+                              (d.ports && d.ports.join(',').includes(search));
             return matchType && matchSearch;
         });
 
@@ -370,7 +352,6 @@
             if (typeof valA === 'string') return sortDesc ? valB.localeCompare(valA) : valA.localeCompare(valB);
             return sortDesc ? valB - valA : valA - valB;
         });
-
         renderTable();
     }
 
@@ -380,8 +361,7 @@
         document.querySelectorAll('th').forEach(th => {
             th.classList.remove('sort-active', 'sort-asc');
             if (th.getAttribute('onclick') && th.getAttribute('onclick').includes(key)) {
-                th.classList.add('sort-active');
-                if (!sortDesc) th.classList.add('sort-asc');
+                th.classList.add('sort-active'); if (!sortDesc) th.classList.add('sort-asc');
             }
         });
         updateView();
@@ -396,72 +376,53 @@
         pageData.forEach(row => {
             const tr = document.createElement('tr');
             const intensityColor = row.intensity > 100 ? 'var(--danger)' : (row.intensity > 10 ? 'var(--warning)' : 'var(--success)');
-            
-            const destIPs = row.targets.map(ip => `<span class="ip-item">${ip}</span>`).join('');
-
             tr.innerHTML = `
-                <td><input type="checkbox" ${selectedIPs.has(row.source_ip) ? 'checked' : ''} onchange="toggleSelect('${row.source_ip}')"></td>
-                <td>
+                <td class="col-check"><input type="checkbox" ${selectedIPs.has(row.source_ip) ? 'checked' : ''} onchange="toggleSelect('${row.source_ip}')"></td>
+                <td class="col-source">
                     <b style="color:var(--primary)">${row.source_ip}</b><br>
-                    <span style="font-size:0.7rem; color:var(--text-dim)">${row.domain !== 'N/A' ? row.domain : 'Unknown Identity'}</span>
+                    <span style="font-size:0.65rem; color:var(--text-dim)">${row.domain !== 'N/A' ? row.domain : 'Identity Unknown'}</span>
                 </td>
-                <td>
+                <td class="col-type">
                     <span class="badge ${row.is_internal ? 'bg-internal' : 'bg-external'}">${row.is_internal ? 'Internal' : 'External'}</span><br>
-                    <small style="color:var(--text-dim); font-size: 0.6rem;">${row.type}</small>
+                    <small style="color:var(--text-dim); font-size: 0.65rem;">${row.type}</small>
                 </td>
-                <td style="text-align:right">${row.hits.toLocaleString()}</td>
-                <td style="text-align:right">${row.total_flows.toLocaleString()}</td>
-                <td style="text-align:right"><span class="intensity-pill" style="background:${intensityColor}22; color:${intensityColor}">${row.intensity.toFixed(1)}</span></td>
-                <td><small style="color:var(--text-dim)">${row.ports ? row.ports.join(', ') : '80, 443'}</small></td>
-                <td><div class="ip-list">${destIPs}</div></td>
+                <td class="col-num">${row.hits.toLocaleString()}</td>
+                <td class="col-num">${row.total_flows.toLocaleString()}</td>
+                <td class="col-targets"><b style="${row.target_count > 1 ? 'color:var(--warning)' : ''}">${row.target_count}</b></td>
+                <td class="col-intensity"><span class="intensity-pill" style="background:${intensityColor}22; color:${intensityColor}">${row.intensity.toFixed(1)}</span></td>
+                <td class="col-ports" style="font-size:0.75rem; color:var(--info)">${row.ports ? row.ports.join(', ') : '80, 443'}</td>
+                <td class="col-dest"><div class="ip-list">${row.targets.map(ip => `<span class="ip-item">${ip}</span>`).join('')}</div></td>
             `;
             tbody.appendChild(tr);
         });
 
         const totalPages = Math.ceil(filteredData.length / pageSize) || 1;
-        document.getElementById('page-info').textContent = `PAGE ${currentPage} / ${totalPages} (${filteredData.length.toLocaleString()} IDENTITIES)`;
-        document.getElementById('prev-btn').disabled = currentPage === 1;
-        document.getElementById('next-btn').disabled = currentPage === totalPages;
+        document.getElementById('page-info').textContent = `PAGE ${currentPage}/${totalPages} | ${filteredData.length.toLocaleString()} ITEMS`;
     }
 
-    function toggleSelect(ip) {
-        if (selectedIPs.has(ip)) selectedIPs.delete(ip);
-        else selectedIPs.add(ip);
-        updateActionBar();
-    }
-
+    function toggleSelect(ip) { if (selectedIPs.has(ip)) selectedIPs.delete(ip); else selectedIPs.add(ip); updateActionBar(); }
     function toggleAll(cb) {
         const start = (currentPage - 1) * pageSize;
-        const pageData = filteredData.slice(start, start + pageSize);
-        pageData.forEach(row => {
-            if (cb.checked) selectedIPs.add(row.source_ip);
-            else selectedIPs.delete(row.source_ip);
+        filteredData.slice(start, start + pageSize).forEach(row => {
+            if (cb.checked) selectedIPs.add(row.source_ip); else selectedIPs.delete(row.source_ip);
         });
-        renderTable();
-        updateActionBar();
+        renderTable(); updateActionBar();
     }
 
     function updateActionBar() {
         const bar = document.getElementById('action-bar');
         const count = document.getElementById('selected-count');
-        if (selectedIPs.size > 0) {
-            bar.classList.add('visible');
-            count.textContent = `${selectedIPs.size.toLocaleString()} Selected for Policy`;
-        } else {
-            bar.classList.remove('visible');
-        }
+        if (selectedIPs.size > 0) { bar.classList.add('visible'); count.textContent = `${selectedIPs.size} Selected for Policy`; }
+        else { bar.classList.remove('visible'); }
     }
 
     function generateACL(action) {
         const output = document.getElementById('acl-output');
         let acl = `! ==================================================\n`;
-        acl += `! GENERATED POLICY: ${action.toUpperCase()} LIST\n`;
+        acl += `! GENERATED SECURITY POLICY (${action.toUpperCase()})\n`;
         acl += `! Target Subnet: 10.27.101.0/24\n`;
         acl += `! ==================================================\n\n`;
-
-        const selectedData = rawData.filter(d => selectedIPs.has(d.source_ip));
-        
-        selectedData.forEach(d => {
+        rawData.filter(d => selectedIPs.has(d.source_ip)).forEach(d => {
             acl += `remark -- ${d.domain !== 'N/A' ? d.domain : d.type} --\n`;
             d.targets.forEach(target => {
                 const ports = d.ports && d.ports.length > 0 ? d.ports : [80, 443];
@@ -472,17 +433,13 @@
             });
             acl += `!\n`;
         });
-
         output.textContent = acl;
         document.getElementById('acl-modal').style.display = 'flex';
     }
 
     function closeModal() { document.getElementById('acl-modal').style.display = 'none'; }
     function changePage(dir) { currentPage += dir; renderTable(); window.scrollTo(0,0); }
-    function copyACL() {
-        const text = document.getElementById('acl-output').textContent;
-        navigator.clipboard.writeText(text).then(() => alert('Policy copied to clipboard!'));
-    }
+    function copyACL() { navigator.clipboard.writeText(document.getElementById('acl-output').textContent).then(() => alert('Policy Copied!')); }
 </script>
 
 </body>
