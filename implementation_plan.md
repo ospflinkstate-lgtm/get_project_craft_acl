@@ -168,4 +168,26 @@ deny ip any any log
 
 ---
 
-> **หมายเหตุ:** ผมพร้อมสร้างไฟล์ `acl_professional.html` ทันทีที่คุณอนุมัติแผนนี้ครับ
+## 📈 Phase 2: Traffic Analysis & Smart Identification (In Progress)
+
+### กิจกรรมปัจจุบัน
+นำไฟล์ `notlike101_traffic_combined.json` (287MB) มาวิเคราะห์เชิงลึกเพื่อระบุว่า IP ภายนอกที่เข้ามาหาหน้าด่าน .101 คือใครบ้าง เพื่อความแม่นยำในการตั้งค่า ACL
+
+### สิ่งที่ดำเนินการแล้ว
+1. **Initial Analysis:** สร้างสคริปต์ `analyze_incoming_101.py` เพื่อกรองเฉพาะทราฟฟิกขาเข้าวง .101
+2. **IP Categorization:** เพิ่มระบบแยกแยะประเภท IP เบื้องต้น (Internal vs External/CDN)
+3. **Sorting Logic:** เรียงลำดับความสำคัญตาม "ประเภท IP" ก่อน แล้วตามด้วย "จำนวน Hits" เพื่อหาตัวที่น่าสงสัยหรือสำคัญที่สุด
+
+### สิ่งที่กำลังดำเนินการ (Next Step)
+- [ ] **Reverse DNS Lookup:** ทำการดึงชื่อ Domain จริงของ IP 50 อันดับแรก เพื่อระบุเจ้าของ (เช่น Google, Akamai, ISP Local Nodes)
+- [ ] **Enriching Summary:** เพิ่มข้อมูล Domain เข้าไปในไฟล์สรุป `incoming_101_summary.json`
+- [ ] **Integration:** เตรียมนำข้อมูลชื่อ Domain เหล่านี้ไปแสดงผลใน `acl_builder.html` เพื่อให้ Engineer ตัดสินใจ "Permit" หรือ "Deny" ได้ง่ายขึ้น
+
+### ตัวอย่างกลุ่ม IP ที่พบ (Top Talkers)
+- **Cloudflare:** พบหลายวง IP เช่น `172.67.x.x` และ `104.26.x.x`
+- **AWS:** พบวง `52.187.x.x`
+- **Unknown High Traffic:** IP `192.100.77.186` (อยู่ระหว่างตรวจสอบ Domain)
+
+---
+
+> **หมายเหตุ:** ข้อมูลจาก Phase นี้จะถูกนำไปใช้เป็น "ฐานข้อมูลอ้างอิง" ในการสร้าง ACL ที่ฉลาดขึ้นในอนาคตครับ

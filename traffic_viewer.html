@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traffic Analyzer V2 | Drag & Drop</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text: #f8fafc;
+            --text-dim: #94a3b8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --internal: #38bdf8;
+            --external: #fb7185;
+            --cdn: #c084fc;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: 'Inter', 'Prompt', sans-serif; 
+            background-color: var(--bg); 
+            color: var(--text);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+
+        .container { max-width: 1300px; margin: 0 auto; }
+        
+        header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 1rem;
+        }
+
+        h1 { font-weight: 600; font-size: 1.5rem; color: var(--primary); }
+
+        /* Drop Zone Styles */
+        #drop-zone {
+            border: 2px dashed #334155;
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            background: #1e293b55;
+            margin-bottom: 2rem;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        #drop-zone.dragover {
+            border-color: var(--primary);
+            background: #6366f111;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid #334155;
+            text-align: center;
+        }
+
+        .stat-value { font-size: 2rem; font-weight: 600; display: block; }
+        .stat-label { color: var(--text-dim); font-size: 0.875rem; }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        button {
+            background: var(--card-bg);
+            color: var(--text);
+            border: 1px solid #334155;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        button:hover { border-color: var(--primary); }
+        button.active { background: var(--primary); border-color: var(--primary); }
+
+        .table-container {
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow-x: auto;
+            border: 1px solid #334155;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+            min-width: 800px;
+        }
+
+        th {
+            background: #1e293b;
+            text-align: left;
+            padding: 1rem;
+            color: var(--text-dim);
+            font-weight: 400;
+            border-bottom: 1px solid #334155;
+        }
+
+        td { padding: 1rem; border-bottom: 1px solid #334155; }
+        tr:hover { background: #33415555; }
+
+        .badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-internal { background: #0c4a6e; color: #38bdf8; }
+        .badge-external { background: #4c0519; color: #fb7185; }
+        .badge-cdn { background: #3b0764; color: #c084fc; }
+
+        .domain-name { color: var(--success); font-weight: 600; }
+        .hits-count { font-family: monospace; font-weight: 600; }
+
+        .loading {
+            padding: 3rem;
+            text-align: center;
+            color: var(--text-dim);
+        }
+
+        .targets-list {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .search-box {
+            background: var(--card-bg);
+            border: 1px solid #334155;
+            color: var(--text);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            width: 300px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div>
+            <h1>Traffic Analyzer V2</h1>
+            <p style="color: var(--text-dim); font-size: 0.875rem;">วิเคราะห์ทราฟฟิกขาเข้าวง 10.27.101.0/24</p>
+        </div>
+        <div id="file-info" style="font-size: 0.75rem; color: var(--text-dim);">
+            พร้อมวิเคราะห์ไฟล์ JSON
+        </div>
+    </header>
+
+    <!-- Drop Zone -->
+    <div id="drop-zone" onclick="document.getElementById('file-input').click()">
+        <p id="drop-text">ลากไฟล์ .json มาวางที่นี่ หรือคลิกเพื่อเลือกไฟล์</p>
+        <input type="file" id="file-input" style="display: none" accept=".json">
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <span class="stat-value" id="total-ips">-</span>
+            <span class="stat-label">Total Unique IPs</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value" id="ext-ips" style="color: var(--external);">-</span>
+            <span class="stat-label">External/CDN IPs</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value" id="int-ips" style="color: var(--internal);">-</span>
+            <span class="stat-label">Internal IPs</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value" id="total-hits">-</span>
+            <span class="stat-label">Total Hits (101 Zone)</span>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="active" onclick="filterData('all', this)">All</button>
+        <button onclick="filterData('external', this)">External Only</button>
+        <button onclick="filterData('internal', this)">Internal Only</button>
+        <input type="text" id="search-input" class="search-box" placeholder="ค้นหา IP หรือ Domain..." oninput="handleSearch()">
+    </div>
+
+    <div class="table-container">
+        <table id="traffic-table">
+            <thead>
+                <tr>
+                    <th>Source IP</th>
+                    <th>Domain / Hostname</th>
+                    <th>Type</th>
+                    <th style="text-align: right;">Hits</th>
+                    <th style="text-align: right;">Total Flow</th>
+                    <th>Targets (.101)</th>
+                </tr>
+            </thead>
+            <tbody id="table-body">
+                <tr>
+                    <td colspan="6" class="loading">กรุณาลากไฟล์ JSON มาวางเพื่อเริ่มการวิเคราะห์</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    let allData = [];
+    let filteredData = [];
+
+    const dropZone = document.getElementById('drop-zone');
+    const fileInput = document.getElementById('file-input');
+
+    // Drag & Drop Handlers
+    dropZone.ondragover = (e) => { e.preventDefault(); dropZone.classList.add('dragover'); };
+    dropZone.ondragleave = () => dropZone.classList.remove('dragover');
+    dropZone.ondrop = (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        const file = e.dataTransfer.files[0];
+        if (file) handleFile(file);
+    };
+
+    fileInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) handleFile(file);
+    };
+
+    function handleFile(file) {
+        if (!file.name.endsWith('.json')) {
+            alert('กรุณาเลือกไฟล์ .json เท่านั้น');
+            return;
+        }
+
+        document.getElementById('drop-text').textContent = `กำลังวิเคราะห์ไฟล์: ${file.name}...`;
+        
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                allData = JSON.parse(e.target.result);
+                filteredData = allData;
+                document.getElementById('drop-text').textContent = `โหลดสำเร็จ: ${file.name} (${allData.length} IPs)`;
+                renderStats(allData);
+                renderTable(allData);
+            } catch (err) {
+                alert('ไฟล์ JSON ไม่ถูกต้อง หรือโครงสร้างไม่ตรงตามกำหนด');
+                console.error(err);
+            }
+        };
+        reader.readAsText(file);
+    }
+
+    function renderStats(data) {
+        const total = data.length;
+        const ext = data.filter(d => !d.is_internal).length;
+        const int = data.filter(d => d.is_internal).length;
+        const hits = data.reduce((sum, d) => sum + d.hits, 0);
+
+        document.getElementById('total-ips').textContent = total.toLocaleString();
+        document.getElementById('ext-ips').textContent = ext.toLocaleString();
+        document.getElementById('int-ips').textContent = int.toLocaleString();
+        document.getElementById('total-hits').textContent = hits.toLocaleString();
+    }
+
+    function renderTable(data) {
+        const tbody = document.getElementById('table-body');
+        tbody.innerHTML = '';
+
+        if (data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="loading">ไม่พบข้อมูลที่ค้นหา</td></tr>';
+            return;
+        }
+
+        data.forEach(row => {
+            const tr = document.createElement('tr');
+            
+            let typeBadge = '';
+            if (row.is_internal) {
+                typeBadge = '<span class="badge badge-internal">Internal</span>';
+            } else if (row.type.includes('CDN')) {
+                typeBadge = '<span class="badge badge-cdn">CDN/Cloud</span>';
+            } else {
+                typeBadge = '<span class="badge badge-external">External</span>';
+            }
+
+            const domainDisplay = !row.domain || row.domain === 'Unknown' || row.domain === 'N/A (Too many hits)' 
+                ? `<span style="color: var(--text-dim)">${row.domain || 'N/A'}</span>` 
+                : `<span class="domain-name">${row.domain}</span>`;
+
+            tr.innerHTML = `
+                <td>${row.source_ip}</td>
+                <td>${domainDisplay}<br><small style="color: var(--text-dim)">${row.type}</small></td>
+                <td>${typeBadge}</td>
+                <td style="text-align: right;" class="hits-count">${row.hits.toLocaleString()}</td>
+                <td style="text-align: right;" class="hits-count">${(row.total_flows || 0).toLocaleString()}</td>
+                <td class="targets-list" title="${row.targets.join(', ')}">${row.targets.join(', ')}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function filterData(type, btn) {
+        document.querySelectorAll('.controls button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        if (type === 'all') filteredData = allData;
+        else if (type === 'external') filteredData = allData.filter(d => !d.is_internal);
+        else if (type === 'internal') filteredData = allData.filter(d => d.is_internal);
+        
+        handleSearch(); // Re-apply search filter
+    }
+
+    function handleSearch() {
+        const query = document.getElementById('search-input').value.toLowerCase();
+        const finalData = filteredData.filter(d => 
+            d.source_ip.toLowerCase().includes(query) || 
+            (d.domain && d.domain.toLowerCase().includes(query)) ||
+            (d.type && d.type.toLowerCase().includes(query))
+        );
+        renderTable(finalData);
+    }
+</script>
+
+</body>
+</html>
