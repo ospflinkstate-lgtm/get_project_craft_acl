@@ -3,12 +3,11 @@ import os
 import socket
 from collections import defaultdict
 
-# Set working directory to script location
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 def get_domain_name(ip):
     try:
-        socket.setdefaulttimeout(0.8)
+        socket.setdefaulttimeout(0.5)
         return socket.gethostbyaddr(ip)[0]
     except Exception:
         return "Unknown"
@@ -16,7 +15,6 @@ def get_domain_name(ip):
 def identify_cdn_hint(ip):
     if ip.startswith(("10.", "192.168.", "172.16.")):
         return "Internal Network"
-    
     cdn_hints = {
         "66.249.": "Google Cache/Bot",
         "116.179.": "ISP CDN Node (Potential)",
@@ -29,81 +27,56 @@ def identify_cdn_hint(ip):
         "104.": "Cloudflare",
         "192.100.77.": "Unknown High Traffic (ISP?)",
     }
-    
     for prefix, name in cdn_hints.items():
-        if ip.startswith(prefix):
-            return f"CDN/Cloud ({name})"
-    
+        if ip.startswith(prefix): return f"CDN/Cloud ({name})"
     return "External (Other)"
 
 def analyze_traffic(input_file, output_file):
     print(f"Starting analysis on: {input_file} ...")
-    summary = defaultdict(lambda: {"hits": 0, "total_flows": 0, "dst_ips": set()})
+    # เพิ่ม "ports" ในโครงสร้างข้อมูล
+    summary = defaultdict(lambda: {"hits": 0, "total_flows": 0, "dst_ips": set(), "ports": set()})
     
     try:
-        if not os.path.exists(input_file):
-            print(f"Error: {input_file} not found!")
-            return
-
         with open(input_file, 'r', encoding='utf-8') as f:
             data = json.load(f)
             hits = data.get("hits", [])
-            print(f"Total hits found: {len(hits)}")
             
             for hit in hits:
                 src = hit.get("src_addr")
                 dst = hit.get("dst_addr")
+                port = hit.get("dst_port")
                 flows = hit.get("total_flows", 0)
                 
                 if dst and dst.startswith("10.27.101."):
                     summary[src]["hits"] += 1
                     summary[src]["total_flows"] += flows
                     summary[src]["dst_ips"].add(dst)
+                    if port: summary[src]["ports"].add(port)
         
-        external_list = []
-        internal_list = []
-        
+        all_list = []
         for src, info in summary.items():
             is_internal = src.startswith(("10.", "192.168.", "172.16."))
-            is_ap_109 = src.startswith("10.27.109.")
-            
-            item = {
+            all_list.append({
                 "source_ip": src,
                 "is_internal": is_internal,
-                "is_ap_109": is_ap_109,
                 "hits": info["hits"],
                 "total_flows": info["total_flows"],
                 "target_count": len(info["dst_ips"]),
-                "targets": list(info["dst_ips"])
-            }
-            
-            if is_internal:
-                if not is_ap_109:
-                    internal_list.append(item)
-            else:
-                external_list.append(item)
+                "targets": list(info["dst_ips"]),
+                "ports": sorted(list(info["ports"]))[:10] # เก็บ 10 port แรก
+            })
         
-        external_list.sort(key=lambda x: x["hits"], reverse=True)
-        internal_list.sort(key=lambda x: x["hits"], reverse=True)
+        # คัดเลือก Top 50 ของแต่ละกลุ่มเพื่อทำ DNS
+        external_sorted = sorted([x for x in all_list if not x["is_internal"]], key=lambda x: x["hits"], reverse=True)
+        internal_sorted = sorted([x for x in all_list if x["is_internal"] and not x["source_ip"].startswith("10.27.109.")], key=lambda x: x["hits"], reverse=True)
         
-        top_external = external_list[:50]
-        top_internal = internal_list[:50]
-        all_selected = top_external + top_internal
-        
-        print(f"Performing Reverse DNS for top 50 External and top 50 Internal (100 total)...")
+        selected = external_sorted[:50] + internal_sorted[:50]
+        selected_ips = {x["source_ip"] for x in selected}
         
         final_results = []
-        for i, item in enumerate(all_selected):
-            print(f"[{i+1}/{len(all_selected)}] Checking: {item['source_ip']}")
-            item["domain"] = get_domain_name(item["source_ip"])
-            item["type"] = identify_cdn_hint(item["source_ip"])
-            final_results.append(item)
-            
-        remaining_external = external_list[50:]
-        remaining_internal = internal_list[50:]
-        
-        for item in remaining_external + remaining_internal:
-            item["domain"] = "N/A (Too many hits)"
+        print(f"Enriching top 100 IPs with Domain Names...")
+        for i, item in enumerate(all_list):
+            item["domain"] = get_domain_name(item["source_ip"]) if item["source_ip"] in selected_ips else "N/A"
             item["type"] = identify_cdn_hint(item["source_ip"])
             final_results.append(item)
 
@@ -111,13 +84,8 @@ def analyze_traffic(input_file, output_file):
         
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(final_results, f, indent=4, ensure_ascii=False)
-            
-        print(f"Analysis complete! Saved to: {output_file}")
-        
-    except Exception as e:
-        print(f"An error occurred: {e}")
+        print("Analysis complete!")
+    except Exception as e: print(f"Error: {e}")
 
 if __name__ == "__main__":
-    input_path = "notlike101_traffic_combined.json"
-    output_path = "incoming_101_summary.json"
-    analyze_traffic(input_path, output_path)
+    analyze_traffic("notlike101_traffic_combined.json", "incoming_101_summary.json")

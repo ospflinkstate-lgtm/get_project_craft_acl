@@ -3,383 +3,485 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Traffic Analyzer Pro | Dropdown Filter & Pagination</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>ACL Commander Pro | Expert Analysis V3.1</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #6366f1;
-            --bg: #0f172a;
-            --card-bg: #1e293b;
-            --text: #f8fafc;
-            --text-dim: #94a3b8;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --danger: #ef4444;
+            --primary: #818cf8;
+            --primary-glow: rgba(129, 140, 248, 0.2);
+            --bg: #030712;
+            --card: rgba(17, 24, 39, 0.7);
+            --border: rgba(75, 85, 99, 0.3);
+            --text: #f3f4f6;
+            --text-dim: #9ca3af;
+            --success: #34d399;
+            --danger: #f87171;
+            --warning: #fbbf24;
             --internal: #38bdf8;
             --external: #fb7185;
-            --cdn: #c084fc;
+            --glass: rgba(255, 255, 255, 0.03);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
             font-family: 'Inter', 'Prompt', sans-serif; 
-            background-color: var(--bg); 
+            background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, var(--bg) 100%);
             color: var(--text);
-            line-height: 1.6;
+            min-height: 100vh;
             padding: 2rem;
+            overflow-x: hidden;
         }
 
-        .container { max-width: 1400px; margin: 0 auto; }
-        
-        header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 2rem;
-            border-bottom: 1px solid #334155;
-            padding-bottom: 1rem;
+        .glass-panel {
+            background: var(--card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
-        h1 { font-weight: 600; font-size: 1.5rem; color: var(--primary); }
+        .container { max-width: 1700px; margin: 0 auto; position: relative; }
 
-        #drop-zone {
-            border: 2px dashed #334155;
-            border-radius: 12px;
-            padding: 1.5rem;
-            text-align: center;
-            background: #1e293b55;
-            margin-bottom: 2rem;
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-
-        #drop-zone.dragover {
-            border-color: var(--primary);
-            background: #6366f111;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .stat-card {
-            background: var(--card-bg);
-            padding: 1.2rem;
-            border-radius: 12px;
-            border: 1px solid #334155;
-            text-align: center;
-        }
-
-        .stat-value { font-size: 1.8rem; font-weight: 600; display: block; }
-        .stat-label { color: var(--text-dim); font-size: 0.8rem; }
-
-        .controls-container {
-            background: var(--card-bg);
-            padding: 1.2rem;
-            border-radius: 12px;
-            border: 1px solid #334155;
-            margin-bottom: 1.5rem;
+        header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 1rem;
-            flex-wrap: wrap;
+            margin-bottom: 2.5rem;
         }
 
-        .filter-group {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
+        .logo-area h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(to right, #fff, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -1px;
         }
 
-        .select-input {
-            background: #0f172a;
-            border: 1px solid #334155;
-            color: var(--text);
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-family: inherit;
+        #drop-zone {
+            border: 2px dashed var(--border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            text-align: center;
+            background: var(--glass);
+            margin-bottom: 2rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
+        }
+        #drop-zone:hover { border-color: var(--primary); background: var(--primary-glow); transform: translateY(-2px); }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: var(--glass);
+            padding: 1.2rem;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+            background: var(--primary); opacity: 0.5;
+        }
+        .stat-val { font-size: 1.6rem; font-weight: 700; display: block; margin-bottom: 0.2rem; }
+        .stat-lbl { color: var(--text-dim); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; }
+
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+        }
+        .search-input {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            color: white;
+            padding: 0.8rem 1.2rem;
+            border-radius: 12px;
+            width: 450px;
             outline: none;
+            transition: all 0.3s;
         }
+        .search-input:focus { border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-glow); }
 
-        .select-input:focus { border-color: var(--primary); }
-
-        .search-box {
-            background: #0f172a;
-            border: 1px solid #334155;
-            color: var(--text);
-            padding: 0.6rem 1rem;
-            border-radius: 8px;
-            width: 300px;
-            font-family: inherit;
-        }
-
-        .pagination {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-        }
-
-        button {
-            background: #0f172a;
-            color: var(--text);
-            border: 1px solid #334155;
-            padding: 0.4rem 0.8rem;
-            border-radius: 6px;
+        select {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+            color: white;
+            padding: 0.8rem 1.2rem;
+            border-radius: 12px;
             cursor: pointer;
-            font-size: 0.85rem;
-            transition: all 0.2s;
         }
-
-        button:hover:not(:disabled) { border-color: var(--primary); background: #1e293b; }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
 
         .table-container {
-            background: var(--card-bg);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: rgba(0,0,0,0.2);
+        }
+        table { width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed; }
+        th {
+            padding: 1rem;
+            background: rgba(31, 41, 55, 0.8);
+            color: var(--text-dim);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: background 0.3s;
+            position: relative;
+        }
+        th:hover { background: rgba(55, 65, 81, 1); color: white; }
+        th.sort-active { color: var(--primary); }
+        th.sort-active::after { content: ' ↓'; position: absolute; margin-left: 4px; }
+        th.sort-asc::after { content: ' ↑'; }
+
+        td { padding: 0.8rem 1rem; border-bottom: 1px solid var(--border); vertical-align: top; overflow: hidden; }
+        tr:hover { background: rgba(255,255,255,0.03); }
+
+        #action-bar {
+            position: fixed;
+            bottom: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary);
+            color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+        }
+        #action-bar.visible { bottom: 30px; }
+        .btn-gen {
+            background: white;
+            color: var(--primary);
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 25px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-gen:hover { transform: scale(1.05); }
+
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: none; align-items: center; justify-content: center;
+            z-index: 2000; backdrop-filter: blur(10px);
+        }
+        .modal-content {
+            background: #111827;
+            width: 90%; max-width: 900px;
+            border-radius: 24px;
+            padding: 2.5rem;
+            border: 1px solid var(--primary);
+            max-height: 85vh; overflow-y: auto;
+        }
+        pre {
+            background: #000;
+            padding: 1.5rem;
             border-radius: 12px;
+            color: #10b981;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85rem;
             overflow-x: auto;
             border: 1px solid #334155;
+            line-height: 1.5;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85rem;
-            min-width: 900px;
-        }
-
-        th {
-            background: #1e293b;
-            text-align: left;
-            padding: 1rem;
-            color: var(--text-dim);
-            font-weight: 400;
-            border-bottom: 2px solid #334155;
-        }
-
-        td { padding: 0.8rem 1rem; border-bottom: 1px solid #334155; }
-        tr:hover { background: #33415555; }
-
-        .badge {
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            white-space: nowrap;
-        }
-
-        .badge-internal { background: #0c4a6e; color: #38bdf8; }
-        .badge-external { background: #4c0519; color: #fb7185; }
-        .badge-cdn { background: #3b0764; color: #c084fc; }
-
-        .domain-name { color: var(--success); font-weight: 600; }
-        .hits-count { font-family: monospace; font-weight: 600; color: var(--warning); }
+        .badge { padding: 0.25rem 0.5rem; border-radius: 6px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; }
+        .bg-internal { background: rgba(56, 189, 248, 0.1); color: var(--internal); border: 1px solid var(--internal); }
+        .bg-external { background: rgba(251, 113, 133, 0.1); color: var(--external); border: 1px solid var(--external); }
         
-        .targets-list {
-            font-size: 0.75rem;
-            color: var(--text-dim);
-            max-width: 350px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
+        .intensity-pill { padding: 1px 6px; border-radius: 8px; font-size: 0.7rem; font-weight: 700; }
 
-        .loading-overlay {
-            padding: 5rem;
-            text-align: center;
-            color: var(--text-dim);
-        }
+        input[type="checkbox"] { width: 18px; height: 18px; cursor: pointer; accent-color: var(--primary); }
 
-        .page-info { font-size: 0.8rem; color: var(--text-dim); }
+        .pagination { display: flex; gap: 0.5rem; align-items: center; }
+        .btn-page { background: var(--glass); border: 1px solid var(--border); color: white; padding: 0.4rem 0.8rem; border-radius: 8px; cursor: pointer; font-size: 0.8rem; }
+        .btn-page:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        .ip-list { font-size: 0.7rem; color: var(--text-dim); line-height: 1.3; }
+        .ip-item { background: rgba(255,255,255,0.05); padding: 2px 4px; border-radius: 4px; display: inline-block; margin: 1px; }
+
+        /* Column Widths */
+        .col-check { width: 50px; }
+        .col-source { width: 220px; }
+        .col-type { width: 150px; }
+        .col-stats { width: 100px; text-align: right; }
+        .col-intensity { width: 100px; text-align: right; }
+        .col-ports { width: 120px; }
+        .col-dest { width: auto; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <header>
-        <div>
-            <h1>Traffic Analyzer Pro</h1>
-            <p style="color: var(--text-dim); font-size: 0.8rem;">Monitoring Subnet 10.27.101.0/24</p>
+        <div class="logo-area">
+            <h1>ACL COMMANDER PRO <small style="font-size: 0.7rem; color: var(--success); vertical-align: middle;">V3.1</small></h1>
+            <p style="color: var(--text-dim); font-size: 0.8rem; margin-top: 0.2rem;">Expert Network Security Analysis & ACL Generation</p>
         </div>
-        <div id="file-info" style="font-size: 0.75rem; color: var(--text-dim); text-align: right;">
-            Version 2.2 | Dropdown Filters<br>Ready for JSON Data
+        <div class="pagination">
+            <span id="page-info" style="font-size: 0.8rem; color: var(--text-dim); margin-right: 1rem;"></span>
+            <button class="btn-page" id="prev-btn" onclick="changePage(-1)">PREV</button>
+            <button class="btn-page" id="next-btn" onclick="changePage(1)">NEXT</button>
         </div>
     </header>
 
     <div id="drop-zone" onclick="document.getElementById('file-input').click()">
-        <p id="drop-text">Drag & Drop <b>incoming_101_summary.json</b> here or click to browse</p>
+        <h3 id="drop-text" style="font-weight: 500;">Drop <b>incoming_101_summary.json</b> to begin analysis</h3>
         <input type="file" id="file-input" style="display: none" accept=".json">
     </div>
 
     <div class="stats-grid">
-        <div class="stat-card"><span class="stat-value" id="total-ips">-</span><span class="stat-label">Total IPs</span></div>
-        <div class="stat-card"><span class="stat-value" id="ext-ips" style="color: var(--external);">-</span><span class="stat-label">External/CDN</span></div>
-        <div class="stat-card"><span class="stat-value" id="int-ips" style="color: var(--internal);">-</span><span class="stat-label">Internal</span></div>
-        <div class="stat-card"><span class="stat-value" id="total-hits" style="color: var(--warning);">-</span><span class="stat-label">Total Flows</span></div>
+        <div class="stat-card"><span class="stat-lbl">Identified Identities</span><span class="stat-val" id="total-ips">-</span></div>
+        <div class="stat-card"><span class="stat-lbl">External Entities</span><span class="stat-val" id="ext-ips" style="color: var(--external);">-</span></div>
+        <div class="stat-card"><span class="stat-lbl">Internal Nodes</span><span class="stat-val" id="int-ips" style="color: var(--internal);">-</span></div>
+        <div class="stat-card"><span class="stat-lbl">Traffic Summary</span><span class="stat-val" id="total-hits" style="color: var(--warning);">-</span></div>
     </div>
 
-    <div class="controls-container">
-        <div class="filter-group">
-            <label style="font-size: 0.85rem; color: var(--text-dim);">Network Type:</label>
-            <select id="type-select" class="select-input" onchange="updateView(true)">
-                <option value="all">All Networks</option>
-                <option value="internal">Internal Network</option>
-                <option value="external">External (Other)</option>
-                <!-- Dynamic categories will be added here -->
-            </select>
-        </div>
-        
-        <input type="text" id="search-input" class="search-box" placeholder="Search IP or Domain..." oninput="updateView(true)">
-        
-        <div class="pagination">
-            <span class="page-info" id="page-display">Page 1 of 1</span>
-            <button onclick="changePage(-1)" id="prev-btn">Previous</button>
-            <button onclick="changePage(1)" id="next-btn">Next</button>
-        </div>
+    <div class="toolbar">
+        <input type="text" id="search-input" class="search-input" placeholder="Search by IP, Domain, or Type..." oninput="updateView(true)">
+        <select id="type-select" onchange="updateView(true)">
+            <option value="all">Filter: All Networks</option>
+            <option value="internal">Filter: Internal Only</option>
+            <option value="external">Filter: External Only</option>
+        </select>
     </div>
 
     <div class="table-container">
         <table>
             <thead>
                 <tr>
-                    <th>Source IP</th>
-                    <th>Domain / Identity</th>
-                    <th>Network Type</th>
-                    <th style="text-align: right;">Hits</th>
-                    <th style="text-align: right;">Flows</th>
-                    <th>Targets (.101 Zone)</th>
+                    <th class="col-check"><input type="checkbox" id="select-all" onclick="toggleAll(this)"></th>
+                    <th class="col-source" onclick="handleSort('source_ip')">Source IP / Identity</th>
+                    <th class="col-type" onclick="handleSort('type')">Type</th>
+                    <th class="col-stats" onclick="handleSort('hits')" style="text-align: right;">Hits</th>
+                    <th class="col-stats" onclick="handleSort('total_flows')" style="text-align: right;">Flows</th>
+                    <th class="col-intensity" onclick="handleSort('intensity')" style="text-align: right;">Intens.</th>
+                    <th class="col-ports">Ports</th>
+                    <th class="col-dest">Destination IPs (Target Servers)</th>
                 </tr>
             </thead>
             <tbody id="table-body">
-                <tr><td colspan="6" class="loading-overlay">Please drop a JSON file to start analysis.</td></tr>
+                <tr><td colspan="8" style="text-align: center; padding: 4rem; color: var(--text-dim);">Ready for data ingestion...</td></tr>
             </tbody>
         </table>
     </div>
 </div>
 
+<div id="action-bar">
+    <span id="selected-count">0 items selected</span>
+    <div style="display: flex; gap: 0.8rem;">
+        <button class="btn-gen" onclick="generateACL('permit')" style="background: var(--success); color: white;">PERMIT ACL</button>
+        <button class="btn-gen" onclick="generateACL('deny')" style="background: var(--danger); color: white;">DENY ACL</button>
+    </div>
+</div>
+
+<div id="acl-modal" class="modal" onclick="closeModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <h2 style="margin-bottom: 1.5rem; display: flex; justify-content: space-between;">
+            Cisco IOS Configuration Preview
+            <button onclick="closeModal()" style="background: none; border: none; color: white; cursor: pointer; font-size: 1.5rem;">×</button>
+        </h2>
+        <pre id="acl-output"></pre>
+        <div style="margin-top: 1.5rem; text-align: right;">
+            <button class="btn-gen" onclick="copyACL()" style="background: var(--primary); color: white;">COPY TO CLIPBOARD</button>
+        </div>
+    </div>
+</div>
+
 <script>
     let rawData = [];
-    let currentFiltered = [];
+    let filteredData = [];
+    let selectedIPs = new Set();
     let currentPage = 1;
     const pageSize = 100;
+    let sortKey = 'hits';
+    let sortDesc = true;
 
     const dropZone = document.getElementById('drop-zone');
-    const fileInput = document.getElementById('file-input');
-
-    // File Handling
     dropZone.ondragover = (e) => { e.preventDefault(); dropZone.classList.add('dragover'); };
     dropZone.ondragleave = () => dropZone.classList.remove('dragover');
-    dropZone.ondrop = (e) => {
-        e.preventDefault();
-        dropZone.classList.remove('dragover');
-        if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
-    };
-    fileInput.onchange = (e) => { if (e.target.files[0]) handleFile(e.target.files[0]); };
+    dropZone.ondrop = (e) => { e.preventDefault(); const file = e.dataTransfer.files[0]; if (file) handleFile(file); };
+    document.getElementById('file-input').onchange = (e) => handleFile(e.target.files[0]);
 
     function handleFile(file) {
         const reader = new FileReader();
         reader.onload = (e) => {
-            try {
-                rawData = JSON.parse(e.target.result);
-                document.getElementById('drop-text').innerHTML = `<b>Loaded:</b> ${file.name} (${rawData.length.toLocaleString()} IPs)`;
-                initTypeDropdown();
-                updateStats(rawData);
-                updateView(true);
-            } catch (err) { alert('Invalid JSON file structure.'); }
+            rawData = JSON.parse(e.target.result);
+            rawData.forEach(d => { d.intensity = d.hits > 0 ? (d.total_flows / d.hits) : 0; });
+            document.getElementById('drop-text').textContent = `DB Engaged: ${file.name}`;
+            initTypeDropdown();
+            updateStats();
+            updateView(true);
         };
         reader.readAsText(file);
     }
 
     function initTypeDropdown() {
-        const types = [...new Set(rawData.map(d => d.type))].filter(t => t);
+        const types = [...new Set(rawData.map(d => d.type))].filter(t => t && !t.includes('Internal') && !t.includes('Other'));
         const select = document.getElementById('type-select');
-        
-        // Reset dynamic options
         while (select.options.length > 3) select.remove(3);
-        
         types.forEach(t => {
-            if (t !== "Internal Network" && t !== "External (Other)") {
-                const opt = document.createElement('option');
-                opt.value = t;
-                opt.textContent = t.replace('CDN/Cloud ', '');
-                select.appendChild(opt);
-            }
+            const opt = document.createElement('option');
+            opt.value = t; opt.textContent = t.replace('CDN/Cloud ', '');
+            select.appendChild(opt);
         });
     }
 
-    function updateStats(data) {
-        document.getElementById('total-ips').textContent = data.length.toLocaleString();
-        document.getElementById('ext-ips').textContent = data.filter(d => !d.is_internal).length.toLocaleString();
-        document.getElementById('int-ips').textContent = data.filter(d => d.is_internal).length.toLocaleString();
-        document.getElementById('total-hits').textContent = data.reduce((s, d) => s + (d.total_flows || 0), 0).toLocaleString();
+    function updateStats() {
+        document.getElementById('total-ips').textContent = rawData.length.toLocaleString();
+        document.getElementById('ext-ips').textContent = rawData.filter(d => !d.is_internal).length.toLocaleString();
+        document.getElementById('int-ips').textContent = rawData.filter(d => d.is_internal).length.toLocaleString();
+        document.getElementById('total-hits').textContent = rawData.reduce((s,d) => s + (d.hits || 0), 0).toLocaleString() + ' Hits';
     }
 
     function updateView(resetPage = false) {
         if (resetPage) currentPage = 1;
-        
-        const searchQuery = document.getElementById('search-input').value.toLowerCase();
-        const selectedType = document.getElementById('type-select').value;
-        
-        // Filter logic
-        let data = rawData;
-        if (selectedType === 'internal') data = data.filter(d => d.is_internal);
-        else if (selectedType === 'external') data = data.filter(d => !d.is_internal);
-        else if (selectedType !== 'all') data = data.filter(d => d.type === selectedType);
+        const search = document.getElementById('search-input').value.toLowerCase();
+        const type = document.getElementById('type-select').value;
 
-        if (searchQuery) {
-            data = data.filter(d => 
-                d.source_ip.toLowerCase().includes(searchQuery) || 
-                (d.domain && d.domain.toLowerCase().includes(searchQuery)) ||
-                (d.type && d.type.toLowerCase().includes(searchQuery))
-            );
-        }
+        filteredData = rawData.filter(d => {
+            const matchType = type === 'all' ? true : 
+                            type === 'internal' ? d.is_internal : 
+                            type === 'external' ? !d.is_internal : d.type === type;
+            const matchSearch = d.source_ip.toLowerCase().includes(search) || 
+                              (d.domain && d.domain.toLowerCase().includes(search));
+            return matchType && matchSearch;
+        });
 
-        currentFiltered = data;
+        filteredData.sort((a, b) => {
+            let valA = a[sortKey]; let valB = b[sortKey];
+            if (typeof valA === 'string') return sortDesc ? valB.localeCompare(valA) : valA.localeCompare(valB);
+            return sortDesc ? valB - valA : valA - valB;
+        });
+
         renderTable();
+    }
+
+    function handleSort(key) {
+        if (sortKey === key) sortDesc = !sortDesc;
+        else { sortKey = key; sortDesc = true; }
+        document.querySelectorAll('th').forEach(th => {
+            th.classList.remove('sort-active', 'sort-asc');
+            if (th.getAttribute('onclick') && th.getAttribute('onclick').includes(key)) {
+                th.classList.add('sort-active');
+                if (!sortDesc) th.classList.add('sort-asc');
+            }
+        });
+        updateView();
     }
 
     function renderTable() {
         const tbody = document.getElementById('table-body');
         const start = (currentPage - 1) * pageSize;
-        const end = start + pageSize;
-        const pageData = currentFiltered.slice(start, end);
-
+        const pageData = filteredData.slice(start, start + pageSize);
         tbody.innerHTML = '';
-        if (pageData.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" class="loading-overlay">No matching data found.</td></tr>';
-        }
 
         pageData.forEach(row => {
             const tr = document.createElement('tr');
-            const typeClass = row.is_internal ? 'badge-internal' : (row.type.includes('CDN') ? 'badge-cdn' : 'badge-external');
-            const domainColor = (row.domain && row.domain !== 'Unknown' && row.domain !== 'N/A (Too many hits)') ? 'domain-name' : '';
+            const intensityColor = row.intensity > 100 ? 'var(--danger)' : (row.intensity > 10 ? 'var(--warning)' : 'var(--success)');
+            
+            const destIPs = row.targets.map(ip => `<span class="ip-item">${ip}</span>`).join('');
 
             tr.innerHTML = `
-                <td><b>${row.source_ip}</b></td>
-                <td><span class="${domainColor}">${row.domain || 'Unknown'}</span><br><small style="color: var(--text-dim)">${row.type}</small></td>
-                <td><span class="badge ${typeClass}">${row.is_internal ? 'Internal' : 'External'}</span></td>
-                <td style="text-align: right;" class="hits-count">${(row.hits || 0).toLocaleString()}</td>
-                <td style="text-align: right;" class="hits-count">${(row.total_flows || 0).toLocaleString()}</td>
-                <td class="targets-list" title="${row.targets.join(', ')}">${row.targets.join(', ')}</td>
+                <td><input type="checkbox" ${selectedIPs.has(row.source_ip) ? 'checked' : ''} onchange="toggleSelect('${row.source_ip}')"></td>
+                <td>
+                    <b style="color:var(--primary)">${row.source_ip}</b><br>
+                    <span style="font-size:0.7rem; color:var(--text-dim)">${row.domain !== 'N/A' ? row.domain : 'Unknown Identity'}</span>
+                </td>
+                <td>
+                    <span class="badge ${row.is_internal ? 'bg-internal' : 'bg-external'}">${row.is_internal ? 'Internal' : 'External'}</span><br>
+                    <small style="color:var(--text-dim); font-size: 0.6rem;">${row.type}</small>
+                </td>
+                <td style="text-align:right">${row.hits.toLocaleString()}</td>
+                <td style="text-align:right">${row.total_flows.toLocaleString()}</td>
+                <td style="text-align:right"><span class="intensity-pill" style="background:${intensityColor}22; color:${intensityColor}">${row.intensity.toFixed(1)}</span></td>
+                <td><small style="color:var(--text-dim)">${row.ports ? row.ports.join(', ') : '80, 443'}</small></td>
+                <td><div class="ip-list">${destIPs}</div></td>
             `;
             tbody.appendChild(tr);
         });
 
-        const totalPages = Math.ceil(currentFiltered.length / pageSize) || 1;
-        document.getElementById('page-display').textContent = `Page ${currentPage} of ${totalPages} (${currentFiltered.length.toLocaleString()} total)`;
+        const totalPages = Math.ceil(filteredData.length / pageSize) || 1;
+        document.getElementById('page-info').textContent = `PAGE ${currentPage} / ${totalPages} (${filteredData.length.toLocaleString()} IDENTITIES)`;
         document.getElementById('prev-btn').disabled = currentPage === 1;
         document.getElementById('next-btn').disabled = currentPage === totalPages;
     }
 
-    function changePage(dir) {
-        currentPage += dir;
+    function toggleSelect(ip) {
+        if (selectedIPs.has(ip)) selectedIPs.delete(ip);
+        else selectedIPs.add(ip);
+        updateActionBar();
+    }
+
+    function toggleAll(cb) {
+        const start = (currentPage - 1) * pageSize;
+        const pageData = filteredData.slice(start, start + pageSize);
+        pageData.forEach(row => {
+            if (cb.checked) selectedIPs.add(row.source_ip);
+            else selectedIPs.delete(row.source_ip);
+        });
         renderTable();
-        window.scrollTo(0, 0);
+        updateActionBar();
+    }
+
+    function updateActionBar() {
+        const bar = document.getElementById('action-bar');
+        const count = document.getElementById('selected-count');
+        if (selectedIPs.size > 0) {
+            bar.classList.add('visible');
+            count.textContent = `${selectedIPs.size.toLocaleString()} Selected for Policy`;
+        } else {
+            bar.classList.remove('visible');
+        }
+    }
+
+    function generateACL(action) {
+        const output = document.getElementById('acl-output');
+        let acl = `! ==================================================\n`;
+        acl += `! GENERATED POLICY: ${action.toUpperCase()} LIST\n`;
+        acl += `! Target Subnet: 10.27.101.0/24\n`;
+        acl += `! ==================================================\n\n`;
+
+        const selectedData = rawData.filter(d => selectedIPs.has(d.source_ip));
+        
+        selectedData.forEach(d => {
+            acl += `remark -- ${d.domain !== 'N/A' ? d.domain : d.type} --\n`;
+            d.targets.forEach(target => {
+                const ports = d.ports && d.ports.length > 0 ? d.ports : [80, 443];
+                ports.forEach(port => {
+                    acl += `ip access-list extended INBOUND_ACL\n`;
+                    acl += ` ${action} tcp host ${d.source_ip} host ${target} eq ${port}\n`;
+                });
+            });
+            acl += `!\n`;
+        });
+
+        output.textContent = acl;
+        document.getElementById('acl-modal').style.display = 'flex';
+    }
+
+    function closeModal() { document.getElementById('acl-modal').style.display = 'none'; }
+    function changePage(dir) { currentPage += dir; renderTable(); window.scrollTo(0,0); }
+    function copyACL() {
+        const text = document.getElementById('acl-output').textContent;
+        navigator.clipboard.writeText(text).then(() => alert('Policy copied to clipboard!'));
     }
 </script>
 
