@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ACL Commander Pro | Expert Analysis V3.4</title>
-    <!-- Last Build Trigger: 2026-05-13 08:55 -->
+    <title>ACL Commander Pro | Expert Analysis V3.5</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -135,6 +134,7 @@
         
         .ip-list { font-size: 0.7rem; color: var(--text-dim); display: flex; flex-wrap: wrap; gap: 2px; }
         .ip-item { background: rgba(255,255,255,0.05); padding: 1px 3px; border-radius: 3px; }
+        .ip-item b { color: var(--warning); margin-left: 2px; font-size: 0.65rem; }
 
         /* Guide Section */
         .guide-section {
@@ -190,7 +190,7 @@
 <div class="container">
     <header>
         <div class="logo-area">
-            <h1>ACL COMMANDER PRO <small style="font-size: 0.7rem; color: var(--success);">V3.4</small></h1>
+            <h1>ACL COMMANDER PRO <small style="font-size: 0.7rem; color: var(--success);">V3.5</small></h1>
         </div>
         <div style="display: flex; gap: 0.5rem; align-items: center;">
             <span id="page-info" style="font-size: 0.75rem; color: var(--text-dim);"></span>
@@ -234,7 +234,7 @@
                     <th class="col-targets" onclick="handleSort('target_count')">Targets</th>
                     <th class="col-intensity" onclick="handleSort('intensity')">Intens.</th>
                     <th class="col-ports">Dst Ports</th>
-                    <th class="col-dest">Target Destination List (.101 Zone)</th>
+                    <th class="col-dest">Target Destination (Per-Machine Hits)</th>
                 </tr>
             </thead>
             <tbody id="table-body">
@@ -304,12 +304,14 @@
     function handleFile(file) {
         const reader = new FileReader();
         reader.onload = (e) => {
-            rawData = JSON.parse(e.target.result);
-            rawData.forEach(d => { d.intensity = d.hits > 0 ? (d.total_flows / d.hits) : 0; });
-            document.getElementById('drop-text').innerHTML = `<b>Database Loaded:</b> ${file.name}`;
-            initTypeDropdown();
-            updateStats();
-            updateView(true);
+            try {
+                rawData = JSON.parse(e.target.result);
+                rawData.forEach(d => { d.intensity = d.hits > 0 ? (d.total_flows / d.hits) : 0; });
+                document.getElementById('drop-text').innerHTML = `<b>Database Loaded:</b> ${file.name}`;
+                initTypeDropdown();
+                updateStats();
+                updateView(true);
+            } catch (err) { alert("Invalid JSON format. Make sure you use the new summary file."); }
         };
         reader.readAsText(file);
     }
@@ -341,9 +343,13 @@
             const matchType = type === 'all' ? true : 
                             type === 'internal' ? d.is_internal : 
                             type === 'external' ? !d.is_internal : d.type === type;
+            
+            // Handle targets both as strings (v3.4) and objects (v3.5)
+            const targetStr = d.targets.map(t => typeof t === 'string' ? t : t.ip).join(',');
+            
             const matchSearch = d.source_ip.toLowerCase().includes(search) || 
                               (d.domain && d.domain.toLowerCase().includes(search)) ||
-                              (d.targets.join(',').includes(search)) ||
+                              (targetStr.includes(search)) ||
                               (d.ports && d.ports.join(',').includes(search));
             return matchType && matchSearch;
         });
@@ -377,6 +383,13 @@
         pageData.forEach(row => {
             const tr = document.createElement('tr');
             const intensityColor = row.intensity > 100 ? 'var(--danger)' : (row.intensity > 10 ? 'var(--warning)' : 'var(--success)');
+            
+            // Render Target Breakdown
+            const targetHtml = row.targets.map(t => {
+                if (typeof t === 'string') return `<span class="ip-item">${t}</span>`;
+                return `<span class="ip-item">${t.ip}<b>(${t.hits.toLocaleString()})</b></span>`;
+            }).join('');
+
             tr.innerHTML = `
                 <td class="col-check"><input type="checkbox" ${selectedIPs.has(row.source_ip) ? 'checked' : ''} onchange="toggleSelect('${row.source_ip}')"></td>
                 <td class="col-source">
@@ -392,7 +405,7 @@
                 <td class="col-targets"><b style="${row.target_count > 1 ? 'color:var(--warning)' : ''}">${row.target_count}</b></td>
                 <td class="col-intensity"><span class="intensity-pill" style="background:${intensityColor}22; color:${intensityColor}">${row.intensity.toFixed(1)}</span></td>
                 <td class="col-ports" style="font-size:0.75rem; color:var(--info)">${row.ports ? row.ports.join(', ') : '80, 443'}</td>
-                <td class="col-dest"><div class="ip-list">${row.targets.map(ip => `<span class="ip-item">${ip}</span>`).join('')}</div></td>
+                <td class="col-dest"><div class="ip-list">${targetHtml}</div></td>
             `;
             tbody.appendChild(tr);
         });
@@ -425,11 +438,12 @@
         acl += `! ==================================================\n\n`;
         rawData.filter(d => selectedIPs.has(d.source_ip)).forEach(d => {
             acl += `remark -- ${d.domain !== 'N/A' ? d.domain : d.type} --\n`;
-            d.targets.forEach(target => {
+            d.targets.forEach(t => {
+                const targetIp = typeof t === 'string' ? t : t.ip;
                 const ports = d.ports && d.ports.length > 0 ? d.ports : [80, 443];
                 ports.forEach(port => {
                     acl += `ip access-list extended INBOUND_ACL\n`;
-                    acl += ` ${action} tcp host ${d.source_ip} host ${target} eq ${port}\n`;
+                    acl += ` ${action} tcp host ${d.source_ip} host ${targetIp} eq ${port}\n`;
                 });
             });
             acl += `!\n`;
