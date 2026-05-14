@@ -33,12 +33,12 @@ def identify_cdn_hint(ip):
 def analyze_traffic(input_file, output_file):
     print(f"Starting analysis on: {input_file} ...")
     
-    # summary structure: { src_ip: { hits: X, flows: Y, targets: { dst_ip: hits_count }, ports: set } }
+    # summary structure: { src_ip: { hits, flows, target_breakdown, port_breakdown } }
     summary = defaultdict(lambda: {
         "hits": 0, 
         "total_flows": 0, 
         "target_breakdown": defaultdict(int),
-        "ports": set()
+        "port_breakdown": defaultdict(int)
     })
     
     try:
@@ -56,17 +56,19 @@ def analyze_traffic(input_file, output_file):
                     summary[src]["hits"] += 1
                     summary[src]["total_flows"] += flows
                     summary[src]["target_breakdown"][dst] += 1
-                    if port: summary[src]["ports"].add(port)
+                    if port: summary[src]["port_breakdown"][port] += 1
         
         all_list = []
         for src, info in summary.items():
             is_internal = src.startswith(("10.", "192.168.", "172.16."))
             
-            # Convert target breakdown to sorted list of objects
-            target_list = []
-            for t_ip, t_hits in info["target_breakdown"].items():
-                target_list.append({"ip": t_ip, "hits": t_hits})
+            # Target breakdown list
+            target_list = [{"ip": t_ip, "hits": t_hits} for t_ip, t_hits in info["target_breakdown"].items()]
             target_list.sort(key=lambda x: x["hits"], reverse=True)
+
+            # Port breakdown list
+            port_list = [{"port": p, "hits": p_hits} for p, p_hits in info["port_breakdown"].items()]
+            port_list.sort(key=lambda x: x["hits"], reverse=True)
 
             all_list.append({
                 "source_ip": src,
@@ -74,8 +76,9 @@ def analyze_traffic(input_file, output_file):
                 "hits": info["hits"],
                 "total_flows": info["total_flows"],
                 "target_count": len(info["target_breakdown"]),
-                "targets": target_list, # New breakdown format
-                "ports": sorted(list(info["ports"]))[:10]
+                "targets": target_list,
+                "ports": port_list, # Updated to list of objects
+                "port_count": len(info["port_breakdown"])
             })
         
         # DNS Enrichment for Top 100

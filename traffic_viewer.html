@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ACL Commander Pro | Expert Analysis V3.5</title>
+    <title>ACL Commander Pro | Full Visibility V3.6</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -132,9 +132,9 @@
         .bg-internal { background: rgba(56, 189, 248, 0.1); color: var(--info); border: 1px solid var(--info); }
         .bg-external { background: rgba(251, 113, 133, 0.1); color: var(--external); border: 1px solid var(--external); }
         
-        .ip-list { font-size: 0.7rem; color: var(--text-dim); display: flex; flex-wrap: wrap; gap: 2px; }
-        .ip-item { background: rgba(255,255,255,0.05); padding: 1px 3px; border-radius: 3px; }
-        .ip-item b { color: var(--warning); margin-left: 2px; font-size: 0.65rem; }
+        .item-chip { background: rgba(255,255,255,0.05); padding: 1px 4px; border-radius: 3px; display: inline-block; margin: 1px; font-size: 0.7rem; }
+        .item-chip b { color: var(--warning); margin-left: 3px; font-size: 0.65rem; }
+        .port-chip { color: var(--info); border: 1px solid rgba(56, 189, 248, 0.2); }
 
         /* Guide Section */
         .guide-section {
@@ -181,7 +181,7 @@
         .col-num { width: 100px; text-align: right; }
         .col-targets { width: 80px; text-align: right; }
         .col-intensity { width: 90px; text-align: right; }
-        .col-ports { width: 130px; }
+        .col-ports { width: 150px; }
         .col-dest { width: auto; }
     </style>
 </head>
@@ -190,7 +190,7 @@
 <div class="container">
     <header>
         <div class="logo-area">
-            <h1>ACL COMMANDER PRO <small style="font-size: 0.7rem; color: var(--success);">V3.5</small></h1>
+            <h1>ACL COMMANDER PRO <small style="font-size: 0.7rem; color: var(--success);">V3.6</small></h1>
         </div>
         <div style="display: flex; gap: 0.5rem; align-items: center;">
             <span id="page-info" style="font-size: 0.75rem; color: var(--text-dim);"></span>
@@ -200,7 +200,7 @@
     </header>
 
     <div id="drop-zone" onclick="document.getElementById('file-input').click()">
-        <p id="drop-text">Drag & Drop <b>incoming_101_summary.json</b> to run Expert Analysis</p>
+        <p id="drop-text">Drag & Drop <b>incoming_101_summary.json</b> for Full Visibility Analysis</p>
         <input type="file" id="file-input" style="display: none" accept=".json">
     </div>
 
@@ -213,7 +213,7 @@
 
     <div class="toolbar">
         <div style="display: flex; gap: 0.5rem;">
-            <input type="text" id="search-input" class="search-input" placeholder="Search IP, Domain, Port or Target..." oninput="updateView(true)">
+            <input type="text" id="search-input" class="search-input" placeholder="Search IP, Domain, Port or Hits..." oninput="updateView(true)">
             <select id="type-select" onchange="updateView(true)">
                 <option value="all">Filter: All Networks</option>
                 <option value="internal">Filter: Internal Only</option>
@@ -229,23 +229,23 @@
                     <th class="col-check"><input type="checkbox" id="select-all" onclick="toggleAll(this)"></th>
                     <th class="col-source" onclick="handleSort('source_ip')">Source Identity</th>
                     <th class="col-type" onclick="handleSort('type')">Type</th>
-                    <th class="col-num" onclick="handleSort('hits')">Hits</th>
+                    <th class="col-num" onclick="handleSort('hits')">Total Hits</th>
                     <th class="col-num" onclick="handleSort('total_flows')">Volume</th>
                     <th class="col-targets" onclick="handleSort('target_count')">Targets</th>
                     <th class="col-intensity" onclick="handleSort('intensity')">Intens.</th>
-                    <th class="col-ports">Dst Ports</th>
+                    <th class="col-ports" onclick="handleSort('port_count')">Dst Ports (Hits)</th>
                     <th class="col-dest">Target Destination (Per-Machine Hits)</th>
                 </tr>
             </thead>
             <tbody id="table-body">
-                <tr><td colspan="9" style="text-align: center; padding: 4rem; color: var(--text-dim);">Ready for Expert Analysis...</td></tr>
+                <tr><td colspan="9" style="text-align: center; padding: 4rem; color: var(--text-dim);">Awaiting Full Visibility data...</td></tr>
             </tbody>
         </table>
     </div>
 
     <div class="guide-section">
         <h3 style="margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-            📘 Network Classification Logic (เกณฑ์การแยกประเภท)
+            📘 Network Classification Logic (V3.6)
         </h3>
         <div class="guide-grid">
             <div class="guide-item">
@@ -255,13 +255,13 @@
             </div>
             <div class="guide-item">
                 <h4>☁️ CDN / Cloud Nodes</h4>
-                <p><b>Logic:</b> ตรวจสอบจาก IP Prefix ของผู้ให้บริการ (เช่น Cloudflare, Google, AWS) และการทำ Reverse DNS หา Hostname ที่มีคำว่า cache หรือ mirror<br>
+                <p><b>Logic:</b> ตรวจสอบจาก IP Prefix ของผู้ให้บริการ และการทำ Reverse DNS หา Hostname ที่มีคำว่า cache หรือ mirror<br>
                 <b>Note:</b> ทราฟฟิกกลุ่มนี้มักเป็นบริการอัปเดตไฟล์ หรือบริการเว็บยอดนิยม</p>
             </div>
             <div class="guide-item">
                 <h4>🌍 External (Other)</h4>
                 <p><b>Logic:</b> IP สาธารณะทั่วไปที่ไม่ตรงกับฐานข้อมูล CDN หรือ ISP Node ที่ระบุไว้<br>
-                <b>Note:</b> ควรตรวจสอบ IP กลุ่มนี้เป็นพิเศษ หากมีค่า Intensity สูงแต่ไม่มีชื่อ Domain ระบุไว้</p>
+                <b>Note:</b> ข้อมูลใน V3.6 ช่วยให้คุณเห็นได้ว่า IP เหล่านี้พยายามเข้าถึงพอร์ตใดบ่อยที่สุด</p>
             </div>
         </div>
     </div>
@@ -306,12 +306,16 @@
         reader.onload = (e) => {
             try {
                 rawData = JSON.parse(e.target.result);
-                rawData.forEach(d => { d.intensity = d.hits > 0 ? (d.total_flows / d.hits) : 0; });
-                document.getElementById('drop-text').innerHTML = `<b>Database Loaded:</b> ${file.name}`;
+                rawData.forEach(d => { 
+                    d.intensity = d.hits > 0 ? (d.total_flows / d.hits) : 0;
+                    // v3.6 added port_count if not present
+                    if (!d.port_count) d.port_count = d.ports ? d.ports.length : 0;
+                });
+                document.getElementById('drop-text').innerHTML = `<b>Full Visibility Loaded:</b> ${file.name}`;
                 initTypeDropdown();
                 updateStats();
                 updateView(true);
-            } catch (err) { alert("Invalid JSON format. Make sure you use the new summary file."); }
+            } catch (err) { alert("Invalid JSON format. Make sure to use the V3.6 summary file."); }
         };
         reader.readAsText(file);
     }
@@ -344,13 +348,13 @@
                             type === 'internal' ? d.is_internal : 
                             type === 'external' ? !d.is_internal : d.type === type;
             
-            // Handle targets both as strings (v3.4) and objects (v3.5)
             const targetStr = d.targets.map(t => typeof t === 'string' ? t : t.ip).join(',');
+            const portStr = d.ports.map(p => typeof p === 'number' ? p : p.port).join(',');
             
             const matchSearch = d.source_ip.toLowerCase().includes(search) || 
                               (d.domain && d.domain.toLowerCase().includes(search)) ||
                               (targetStr.includes(search)) ||
-                              (d.ports && d.ports.join(',').includes(search));
+                              (portStr.includes(search));
             return matchType && matchSearch;
         });
 
@@ -386,8 +390,14 @@
             
             // Render Target Breakdown
             const targetHtml = row.targets.map(t => {
-                if (typeof t === 'string') return `<span class="ip-item">${t}</span>`;
-                return `<span class="ip-item">${t.ip}<b>(${t.hits.toLocaleString()})</b></span>`;
+                if (typeof t === 'string') return `<span class="item-chip">${t}</span>`;
+                return `<span class="item-chip">${t.ip}<b>(${t.hits.toLocaleString()})</b></span>`;
+            }).join('');
+
+            // Render Port Breakdown (V3.6)
+            const portHtml = row.ports.map(p => {
+                if (typeof p === 'number') return `<span class="item-chip port-chip">${p}</span>`;
+                return `<span class="item-chip port-chip">${p.port}<b>(${p.hits.toLocaleString()})</b></span>`;
             }).join('');
 
             tr.innerHTML = `
@@ -398,13 +408,13 @@
                 </td>
                 <td class="col-type">
                     <span class="badge ${row.is_internal ? 'bg-internal' : 'bg-external'}">${row.is_internal ? 'Internal' : 'External'}</span><br>
-                    <small style="color:var(--text-dim); font-size: 0.65rem;">${row.type}</small>
+                    <small style="color:var(--text-dim); font-size: 0.6rem;">${row.type}</small>
                 </td>
                 <td class="col-num">${row.hits.toLocaleString()}</td>
                 <td class="col-num">${row.total_flows.toLocaleString()}</td>
                 <td class="col-targets"><b style="${row.target_count > 1 ? 'color:var(--warning)' : ''}">${row.target_count}</b></td>
                 <td class="col-intensity"><span class="intensity-pill" style="background:${intensityColor}22; color:${intensityColor}">${row.intensity.toFixed(1)}</span></td>
-                <td class="col-ports" style="font-size:0.75rem; color:var(--info)">${row.ports ? row.ports.join(', ') : '80, 443'}</td>
+                <td class="col-ports"><div class="ip-list">${portHtml}</div></td>
                 <td class="col-dest"><div class="ip-list">${targetHtml}</div></td>
             `;
             tbody.appendChild(tr);
@@ -433,17 +443,17 @@
     function generateACL(action) {
         const output = document.getElementById('acl-output');
         let acl = `! ==================================================\n`;
-        acl += `! GENERATED SECURITY POLICY (${action.toUpperCase()})\n`;
-        acl += `! Target Subnet: 10.27.101.0/24\n`;
+        acl += `! GENERATED SECURITY POLICY (FULL VISIBILITY V3.6)\n`;
         acl += `! ==================================================\n\n`;
         rawData.filter(d => selectedIPs.has(d.source_ip)).forEach(d => {
             acl += `remark -- ${d.domain !== 'N/A' ? d.domain : d.type} --\n`;
             d.targets.forEach(t => {
                 const targetIp = typeof t === 'string' ? t : t.ip;
-                const ports = d.ports && d.ports.length > 0 ? d.ports : [80, 443];
-                ports.forEach(port => {
+                // Generate based on port breakdown
+                d.ports.forEach(p => {
+                    const portNum = typeof p === 'number' ? p : p.port;
                     acl += `ip access-list extended INBOUND_ACL\n`;
-                    acl += ` ${action} tcp host ${d.source_ip} host ${targetIp} eq ${port}\n`;
+                    acl += ` ${action} tcp host ${d.source_ip} host ${targetIp} eq ${portNum}\n`;
                 });
             });
             acl += `!\n`;
