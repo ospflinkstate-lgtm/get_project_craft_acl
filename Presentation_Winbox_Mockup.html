@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MikroTik Firewall Presentation Mockup</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0f2f5; }
+        .winbox-window {
+            background-color: #ece9d8;
+            border: 1px solid #0055ea;
+            border-radius: 4px 4px 0 0;
+            box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        .winbox-titlebar {
+            background: linear-gradient(to right, #0058e6, #3a93ff);
+            color: white;
+            padding: 4px 8px;
+            font-size: 13px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .winbox-toolbar {
+            background-color: #f4f3ee;
+            border-bottom: 1px solid #ccc;
+            padding: 4px;
+            display: flex;
+            gap: 4px;
+        }
+        .winbox-btn {
+            padding: 2px 8px;
+            border: 1px solid transparent;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .winbox-btn:hover { border: 1px solid #a6bede; background-color: #e5f1fb; }
+        .winbox-tabs {
+            display: flex;
+            background-color: #f4f3ee;
+            padding-top: 4px;
+            padding-left: 2px;
+            border-bottom: 1px solid #ccc;
+        }
+        .winbox-tab {
+            padding: 4px 12px;
+            font-size: 12px;
+            border: 1px solid #ccc;
+            border-bottom: none;
+            background-color: #e3e3e3;
+            margin-right: 2px;
+            border-radius: 3px 3px 0 0;
+            cursor: pointer;
+        }
+        .winbox-tab.active { background-color: #fff; border-bottom: 1px solid #fff; margin-bottom: -1px; font-weight: bold; }
+        .winbox-content { background-color: #fff; min-height: 400px; overflow: auto; }
+        .winbox-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .winbox-table th { 
+            background: linear-gradient(to bottom, #f9f9f9, #e0e0e0); 
+            border: 1px solid #ccc; 
+            padding: 4px; 
+            text-align: left; 
+            font-weight: normal;
+        }
+        .winbox-table td { border: 1px dotted #ccc; padding: 2px 4px; }
+        .winbox-table tr:nth-child(even) { background-color: #f9f9f9; }
+        .winbox-table tr:hover { background-color: #316ac5; color: white; }
+        .icon-accept { color: #00aa00; font-weight: bold; }
+        .icon-drop { color: #cc0000; font-weight: bold; }
+        .comment-row { background-color: #ffffe1 !important; color: #000 !important; font-style: italic; }
+    </style>
+</head>
+<body class="p-8 flex flex-col gap-8">
+
+    <div class="mb-4 text-center">
+        <h1 class="text-3xl font-bold text-slate-800">MikroTik Winbox Presentation View</h1>
+        <p class="text-slate-500">Capture these screens for your PowerPoint Presentation</p>
+    </div>
+
+    <!-- Filter Rules Window -->
+    <div class="max-w-5xl mx-auto w-full winbox-window">
+        <div class="winbox-titlebar">
+            <span><i class="fa-solid fa-fire text-orange-400 mr-2"></i>Firewall</span>
+            <div class="flex gap-1"><span class="px-2 bg-slate-300 text-black cursor-pointer rounded-sm">-</span><span class="px-2 bg-red-500 cursor-pointer rounded-sm">X</span></div>
+        </div>
+        <div class="winbox-toolbar">
+            <button class="winbox-btn text-blue-600"><i class="fa-solid fa-plus"></i></button>
+            <button class="winbox-btn text-red-600"><i class="fa-solid fa-minus"></i></button>
+            <button class="winbox-btn"><i class="fa-solid fa-check text-green-600"></i></button>
+            <button class="winbox-btn"><i class="fa-solid fa-xmark text-red-600"></i></button>
+            <div class="border-l border-gray-300 mx-1"></div>
+            <button class="winbox-btn"><i class="fa-solid fa-magnifying-glass"></i> Find</button>
+        </div>
+        <div class="winbox-tabs">
+            <div class="winbox-tab active">Filter Rules</div>
+            <div class="winbox-tab">NAT</div>
+            <div class="winbox-tab">Mangle</div>
+            <div class="winbox-tab">Raw</div>
+            <div class="winbox-tab">Service Ports</div>
+            <div class="winbox-tab">Connections</div>
+            <div class="winbox-tab">Address Lists</div>
+            <div class="winbox-tab">Layer7 Protocols</div>
+        </div>
+        <div class="winbox-content">
+            <table class="winbox-table">
+                <thead>
+                    <tr>
+                        <th class="w-8">#</th>
+                        <th class="w-16">Action</th>
+                        <th class="w-16">Chain</th>
+                        <th class="w-24">Protocol</th>
+                        <th class="w-24">Dst. Port</th>
+                        <th class="w-32">Dst. Address List</th>
+                        <th>Connection State</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="comment-row"><td colspan="7">;;; [01] ACCEPT ESTABLISHED/RELATED</td></tr>
+                    <tr>
+                        <td class="text-center text-gray-500">0</td>
+                        <td><span class="icon-accept">✓ accept</span></td>
+                        <td>forward</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td>established, related</td>
+                    </tr>
+                    <tr class="comment-row"><td colspan="7">;;; [02] DROP INVALID</td></tr>
+                    <tr>
+                        <td class="text-center text-gray-500">1</td>
+                        <td><span class="icon-drop">✗ drop</span></td>
+                        <td>forward</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td>invalid</td>
+                    </tr>
+                    <tr class="comment-row"><td colspan="7">;;; [03] ALLOW SSH (TCP)</td></tr>
+                    <tr>
+                        <td class="text-center text-gray-500">2</td>
+                        <td><span class="icon-accept">✓ accept</span></td>
+                        <td>forward</td>
+                        <td>6 (tcp)</td>
+                        <td>22</td>
+                        <td>allow-port-22-servers</td>
+                        <td></td>
+                    </tr>
+                    <tr class="comment-row"><td colspan="7">;;; [06] ALLOW HTTP (TCP)</td></tr>
+                    <tr>
+                        <td class="text-center text-gray-500">3</td>
+                        <td><span class="icon-accept">✓ accept</span></td>
+                        <td>forward</td>
+                        <td>6 (tcp)</td>
+                        <td>80</td>
+                        <td>allow-port-80-servers</td>
+                        <td></td>
+                    </tr>
+                    <tr class="comment-row"><td colspan="7">;;; [12] ALLOW HTTPS (TCP)</td></tr>
+                    <tr>
+                        <td class="text-center text-gray-500">4</td>
+                        <td><span class="icon-accept">✓ accept</span></td>
+                        <td>forward</td>
+                        <td>6 (tcp)</td>
+                        <td>443</td>
+                        <td>allow-port-443-servers</td>
+                        <td></td>
+                    </tr>
+                    <tr class="comment-row"><td colspan="7">;;; ... (Other Allowed Ports) ...</td></tr>
+                    <tr><td colspan="7" class="text-center text-gray-400 py-4">...</td></tr>
+                    <tr class="comment-row"><td colspan="7">;;; [99] DEFAULT DROP ALL TO .101 (Zero-Trust)</td></tr>
+                    <tr>
+                        <td class="text-center text-gray-500">99</td>
+                        <td><span class="icon-drop">✗ drop</span></td>
+                        <td>forward</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Address Lists Window -->
+    <div class="max-w-5xl mx-auto w-full winbox-window mt-8">
+        <div class="winbox-titlebar">
+            <span><i class="fa-solid fa-fire text-orange-400 mr-2"></i>Firewall</span>
+            <div class="flex gap-1"><span class="px-2 bg-slate-300 text-black cursor-pointer rounded-sm">-</span><span class="px-2 bg-red-500 cursor-pointer rounded-sm">X</span></div>
+        </div>
+        <div class="winbox-tabs">
+            <div class="winbox-tab">Filter Rules</div>
+            <div class="winbox-tab">NAT</div>
+            <div class="winbox-tab active">Address Lists</div>
+        </div>
+        <div class="winbox-content">
+            <table class="winbox-table">
+                <thead>
+                    <tr>
+                        <th class="w-8">#</th>
+                        <th class="w-48">Name</th>
+                        <th class="w-48">Address</th>
+                        <th>Comment</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="text-center text-gray-500">0</td>
+                        <td>allow-port-22-servers</td>
+                        <td>10.27.101.3</td>
+                        <td>waf-oasis</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center text-gray-500">1</td>
+                        <td>allow-port-22-servers</td>
+                        <td>10.27.101.5</td>
+                        <td>cc-main</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center text-gray-500">2</td>
+                        <td>allow-port-80-servers</td>
+                        <td>10.27.101.9</td>
+                        <td>web-portal</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center text-gray-500">3</td>
+                        <td>allow-port-443-servers</td>
+                        <td>10.27.101.27</td>
+                        <td>IC-Payment-v2</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center text-gray-500">4</td>
+                        <td>allow-port-443-servers</td>
+                        <td>10.27.101.66</td>
+                        <td>waf-lib</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</body>
+</html>

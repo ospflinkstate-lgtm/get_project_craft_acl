@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enterprise Whitelist Review</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            overflow: hidden; /* Prevent body scroll, handle scroll in containers */
+        }
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .drop-zone {
+            border: 2px dashed rgba(56, 189, 248, 0.4);
+            transition: all 0.3s ease;
+        }
+        .drop-zone.dragover {
+            border-color: #38bdf8;
+            background: rgba(56, 189, 248, 0.1);
+            transform: scale(1.02);
+        }
+        
+        /* Toggle Styling */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #10b981;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #10b981;
+        }
+        
+        /* Sidebar Item Hover & Active */
+        .sidebar-item { transition: all 0.2s; border-left: 3px solid transparent; }
+        .sidebar-item:hover { background-color: rgba(51, 65, 85, 0.5); }
+        .sidebar-item.active { background-color: rgba(51, 65, 85, 0.8); border-left-color: #38bdf8; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    </style>
+</head>
+<body class="h-screen flex flex-col">
+
+    <!-- Header -->
+    <header class="flex-shrink-0 flex justify-between items-center glass-panel px-6 py-4 border-b border-slate-700/50 z-10">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+                <i class="fa-solid fa-shield-halved text-white text-xl"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold text-white tracking-tight">Zero-Trust Whitelist Review</h1>
+                <p class="text-slate-400 text-xs mt-0.5">Enterprise Master-Detail Dashboard</p>
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-6">
+            <!-- Global Stats -->
+            <div id="globalStats" class="hidden flex gap-4 text-sm bg-slate-800/80 px-4 py-2 rounded-lg border border-slate-700/50">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+                    <span class="text-slate-300">Allowed: <span id="statAllowed" class="text-white font-bold">0</span></span>
+                </div>
+                <div class="w-px h-4 bg-slate-700"></div>
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
+                    <span class="text-slate-300">Denied: <span id="statDenied" class="text-white font-bold">0</span></span>
+                </div>
+            </div>
+
+            <button id="btnExport" class="hidden px-5 py-2 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white rounded-lg font-medium shadow-lg shadow-emerald-500/20 transition-all flex items-center gap-2 text-sm">
+                <i class="fa-solid fa-code"></i> Generate Script
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 flex overflow-hidden relative">
+        
+        <!-- Upload Section (Full screen overlay initially) -->
+        <div id="uploadSection" class="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 bg-[#0f172a]">
+            <div class="glass-panel p-12 max-w-2xl w-full flex flex-col items-center justify-center text-center drop-zone rounded-3xl cursor-pointer shadow-2xl" onclick="document.getElementById('fileInput').click()">
+                <div class="w-24 h-24 bg-slate-800/80 rounded-full flex items-center justify-center mb-6 text-cyan-400 shadow-inner border border-slate-700">
+                    <i class="fa-solid fa-cloud-arrow-up text-4xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold mb-3">Drop Traffic Data JSON Here</h2>
+                <p class="text-slate-400 mb-8 max-w-md">Upload <span class="text-cyan-300 font-mono text-sm px-2 py-1 bg-slate-800 rounded">notlike101_traffic_combined.json</span> to auto-filter Ephemeral ports and begin review.</p>
+                <input type="file" id="fileInput" class="hidden" accept=".json">
+                <div class="px-8 py-3 bg-cyan-600 hover:bg-cyan-500 rounded-full text-sm font-semibold transition text-white shadow-lg shadow-cyan-500/25">Browse Files</div>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div id="loadingOverlay" class="absolute inset-0 bg-slate-900/90 backdrop-blur-sm z-30 flex flex-col items-center justify-center hidden">
+            <i class="fa-solid fa-circle-notch fa-spin text-5xl text-cyan-500 mb-4"></i>
+            <p class="text-lg font-medium text-slate-300 animate-pulse" id="loadingText">Processing Data...</p>
+        </div>
+
+        <!-- Dashboard Layout -->
+        <div id="dashboardSection" class="hidden flex-1 flex w-full h-full">
+            
+            <!-- Left Sidebar (Master List) -->
+            <aside class="w-80 border-r border-slate-800 flex flex-col bg-[#131c31] flex-shrink-0">
+                <!-- Search -->
+                <div class="p-4 border-b border-slate-800">
+                    <div class="relative">
+                        <i class="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500"></i>
+                        <input type="text" id="searchInput" placeholder="Search IP or Hostname..." class="w-full bg-slate-900 border border-slate-700 text-sm text-slate-200 rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:border-cyan-500 transition-colors">
+                    </div>
+                </div>
+                <!-- IP List -->
+                <div id="sidebarList" class="flex-1 overflow-y-auto py-2">
+                    <!-- Dynamic List -->
+                </div>
+            </aside>
+
+            <!-- Right Content (Detail View) -->
+            <section class="flex-1 flex flex-col bg-[#0b1121] relative">
+                
+                <!-- Empty State -->
+                <div id="detailEmptyState" class="absolute inset-0 flex flex-col items-center justify-center text-slate-500 z-10">
+                    <i class="fa-solid fa-hand-pointer text-4xl mb-4 opacity-50"></i>
+                    <p class="text-lg">Select a Host from the sidebar to review ports</p>
+                </div>
+
+                <!-- Detail Content -->
+                <div id="detailContent" class="hidden flex-1 flex flex-col h-full overflow-hidden z-20">
+                    <!-- Detail Header -->
+                    <div class="p-8 border-b border-slate-800/50 bg-gradient-to-b from-[#131c31] to-transparent flex justify-between items-end flex-shrink-0">
+                        <div>
+                            <div class="flex items-center gap-3 mb-2">
+                                <span class="px-2.5 py-1 bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded text-xs font-bold tracking-wider">TARGET HOST</span>
+                                <span class="text-slate-400 text-sm"><i class="fa-solid fa-network-wired mr-1"></i> <span id="detailPortCount">0</span> Ports Discovered</span>
+                            </div>
+                            <h2 id="detailIp" class="text-3xl font-bold text-white font-mono tracking-tight">10.27.101.X</h2>
+                            <p id="detailHostname" class="text-lg text-cyan-400 mt-1 font-medium">Hostname</p>
+                        </div>
+                        <div class="flex gap-3">
+                            <button onclick="setAllForCurrentHost(false)" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-sm transition border border-slate-700 flex items-center gap-2">
+                                <i class="fa-solid fa-xmark text-red-400"></i> Deny All
+                            </button>
+                            <button onclick="setAllForCurrentHost(true)" class="px-4 py-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-lg text-sm transition border border-emerald-500/30 flex items-center gap-2">
+                                <i class="fa-solid fa-check text-emerald-400"></i> Allow All
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Port Table Container -->
+                    <div class="flex-1 overflow-y-auto p-8">
+                        <div class="bg-slate-800/40 rounded-xl border border-slate-700/50 overflow-hidden shadow-xl">
+                            <table class="w-full text-left text-sm">
+                                <thead class="bg-slate-900/80 text-slate-400 uppercase text-xs border-b border-slate-700/50">
+                                    <tr>
+                                        <th class="px-6 py-4 font-semibold">Service</th>
+                                        <th class="px-6 py-4 font-semibold">Protocol</th>
+                                        <th class="px-6 py-4 font-semibold">Sources Detected</th>
+                                        <th class="px-6 py-4 font-semibold text-right">Policy Decision</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="detailTableBody" class="divide-y divide-slate-700/50">
+                                    <!-- Dynamic Rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+        </div>
+    </main>
+
+    <!-- Modal for MikroTik Script -->
+    <div id="scriptModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-6 opacity-0 transition-opacity duration-300">
+        <div class="glass-panel w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden border border-slate-600/50 transform scale-95 transition-transform duration-300 rounded-2xl" id="scriptModalContent">
+            <div class="flex justify-between items-center p-5 border-b border-slate-700 bg-slate-800/80">
+                <h3 class="text-xl font-bold text-emerald-400 flex items-center gap-2">
+                    <i class="fa-solid fa-terminal"></i> MikroTik Deployment Script (v7)
+                </h3>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white transition w-8 h-8 flex items-center justify-center rounded bg-slate-700/50"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-6 overflow-auto flex-1 bg-[#0b1121]">
+                <div class="relative group">
+                    <button onclick="copyScript()" class="absolute top-4 right-4 px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded text-sm font-medium transition opacity-0 group-hover:opacity-100 flex items-center gap-2 shadow-lg">
+                        <i class="fa-solid fa-copy"></i> Copy to Clipboard
+                    </button>
+                    <pre class="bg-[#0d1117] p-5 rounded-xl border border-slate-700 overflow-x-auto"><code id="scriptCode" class="text-sm font-mono text-slate-300 leading-relaxed"></code></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // --- State ---
+        let hostMap = {};
+        let trafficData = [];
+        let hostCentric = {}; // { ip: { port: { proto: Set, sources: Set } } }
+        let decisionState = {}; // "ip:port" -> boolean
+        
+        let currentSelectedIp = null;
+        let sortedIps = [];
+
+        const STANDARD_PORTS = [
+            3389, 8080, 8443, 3306, 5432, 27017, 6379, 9000, 1521, 1433, 
+            5060, 5061, 8000, 8001, 8002, 8081, 8888, 9200, 5900, 10050, 10051
+        ];
+
+        function isStandardPort(port) {
+            if (!port) return false;
+            return port <= 1024 || STANDARD_PORTS.includes(port);
+        }
+
+        // --- Initialization ---
+        async function loadHostMap() {
+            try {
+                const res = await fetch('host_map.json');
+                hostMap = await res.json();
+            } catch (err) {
+                console.warn("Could not load host_map.json (CORS?). Proceeding without names.");
+            }
+        }
+        loadHostMap();
+
+        // --- Drag and Drop Logic ---
+        const dropZone = document.getElementById('uploadSection');
+        const fileInput = document.getElementById('fileInput');
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }, false);
+        });
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.querySelector('.glass-panel').classList.add('dragover'), false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.querySelector('.glass-panel').classList.remove('dragover'), false);
+        });
+
+        dropZone.addEventListener('drop', e => handleFiles(e.dataTransfer.files), false);
+        fileInput.addEventListener('change', e => handleFiles(e.target.files));
+
+        function handleFiles(files) {
+            if (files.length === 0) return;
+            showLoading("Reading JSON File...");
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    showLoading("Parsing & Filtering Ephemeral Ports...");
+                    setTimeout(() => {
+                        const parsed = JSON.parse(e.target.result);
+                        trafficData = parsed.hits || [];
+                        processTraffic();
+                    }, 50);
+                } catch (err) {
+                    alert("Error parsing JSON: " + err);
+                    hideLoading();
+                }
+            };
+            reader.readAsText(files[0]);
+        }
+
+        function showLoading(text) {
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+            document.getElementById('loadingText').innerText = text;
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+        }
+
+        // --- Data Processing ---
+        function processTraffic() {
+            hostCentric = {};
+            
+            trafficData.forEach(h => {
+                const dst_ip = h.dst_addr;
+                const src_ip = h.src_addr;
+                const dst_port = h.dst_port;
+                const proto = (h.proto || 'TCP').toLowerCase();
+                
+                if (!dst_ip || !dst_ip.startsWith('10.27.101.')) return;
+                if (src_ip === dst_ip) return;
+                if (!isStandardPort(dst_port)) return; // Remove Ephemeral
+                
+                const ruleKey = `${dst_ip}:${dst_port}`;
+                if (decisionState[ruleKey] === undefined) {
+                    decisionState[ruleKey] = false; // Default Drop
+                }
+
+                if (!hostCentric[dst_ip]) hostCentric[dst_ip] = {};
+                if (!hostCentric[dst_ip][dst_port]) hostCentric[dst_ip][dst_port] = { proto: new Set(), sources: new Set() };
+                
+                hostCentric[dst_ip][dst_port].proto.add(proto);
+                hostCentric[dst_ip][dst_port].sources.add(src_ip);
+            });
+
+            sortedIps = Object.keys(hostCentric).sort((a,b) => parseInt(a.split('.')[3]) - parseInt(b.split('.')[3]));
+            
+            document.getElementById('uploadSection').classList.add('hidden');
+            document.getElementById('dashboardSection').classList.remove('hidden');
+            document.getElementById('globalStats').classList.remove('hidden');
+            document.getElementById('btnExport').classList.remove('hidden');
+            
+            renderSidebar();
+            updateStats();
+            hideLoading();
+        }
+
+        function getHostname(ip) {
+            return (hostMap[ip] && hostMap[ip].name) ? hostMap[ip].name : 'Unknown Host';
+        }
+
+        function getServiceName(port) {
+            const m = { 22:'SSH', 80:'HTTP', 443:'HTTPS', 3389:'RDP', 3306:'MySQL', 5432:'PostgreSQL', 53:'DNS', 161:'SNMP' };
+            return m[port] || `Port ${port}`;
+        }
+
+        // --- UI Rendering ---
+        function renderSidebar(filterText = '') {
+            const container = document.getElementById('sidebarList');
+            container.innerHTML = '';
+            
+            const lowerFilter = filterText.toLowerCase();
+            
+            sortedIps.forEach(ip => {
+                const hostname = getHostname(ip);
+                if (filterText && !ip.includes(lowerFilter) && !hostname.toLowerCase().includes(lowerFilter)) return;
+                
+                const portCount = Object.keys(hostCentric[ip]).length;
+                
+                // Count allowed for this IP to show a tiny badge
+                let allowedCount = 0;
+                Object.keys(hostCentric[ip]).forEach(p => { if(decisionState[`${ip}:${p}`]) allowedCount++; });
+                
+                const isActive = ip === currentSelectedIp;
+                const statusDot = allowedCount > 0 ? 'bg-emerald-500' : 'bg-slate-600';
+                
+                const el = document.createElement('div');
+                el.className = `sidebar-item cursor-pointer p-4 border-b border-slate-800/50 flex justify-between items-center ${isActive ? 'active' : ''}`;
+                el.onclick = () => selectHost(ip);
+                
+                el.innerHTML = `
+                    <div class="overflow-hidden">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2 h-2 rounded-full ${statusDot}"></div>
+                            <span class="font-mono text-sm text-cyan-100">${ip}</span>
+                        </div>
+                        <div class="text-xs text-slate-400 mt-1 truncate pl-4">${hostname}</div>
+                    </div>
+                    <div class="bg-slate-800 text-slate-400 text-xs px-2 py-1 rounded border border-slate-700">
+                        ${portCount}
+                    </div>
+                `;
+                container.appendChild(el);
+            });
+        }
+
+        function selectHost(ip) {
+            currentSelectedIp = ip;
+            
+            // Update Sidebar UI
+            document.querySelectorAll('.sidebar-item').forEach(el => {
+                el.classList.remove('active');
+                if(el.innerHTML.includes(ip)) el.classList.add('active'); // simplistic match
+            });
+            renderSidebar(document.getElementById('searchInput').value); // re-render to update classes reliably
+
+            // Show Detail Pane
+            document.getElementById('detailEmptyState').classList.add('hidden');
+            document.getElementById('detailContent').classList.remove('hidden');
+            
+            // Update Detail Header
+            document.getElementById('detailIp').innerText = ip;
+            document.getElementById('detailHostname').innerText = getHostname(ip);
+            
+            const ports = Object.keys(hostCentric[ip]).sort((a,b) => parseInt(a) - parseInt(b));
+            document.getElementById('detailPortCount').innerText = ports.length;
+            
+            renderDetailTable(ip, ports);
+        }
+
+        function renderDetailTable(ip, ports) {
+            const tbody = document.getElementById('detailTableBody');
+            tbody.innerHTML = '';
+            
+            ports.forEach(port => {
+                const ruleKey = `${ip}:${port}`;
+                const stats = hostCentric[ip][port];
+                const protos = Array.from(stats.proto).join(', ').toUpperCase();
+                const isChecked = decisionState[ruleKey];
+                
+                const tr = document.createElement('tr');
+                tr.className = `transition-colors ${isChecked ? 'bg-emerald-900/10' : 'hover:bg-slate-700/20'}`;
+                
+                tr.innerHTML = `
+                    <td class="px-6 py-4">
+                        <div class="font-bold text-slate-200 text-base">${getServiceName(port)}</div>
+                        <div class="text-xs text-slate-500 font-mono mt-0.5">Port ${port}</div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <span class="px-2 py-1 bg-slate-800 text-slate-300 rounded text-xs border border-slate-700 font-mono">${protos}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-2 text-slate-400 text-sm">
+                            <i class="fa-solid fa-users text-slate-500"></i> ${stats.sources.size} Unique IPs
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <div class="relative inline-block w-14 mr-2 align-middle select-none transition duration-200 ease-in">
+                            <input type="checkbox" id="toggle-${port}" ${isChecked ? 'checked' : ''} onchange="toggleRule('${ruleKey}')" class="toggle-checkbox absolute block w-7 h-7 rounded-full bg-white border-4 appearance-none cursor-pointer border-slate-400 z-10 transition-transform duration-200 ease-in-out"/>
+                            <label for="toggle-${port}" class="toggle-label block overflow-hidden h-7 rounded-full bg-slate-600 cursor-pointer transition-colors duration-200 ease-in-out shadow-inner"></label>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- Interaction ---
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            renderSidebar(e.target.value);
+        });
+
+        window.toggleRule = function(ruleKey) {
+            decisionState[ruleKey] = !decisionState[ruleKey];
+            updateStats();
+            // Re-render table row background and sidebar badge
+            if (currentSelectedIp) {
+                const ports = Object.keys(hostCentric[currentSelectedIp]).sort((a,b) => parseInt(a) - parseInt(b));
+                renderDetailTable(currentSelectedIp, ports);
+            }
+            renderSidebar(document.getElementById('searchInput').value);
+        };
+
+        window.setAllForCurrentHost = function(state) {
+            if (!currentSelectedIp) return;
+            const ports = Object.keys(hostCentric[currentSelectedIp]);
+            ports.forEach(port => {
+                decisionState[`${currentSelectedIp}:${port}`] = state;
+            });
+            updateStats();
+            renderDetailTable(currentSelectedIp, ports.sort((a,b) => parseInt(a) - parseInt(b)));
+            renderSidebar(document.getElementById('searchInput').value);
+        };
+
+        function updateStats() {
+            let allowed = 0, denied = 0;
+            Object.values(decisionState).forEach(val => val ? allowed++ : denied++);
+            document.getElementById('statAllowed').innerText = allowed;
+            document.getElementById('statDenied').innerText = denied;
+        }
+
+        // --- MikroTik Code Generator ---
+        document.getElementById('btnExport').addEventListener('click', () => {
+            const approvedByPort = {};
+            
+            Object.keys(decisionState).forEach(ruleKey => {
+                if (decisionState[ruleKey]) {
+                    const [ip, port] = ruleKey.split(':');
+                    if (!approvedByPort[port]) approvedByPort[port] = [];
+                    approvedByPort[port].push(ip);
+                }
+            });
+
+            if (Object.keys(approvedByPort).length === 0) {
+                alert("Please Allow at least one rule before generating script.");
+                return;
+            }
+
+            let script = `/ip firewall address-list\n`;
+            script += `# --- Dynamic Address Lists Generated from Dashboard ---\n`;
+            
+            Object.keys(approvedByPort).sort((a,b)=>parseInt(a)-parseInt(b)).forEach(port => {
+                const listName = `allow-port-${port}-servers`;
+                approvedByPort[port].sort((a,b)=>parseInt(a.split('.')[3])-parseInt(b.split('.')[3])).forEach(ip => {
+                    script += `add list="${listName}" address=${ip} comment="${getHostname(ip)}"\n`;
+                });
+            });
+
+            script += `\n/ip firewall filter\n`;
+            script += `# --- Rule 01: Fast Track / Stateful Return Traffic ---\n`;
+            script += `add chain=forward \\\n    action=accept \\\n    connection-state=established,related \\\n    comment="[01] ACCEPT ESTABLISHED/RELATED"\n\n`;
+            
+            script += `# --- Rule 02: Drop Invalid ---\n`;
+            script += `add chain=forward \\\n    action=drop \\\n    connection-state=invalid \\\n    comment="[02] DROP INVALID"\n\n`;
+            
+            let ruleCounter = 3;
+            Object.keys(approvedByPort).sort((a,b)=>parseInt(a)-parseInt(b)).forEach(port => {
+                const listName = `allow-port-${port}-servers`;
+                const srvName = getServiceName(port);
+                
+                // Extract protocols for this port from approved IPs to be accurate
+                const protocols = new Set();
+                approvedByPort[port].forEach(ip => {
+                    if(hostCentric[ip] && hostCentric[ip][port]) {
+                        hostCentric[ip][port].proto.forEach(p => protocols.add(p));
+                    }
+                });
+                
+                Array.from(protocols).forEach(p => {
+                    script += `# --- Rule ${ruleCounter.toString().padStart(2, '0')}: ALLOW ${srvName.toUpperCase()} --- \n`;
+                    script += `add chain=forward \\\n`;
+                    script += `    action=accept \\\n`;
+                    script += `    protocol=${p} \\\n`;
+                    script += `    dst-port=${port} \\\n`;
+                    script += `    dst-address-list="${listName}" \\\n`;
+                    script += `    comment="[${ruleCounter.toString().padStart(2, '0')}] ALLOW ${srvName.toUpperCase()} (${p.toUpperCase()})"\n\n`;
+                    ruleCounter++;
+                });
+            });
+
+            script += `# --- Rule 99: Zero-Trust Drop ---\n`;
+            script += `add chain=forward \\\n    action=drop \\\n    dst-address=10.27.101.0/24 \\\n    comment="[99] DEFAULT DROP ALL TO .101 (Zero-Trust)"\n`;
+
+            document.getElementById('scriptCode').innerText = script;
+            
+            const modal = document.getElementById('scriptModal');
+            const modalContent = document.getElementById('scriptModalContent');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95');
+            }, 10);
+        });
+
+        window.closeModal = function() {
+            const modal = document.getElementById('scriptModal');
+            const modalContent = document.getElementById('scriptModalContent');
+            modal.classList.add('opacity-0');
+            modalContent.classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
+        };
+
+        window.copyScript = function() {
+            const code = document.getElementById('scriptCode').innerText;
+            navigator.clipboard.writeText(code).then(() => { alert("Script copied to clipboard!"); });
+        };
+    </script>
+</body>
+</html>

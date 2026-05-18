@@ -134,3 +134,44 @@
 > **📌 Remark สำคัญสำหรับการทำงานต่อ:**
 > - ไฟล์หลักที่ควรใช้เป็นฐานข้อมูลในการ Draft ACL คือ **`notlike101_traffic_combined.json`** ซึ่งผ่านกระบวนการ Merge และ Aggregate (ยุบรวมทราฟฟิกที่ซ้ำกัน) แล้ว
 > - สำหรับการนำเสนอผู้บริหาร แนะนำให้ใช้ไฟล์ **`executive_presentation.html`** และเปิดผ่านลิงก์ **GitHub Pages** เพื่อความสะดวกและเป็นมืออาชีพ โดยไม่ต้องเปิดจากเครื่อง Local
+
+---
+
+## 🚀 6. เจาะลึก: MikroTik CCR2116 Deployment Architecture (PoC)
+การนำ Whitelist Draft ไปติดตั้งจริงบนอุปกรณ์ MikroTik ที่ต้องรองรับปริมาณ Traffic มหาศาล
+
+### 🎯 6.1 หัวใจสำคัญ: Address-List & Port Grouping
+การเขียน Rule แบบ 1:1 (1 Rule ต่อ 1 IP) จะทำให้ Firewall ทำงานหนักมาก (CPU Load) เมื่อมีทราฟฟิกเยอะ
+*   **วิธีแก้:** เราจะใช้ `/ip firewall address-list` เข้ามาช่วย
+*   **ตัวอย่าง:** ถ้าระบบบอกว่า "พอร์ต 22 มี 5 Hosts ที่ให้เข้าได้" แทนที่เราจะเขียน 5 Rules เราจะเอา 5 IP นั้นไปใส่ใน Address List ชื่อ `allow-ssh-servers` และเขียน Rule บล็อก/อนุญาตเพียง **1 Rule** เท่านั้น
+
+### 🛡️ 6.2 ลำดับชั้นการวาง Rule (Top-Down Execution)
+CCR2116 จะประมวลผล Rule จากบนลงล่าง การเรียงลำดับที่ถูกต้องจะช่วยประหยัด CPU:
+1.  **Rule 0 (Fast Track / Established & Related):** 
+    อนุญาตทราฟฟิกที่เคยคุยกันแล้ว (รวมถึง Ephemeral Ports) ให้ผ่านไปได้ทันทีโดยไม่ต้องตรวจสอบใหม่
+    ```routeros
+    /ip firewall filter
+    add chain=forward action=accept connection-state=established,related comment="[01] ACCEPT ESTABLISHED/RELATED"
+    ```
+2.  **Rule 1 (Drop Invalid):**
+    ทิ้งแพ็กเกจขยะที่ผิดปกติ
+    ```routeros
+    add chain=forward action=drop connection-state=invalid comment="[02] DROP INVALID"
+    ```
+3.  **Rule 2+ (Whitelist by Service / Address List):**
+    อนุญาตเฉพาะพอร์ตมาตรฐานที่ผ่านการ Prove มาแล้วจาก `Draft_Whitelist_By_Service.md`
+    ```routeros
+    add chain=forward action=accept protocol=tcp dst-port=22 dst-address-list=allow-ssh-servers comment="[03] ALLOW SSH"
+    add chain=forward action=accept protocol=tcp dst-port=443 dst-address-list=allow-web-servers comment="[04] ALLOW HTTPS"
+    ```
+4.  **Rule Last (Default Drop Zero-Trust):**
+    ไม่อนุญาตทุกอย่างที่หลุดรอดมาจากด้านบน
+    ```routeros
+    add chain=forward action=drop dst-address=10.27.101.0/24 comment="[99] DEFAULT DROP ALL (Zero-Trust)"
+    ```
+
+### 💡 6.3 ประโยชน์ของการทำ 2-Way Cross Validation ก่อน Deploy
+การทำ Draft (By Host และ By Service) ก่อนนำมาใส่ MikroTik จะช่วยให้เรา:
+*   เห็นภาพรวมง่ายขึ้นว่าควรรวมกลุ่ม Address-List แบบไหน
+*   ลดจำนวน Rule จากหลักหลายร้อยเหลือเพียงไม่กี่สิบ Rule
+*   ทำให้วิศวกรรุ่นหลัง หรือผู้ตรวจสอบ (Auditor) สามารถอ่าน Rule แล้วเข้าใจเจตนาของ Firewall ได้ทันที
