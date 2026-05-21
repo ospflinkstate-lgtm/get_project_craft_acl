@@ -1,0 +1,1591 @@
+﻿!!!!!   4,5,23,72,74,104
+
+#######################################
+
+IC_Core#sh run
+IC_Core#sh running-config 
+Building configuration...
+
+Current configuration : 44501 bytes
+!
+! Last configuration change at 14:07:30 UTC Fri Oct 24 2025 by arapoh
+! NVRAM config last updated at 14:29:05 UTC Fri Oct 24 2025 by arapoh
+!
+version 17.15
+service tcp-keepalives-in
+service tcp-keepalives-out
+service timestamps debug datetime msec localtime
+service timestamps log datetime msec localtime
+service password-encryption
+service compress-config
+service sequence-numbers
+!
+hostname IC_Core
+!
+!
+vrf definition Mgmt-vrf
+ !
+ address-family ipv4
+ exit-address-family
+ !
+ address-family ipv6
+ exit-address-family
+!
+no aaa new-model
+switch 1 provision c9300-24t
+!
+!
+!
+!
+ip routing
+!
+ip vrf Liin-vrf
+!
+!
+!
+!
+!
+ip name-server 10.41.41.1 10.22.44.1
+no ip domain lookup
+ip domain name mahidol.ac.th
+!
+!
+!
+login on-success log
+ipv6 nd cache expire refresh
+ipv6 unicast-routing
+vtp domain SALAYA
+vtp mode transparent
+!
+!
+!
+!
+!
+!
+!
+!
+flow record Netflow-In
+ match ipv4 tos
+ match ipv4 protocol
+ match ipv4 source address
+ match ipv4 destination address
+ match transport source-port
+ match transport destination-port
+ match interface input
+ collect interface output
+!
+!
+flow exporter flowwug
+ destination 10.27.101.225
+ source Vlan201
+ transport udp 9999
+!
+!
+flow exporter flowprtg
+ destination 10.41.206.7
+ source Vlan201
+ transport udp 8888
+!         
+!
+flow monitor Netflow-Monitor-In
+ exporter flowwug
+ cache timeout inactive 10
+ cache timeout active 60
+ record Netflow-In
+!
+!
+flow monitor netflowprtg
+ exporter flowprtg
+ cache timeout inactive 10
+ cache timeout active 60
+ record Netflow-In
+!
+!
+crypto pki trustpoint TP-self-signed-287781616
+ enrollment selfsigned
+ subject-name cn=IOS-Self-Signed-Certificate-287781616
+ revocation-check none
+ rsakeypair TP-self-signed-287781616
+ hash sha512
+!
+crypto pki trustpoint SLA-TrustPoint
+ enrollment pkcs12
+ revocation-check crl
+ hash sha512
+!
+!
+crypto pki certificate chain TP-self-signed-287781616
+ certificate self-signed 01
+  3082032E 30820216 A0030201 02020101 300D0609 2A864886 F70D0101 0D050030 
+  30312E30 2C060355 04030C25 494F532D 53656C66 2D536967 6E65642D 43657274 
+  69666963 6174652D 32383737 38313631 36301E17 0D323530 39333030 37303133 
+  365A170D 33353039 33303037 30313336 5A303031 2E302C06 03550403 0C25494F 
+  532D5365 6C662D53 69676E65 642D4365 72746966 69636174 652D3238 37373831 
+  36313630 82012230 0D06092A 864886F7 0D010101 05000382 010F0030 82010A02 
+  82010100 AEB2D4A7 47BD12E5 26118C76 8D7C2678 04604D79 4C0093D8 8295B0A3 
+  1537D713 1FB1BB41 10C2CC20 52211A04 39B23195 7F2842F9 DD5D73E9 DE6D8315 
+  DB3F418F 483F195B A7397758 921635FA EC307717 2346DDE8 CC08AE75 B3C9EFF2 
+  28189C2F 1DBC6C68 FA408421 8F261FE3 2BDC11C3 6C319F57 3B6D9C79 AE88BAD4 
+  5BA7F76D 96DD4B51 A41E303D 4BFE3B93 F8781477 30DED0FE E3F73A9B CFFE97A8 
+  15B2D4ED E2F9AE27 D2C3D03D E68A965D 0A568170 875D37F5 1AE11874 2F0FD9B9 
+  0B67A567 25B1056A A8E86B2B 4B904F65 A48D827F 4C2B3373 99B8CA1C 7AFBD6A7 
+  871C29EE E34C5D1D B7229B53 2089F257 964AD4CC 02FB896A 4685EB13 47B6AD6C 
+  3A369963 02030100 01A35330 51301D06 03551D0E 04160414 ECC81FE8 A95C8E30 
+  11E02D3E 3A86FD31 54AD06F6 301F0603 551D2304 18301680 14ECC81F E8A95C8E 
+  3011E02D 3E3A86FD 3154AD06 F6300F06 03551D13 0101FF04 05300301 01FF300D 
+  06092A86 4886F70D 01010D05 00038201 01007814 AB965DAB 38D59C0E 0806AD8C 
+  317F311A 3E102EB6 B6C0F70C 31A592D1 EAB49965 0A12E9A4 2EA3BBB7 D1F6D5F8 
+  6AFD41FD 3B4DA550 9663B8BA 28C862E9 57AB4879 8140A51A 1F964262 4FB1E3A6 
+  1783B5DD E977F95E 32166077 F8A6BD00 7EB18F80 C1ABF32D 25C38813 D99F4F0D 
+  973770B4 BE728038 F40AF447 C844DE21 F8A4A0AA 10369DA6 1F896A92 D8E8F41C 
+  4F9FB74C F725B817 A283FF39 ED0CEF01 CF24B1C0 771163AA E5FAAF9D EFF4C196 
+  C8A09286 679A3C0E BBE62B2D 163600B7 68F94421 237C7FC5 678B6461 D920E74A 
+  D6CC1813 E94D4E54 7F91C2AD 59C88035 EDC71F3B C7CC976D 3FA6C9E8 D1BB5591 
+  DE65A21E 53A7D212 602B66D0 7EA57110 B16F
+        quit
+crypto pki certificate chain SLA-TrustPoint
+ certificate ca 01
+  30820321 30820209 A0030201 02020101 300D0609 2A864886 F70D0101 0B050030 
+  32310E30 0C060355 040A1305 43697363 6F312030 1E060355 04031317 43697363 
+  6F204C69 63656E73 696E6720 526F6F74 20434130 1E170D31 33303533 30313934 
+  3834375A 170D3338 30353330 31393438 34375A30 32310E30 0C060355 040A1305 
+  43697363 6F312030 1E060355 04031317 43697363 6F204C69 63656E73 696E6720 
+  526F6F74 20434130 82012230 0D06092A 864886F7 0D010101 05000382 010F0030 
+  82010A02 82010100 A6BCBD96 131E05F7 145EA72C 2CD686E6 17222EA1 F1EFF64D 
+  CBB4C798 212AA147 C655D8D7 9471380D 8711441E 1AAF071A 9CAE6388 8A38E520 
+  1C394D78 462EF239 C659F715 B98C0A59 5BBB5CBD 0CFEBEA3 700A8BF7 D8F256EE 
+  4AA4E80D DB6FD1C9 60B1FD18 FFC69C96 6FA68957 A2617DE7 104FDC5F EA2956AC 
+  7390A3EB 2B5436AD C847A2C5 DAB553EB 69A9A535 58E9F3E3 C0BD23CF 58BD7188 
+  68E69491 20F320E7 948E71D7 AE3BCC84 F10684C7 4BC8E00F 539BA42B 42C68BB7 
+  C7479096 B4CB2D62 EA2F505D C7B062A4 6811D95B E8250FC4 5D5D5FB8 8F27D191 
+  C55F0D76 61F9A4CD 3D992327 A8BB03BD 4E6D7069 7CBADF8B DF5F4368 95135E44 
+  DFC7C6CF 04DD7FD1 02030100 01A34230 40300E06 03551D0F 0101FF04 04030201 
+  06300F06 03551D13 0101FF04 05300301 01FF301D 0603551D 0E041604 1449DC85 
+  4B3D31E5 1B3E6A17 606AF333 3D3B4C73 E8300D06 092A8648 86F70D01 010B0500 
+  03820101 00507F24 D3932A66 86025D9F E838AE5C 6D4DF6B0 49631C78 240DA905 
+  604EDCDE FF4FED2B 77FC460E CD636FDB DD44681E 3A5673AB 9093D3B1 6C9E3D8B 
+  D98987BF E40CBD9E 1AECA0C2 2189BB5C 8FA85686 CD98B646 5575B146 8DFC66A8 
+  467A3DF4 4D565700 6ADF0F0D CF835015 3C04FF7C 21E878AC 11BA9CD2 55A9232C 
+  7CA7B7E6 C1AF74F6 152E99B7 B1FCF9BB E973DE7F 5BDDEB86 C71E3B49 1765308B 
+  5FB0DA06 B92AFE7F 494E8A9E 07B85737 F3A58BE1 1A48A229 C37C1E69 39F08678 
+  80DDCD16 D6BACECA EEBC7CF9 8428787B 35202CDC 60E4616A B623CDBD 230E3AFB 
+  418616A9 4093E049 4D10AB75 27E86F73 932E35B5 8862FDAE 0275156F 719BB2F0 
+  D697DF7F 28
+        quit
+!
+!
+license boot level network-advantage addon dna-advantage
+memory free low-watermark processor 104985
+!
+diagnostic bootup level minimal
+!
+spanning-tree mode rapid-pvst
+spanning-tree extend system-id
+!
+!
+enable secret 9 $9$hWVyW3floSquY.$096ycCbis/47Ad5aGP1rxH/Rj2SW0WUDOG1yg1jafx.
+!
+username sangsuree.kha privilege 15 secret 9 $14$2Clq$bg2BuiuBotmPCk$JSSIVZwrD5siK3uMfScXia3K2W62NOZcZSGCirpvUG6
+username opanuyun privilege 15 secret 9 $14$g3J9$SL0z3r7/Hro1Dk$KkYsmxEHpDGcRz5YfaIbBq1XZOemS50qh0c8SwGN1cE
+username mutaurus privilege 15 secret 9 $14$o2XL$72i/PzZ2s7SHlU$faIHeXEaZ0wUFRbnZ05p9r6Xh2kbVYiIN6Xiw6d.iMk
+username nttadmin privilege 15 secret 9 $9$bTwN81zwJJfHYE$vjH9QMPyWA14WkMkDF08MRU1juYDdnk4VjZrox9KFYc
+username arapoh privilege 15 secret 9 $9$5t/LnVr4gcixqU$eQtKCZcok0DD53pKZwMbCgOcuae1X6CVk4zC8lScf4w
+!
+redundancy
+ mode sso
+crypto engine compliance shield disable
+!
+!
+!
+!
+!
+transceiver type all
+ monitoring
+!
+vlan 2-17,20-23 
+!
+vlan 32
+ name New-Client-WiFi
+!
+vlan 72
+!
+vlan 74
+!
+vlan 91
+ name IC-WiFi1
+!
+vlan 92
+ name IC-WiFi2
+!
+vlan 93
+ name IC-WiFi3
+!
+vlan 94
+ name IC-WiFi4
+!
+vlan 99
+ name VOIP
+!
+vlan 104
+ name Access_Point
+!
+vlan 106
+ name Cisco-Controller-AP
+!
+vlan 107
+ name Client-WiFi-F1
+!
+vlan 108
+ name Client-WiFi-F2
+!
+vlan 109
+ name AP
+!
+vlan 120
+ name VirtualClassRoom
+!
+vlan 122,168 
+!
+vlan 180
+ name IC_ERP
+!
+vlan 201  
+ name MGMT
+!
+vlan 203
+ name CCTV
+!
+vlan 212
+ name Lab-Com1
+!
+vlan 221
+ name Office
+!
+vlan 222
+ name WiFi
+!
+vlan 223
+ name Lab-Com2
+!
+vlan 227
+ name WiFi-Client-1
+!
+vlan 231
+ name WiFi-Client-2
+!
+vlan 235
+ name WiFi-Client-3
+!
+vlan 239
+ name New@MUIC-WiFi-1K
+!
+vlan 255
+ name News@MUIC-WiFi-4K
+!
+vlan 298 
+!
+vlan 320
+ name Wifi-Client1
+!
+vlan 321
+ name Wifi-Client2
+!         
+vlan 327
+ name Client_IC(LC)
+!
+vlan 725
+ name Route-IC-CoreSA
+!
+vlan 800-802 
+!
+lldp run
+!
+class-map match-any system-cpp-police-ewlc-control
+ description EWLC Control 
+class-map match-any system-cpp-police-topology-control
+ description Topology control
+class-map match-any system-cpp-police-sw-forward
+ description Sw forwarding, L2 LVX data packets, LOGGING, Transit Traffic
+class-map match-any system-cpp-default
+ description EWLC Data, Inter FED Traffic 
+class-map match-any system-cpp-police-sys-data
+ description Openflow, Exception, EGR Exception, NFL Sampled Data, RPF Failed
+class-map match-any system-cpp-police-punt-webauth
+ description Punt Webauth
+class-map match-any system-cpp-police-l2lvx-control
+ description L2 LVX control packets
+class-map match-any system-cpp-police-forus
+ description Forus traffic
+class-map match-any system-cpp-police-multicast-end-station
+ description MCAST END STATION
+class-map match-any system-cpp-police-forus-addr-resolution
+ description Forus address resolution
+class-map match-any system-cpp-police-high-rate-app
+ description High Rate Applications 
+class-map match-any system-cpp-police-multicast
+ description MCAST Data
+class-map match-any system-cpp-police-meraki-next-tunnel
+ description Meraki Next tunnel
+class-map match-any system-cpp-police-l2-control
+ description L2 control
+class-map match-any system-cpp-police-dot1x-auth
+ description DOT1X Auth
+class-map match-any system-cpp-police-data
+ description ICMP redirect, ICMP_GEN and BROADCAST
+class-map match-any system-cpp-police-stackwise-virt-control
+ description Stackwise Virtual OOB
+class-map match-any non-client-nrt-class
+class-map match-any system-cpp-police-routing-control
+ description Routing control and Low Latency
+class-map match-any system-cpp-police-protocol-snooping
+ description Protocol snooping
+class-map match-any system-cpp-police-dhcp-snooping
+ description DHCP snooping
+class-map match-any system-cpp-police-ios-routing
+ description L2 control, Topology control, Routing control, Low Latency
+class-map match-any system-cpp-police-system-critical
+ description System Critical and Gold Pkt
+class-map match-any system-cpp-police-ios-feature
+ description ICMPGEN,BROADCAST,ICMP,L2LVXCntrl,ProtoSnoop,PuntWebauth,MCASTData,Transit,DOT1XAuth,Swfwd,LOGGING,L2LVXData,ForusTraffic,ForusARP,McastEndStn,Openflow,Exception,EGRExcption,NflSampled,RpfFailed
+!
+policy-map system-cpp-policy
+!
+! 
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+interface Loopback0
+ ip address 10.255.255.110 255.255.255.255
+!
+interface Port-channel1
+ description Link-to-IC-Core4500
+ switchport trunk allowed vlan 1-12,20-23,32,91-94,99,104,106,109,201,212,239
+ switchport trunk allowed vlan add 255,320,321,327
+ switchport mode trunk
+!
+interface Port-channel5
+ description Link-to-Kitimas 
+ switchport trunk allowed vlan 1-5,7,9-12,21-23,32,72,74,91-94,99,104,106,109,120,122,167
+ switchport trunk allowed vlan add 168,201,203,212,221-223,227,231,235,239,255
+ switchport trunk allowed vlan add 298,320,321,800-802
+ switchport mode trunk
+!
+interface GigabitEthernet0/0
+ vrf forwarding Mgmt-vrf
+ no ip address
+ shutdown
+ negotiation auto
+!
+interface GigabitEthernet1/0/1
+ switchport trunk allowed vlan 1-12,20-23,32,91-94,99,104,106,109,201,212,239
+ switchport trunk allowed vlan add 255,320,321,327
+ switchport mode trunk
+ speed 1000
+ duplex full
+ channel-group 1 mode on
+!
+interface GigabitEthernet1/0/2
+ switchport trunk allowed vlan 1-12,20-23,32,91-94,99,104,106,109,201,212,239
+ switchport trunk allowed vlan add 255,320,321,327
+ switchport mode trunk
+ speed 1000
+ duplex full
+ channel-group 1 mode on
+!
+interface GigabitEthernet1/0/3
+ switchport access vlan 21
+ switchport mode access
+!
+interface GigabitEthernet1/0/4
+ switchport access vlan 21
+ switchport mode access
+!
+interface GigabitEthernet1/0/5
+ description SA-(3560E)IC
+ switchport trunk allowed vlan 1,2,12,104,201
+ switchport mode trunk
+!
+interface GigabitEthernet1/0/6
+ description == Link To B1-B3-MKT ==
+ switchport trunk allowed vlan 1-3,7,9-12,21,22,32,91-94,99,106,109,120,122,167
+ switchport trunk allowed vlan add 168,201,203,212,221-223,227,231,235,239,255
+ switchport trunk allowed vlan add 298,320,321,800-802
+ switchport mode trunk
+!
+interface GigabitEthernet1/0/7
+ shutdown
+!
+interface GigabitEthernet1/0/8
+ shutdown
+!
+interface GigabitEthernet1/0/9
+ shutdown
+!
+interface GigabitEthernet1/0/10
+ shutdown
+!
+interface GigabitEthernet1/0/11
+ shutdown
+!
+interface GigabitEthernet1/0/12
+ shutdown
+!
+interface GigabitEthernet1/0/13
+ shutdown
+!
+interface GigabitEthernet1/0/14
+ shutdown
+!
+interface GigabitEthernet1/0/15
+ shutdown
+!
+interface GigabitEthernet1/0/16
+ shutdown
+!         
+interface GigabitEthernet1/0/17
+ shutdown
+!
+interface GigabitEthernet1/0/18
+ shutdown
+!
+interface GigabitEthernet1/0/19
+ shutdown
+!
+interface GigabitEthernet1/0/20
+ shutdown
+!
+interface GigabitEthernet1/0/21
+ shutdown
+!
+interface GigabitEthernet1/0/22
+ shutdown
+!
+interface GigabitEthernet1/0/23
+ shutdown
+!
+interface GigabitEthernet1/0/24
+ shutdown
+!
+interface GigabitEthernet1/1/1
+!
+interface GigabitEthernet1/1/2
+!
+interface GigabitEthernet1/1/3
+!
+interface GigabitEthernet1/1/4
+!
+interface TenGigabitEthernet1/1/1
+ description **Route-IC-CoreSA**
+ no switchport
+ ip address 10.166.1.54 255.255.255.252
+ ip access-group BLOCK_VIRUS_SA6 in
+ ip access-group BLOCK_VIRUS_SA6 out
+ ip ospf network point-to-point
+ ipv6 address 2001:3C8:1202:1::56/126
+ ospfv3 network point-to-point
+ ospfv3 1012 ipv6 area 2
+!
+interface TenGigabitEthernet1/1/2
+ description Link-to-Aditayathorn
+ switchport trunk allowed vlan 1-5,7,9-12,21-23,32,72,74,91-94,99,104,106,109,120,122,167
+ switchport trunk allowed vlan add 168,201,203,212,221-223,227,231,235,239,255
+ switchport trunk allowed vlan add 298,320,321,800-802
+ switchport mode trunk
+ channel-group 5 mode on
+!
+interface TenGigabitEthernet1/1/3
+ description Link-to-Aditayathorn
+ switchport trunk allowed vlan 1-5,7,9-12,21-23,32,72,74,91-94,99,104,106,109,120,122,167
+ switchport trunk allowed vlan add 168,201,203,212,221-223,227,231,235,239,255
+ switchport trunk allowed vlan add 298,320,321,800-802
+ switchport mode trunk
+ channel-group 5 mode on
+!
+interface TenGigabitEthernet1/1/4
+ description IC-OP-Backup
+ no switchport
+ ip address 10.166.2.54 255.255.255.252
+ ip ospf network point-to-point
+ ip ospf cost 100
+!
+interface TenGigabitEthernet1/1/5
+ description IC-SH-Backup
+ no switchport
+ ip address 10.166.3.54 255.255.255.252
+ ip ospf network point-to-point
+ ip ospf cost 120
+!
+interface TenGigabitEthernet1/1/6
+ switchport trunk allowed vlan 168,222,298,800-802
+ switchport mode trunk
+!
+interface TenGigabitEthernet1/1/7
+ description == Link To B1-B3-MKT ==
+ switchport trunk allowed vlan 1-5,7,9-12,21-23,32,72,74,91-94,99,104,106,109
+ switchport trunk allowed vlan add 120,122,167,168,201,203,212,221-223,227,231
+ switchport trunk allowed vlan add 235,239,255,298,320,321,800-802
+ switchport mode trunk
+!
+interface TenGigabitEthernet1/1/8
+ switchport trunk allowed vlan 1-12,21,22,104,327
+ switchport mode trunk
+!
+interface FortyGigabitEthernet1/1/1
+!
+interface FortyGigabitEthernet1/1/2
+!
+interface TwentyFiveGigE1/1/1
+!
+interface TwentyFiveGigE1/1/2
+!
+interface AppGigabitEthernet1/0/1
+!
+interface Vlan1
+ ip address 10.27.180.126 255.255.255.192 secondary
+ ip address 10.27.1.254 255.255.255.0
+ ip helper-address 10.27.100.101
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ ip access-group ERP_IC3 in
+ ip access-group ERP_IC3 out
+!
+interface Vlan2
+ ip address 10.27.2.254 255.255.255.0
+ ip helper-address 10.27.222.251
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface Vlan3
+ ip address 10.27.3.254 255.255.255.0
+ ip helper-address 10.27.100.101
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface Vlan4
+ ip address 10.27.4.254 255.255.255.0
+ ip helper-address 10.27.100.101
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface Vlan5
+ ip address 10.27.5.254 255.255.255.0
+ ip helper-address 10.27.100.101
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface Vlan6
+ ip address 10.27.6.254 255.255.255.0
+ ip helper-address 10.27.100.101
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface Vlan7
+ ip address 10.27.7.254 255.255.255.0
+ ip helper-address 10.27.222.251
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface Vlan9
+ ip address 10.27.9.254 255.255.255.0
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface Vlan10
+ ip address 10.27.8.254 255.255.255.0
+ ip helper-address 10.27.100.101
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface Vlan11
+ ip address 10.27.180.62 255.255.255.192 secondary
+ ip address 10.27.24.254 255.255.255.0
+ ip helper-address 10.27.100.101
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ ip access-group ERP_IC3 in
+ ip access-group ERP_IC3 out
+!
+interface Vlan12
+ ip address 10.27.25.254 255.255.255.0
+ ip helper-address 10.27.100.101
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface Vlan20
+ description Link To MUCC Port GI1/0/1
+ no ip address
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ ip access-group BLOCK_VIRUS_SA1 in
+ ip access-group BLOCK_VIRUS_SA1 out
+!
+interface Vlan21
+ description Link To Server Farm Port GI 1/0/21-24
+ ip address 10.27.101.254 255.255.255.0
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface Vlan22
+ description Link To Snort Port 1/0/9
+ ip address 10.27.100.254 255.255.255.0
+ ip helper-address 10.27.100.101
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface Vlan23
+ ip address 10.27.23.254 255.255.255.0
+ ip helper-address 10.27.100.101
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface Vlan32
+ ip address 10.27.63.254 255.255.224.0
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface Vlan91
+ description IC-WiFi1 
+ ip address 10.27.91.254 255.255.255.0
+ ip helper-address 10.27.100.101
+ ip helper-address 10.27.94.253
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface Vlan92
+ description IC-WiFi2 
+ ip address 10.27.92.254 255.255.255.0
+ ip helper-address 10.27.100.101
+ ip helper-address 10.27.94.253
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface Vlan93
+ description IC-WiFi3 
+ ip address 10.27.93.254 255.255.255.0
+ ip helper-address 10.27.100.101
+ ip helper-address 10.27.94.253
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface Vlan94
+ description IC-WiFi4 
+ ip address 10.27.94.254 255.255.255.0
+ ip helper-address 10.27.100.101
+ ip helper-address 10.27.94.253
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface Vlan99
+ description VOIP 
+ ip address 10.27.99.254 255.255.254.0
+!
+interface Vlan104
+ ip address 10.27.104.190 255.255.255.224 secondary
+ ip address 10.27.104.222 255.255.255.224 secondary
+ ip address 10.27.104.62 255.255.255.192 secondary
+ ip address 10.27.104.254 255.255.255.0 secondary
+ ip address 10.27.104.126 255.255.255.192
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface Vlan106
+ description Cisco-Controller-AP
+ ip address 10.27.106.254 255.255.255.0
+ ip helper-address 10.27.100.101
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ ip access-group LimitVlan100 in
+ ip access-group LimitVlan100 out
+!
+interface Vlan107
+ description Client-WiFi-F1 
+ ip address 10.27.107.254 255.255.255.0
+ ip helper-address 10.27.100.101
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface Vlan108
+ description Client-WiFi-F2 
+ ip address 10.27.108.254 255.255.255.0
+ ip helper-address 10.27.100.101
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+interface Vlan109
+ description AP 
+ ip address 10.27.109.254 255.255.255.0
+!
+interface Vlan120
+ description VirtualClassRoom
+ ip address 10.27.20.254 255.255.255.0
+!
+interface Vlan122
+ ip address 10.27.22.254 255.255.255.0
+ ip helper-address 10.27.100.101
+!
+interface Vlan168
+ no ip address
+!
+interface Vlan180
+ no ip address
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ ip access-group ERP_IC3 in
+ ip access-group ERP_IC3 out
+!
+interface Vlan201
+ description Management
+ ip address 10.27.201.254 255.255.255.0
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+ ip access-group LimitMgmtSW in
+ ip access-group LimitMgmtSW out
+!
+interface Vlan203
+ description CCTV
+ ip address 10.27.203.254 255.255.255.0
+ ip helper-address 10.27.100.101
+!
+interface Vlan212
+ ip address 10.27.222.254 255.255.255.0
+ ip helper-address 10.27.222.251
+!
+interface Vlan221
+ description Office 
+ ip address 10.27.221.254 255.255.255.0
+ ip helper-address 10.27.100.101
+!
+interface Vlan222
+ description Lab-Com1 
+ no ip address
+!
+interface Vlan223
+ description Lab-Com2
+ ip address 10.27.223.254 255.255.255.0
+ ip helper-address 10.27.100.101
+!
+interface Vlan227
+ description WiFi-Client-1 
+ ip address 10.27.227.254 255.255.252.0
+ ip helper-address 10.27.100.101
+!
+interface Vlan231
+ description WiFi-Client-2
+ ip address 10.27.231.254 255.255.252.0
+ ip helper-address 10.27.100.101
+!
+interface Vlan235
+ description WiFi-Client-3
+ ip address 10.27.235.254 255.255.252.0
+ ip helper-address 10.27.100.101
+!
+interface Vlan239
+ description News@MUIC-WiFi-1K
+ ip address 10.27.239.254 255.255.252.0
+!
+interface Vlan255
+ description News@MUIC-WiFi-4K
+ ip address 10.27.255.254 255.255.240.0
+!
+interface Vlan320
+ ip address 10.27.123.254 255.255.252.0
+!
+interface Vlan321
+ ip address 10.27.127.254 255.255.252.0
+!
+interface Vlan327
+ description IC (LC Building)
+ ip address 10.27.21.254 255.255.255.0
+ no ip redirects
+ no ip unreachables
+ no ip proxy-arp
+!
+router ospfv3 1012
+ !
+ address-family ipv6 unicast
+  passive-interface default
+  no passive-interface TenGigabitEthernet1/1/1
+ exit-address-family
+!
+router ospf 1012
+ auto-cost reference-bandwidth 10000
+ network 10.27.1.0 0.0.0.255 area 2
+ network 10.27.2.0 0.0.0.255 area 2
+ network 10.27.3.0 0.0.0.255 area 2
+ network 10.27.4.0 0.0.0.255 area 2
+ network 10.27.5.0 0.0.0.255 area 2
+ network 10.27.6.0 0.0.0.255 area 2
+ network 10.27.7.0 0.0.0.255 area 2
+ network 10.27.8.0 0.0.0.255 area 2
+ network 10.27.9.0 0.0.0.255 area 2
+ network 10.27.20.0 0.0.0.255 area 2
+ network 10.27.21.0 0.0.0.255 area 2
+ network 10.27.22.0 0.0.0.255 area 2
+ network 10.27.23.0 0.0.0.255 area 2
+ network 10.27.24.0 0.0.0.255 area 2
+ network 10.27.25.0 0.0.0.255 area 2
+ network 10.27.32.0 0.0.31.255 area 2
+ network 10.27.91.0 0.0.0.255 area 2
+ network 10.27.92.0 0.0.0.255 area 2
+ network 10.27.93.0 0.0.0.255 area 2
+ network 10.27.94.0 0.0.0.255 area 2
+ network 10.27.98.0 0.0.1.255 area 2
+ network 10.27.100.0 0.0.0.255 area 2
+ network 10.27.101.0 0.0.0.255 area 2
+ network 10.27.104.240 0.0.0.15 area 2
+ network 10.27.104.0 0.0.0.255 area 2
+ network 10.27.106.0 0.0.0.255 area 2
+ network 10.27.107.0 0.0.0.255 area 2
+ network 10.27.108.0 0.0.0.255 area 2
+ network 10.27.109.0 0.0.0.255 area 2
+ network 10.27.120.0 0.0.3.255 area 2
+ network 10.27.124.0 0.0.3.255 area 2
+ network 10.27.180.0 0.0.0.63 area 2
+ network 10.27.180.64 0.0.0.63 area 2
+ network 10.27.201.0 0.0.0.255 area 2
+ network 10.27.203.0 0.0.0.255 area 2
+ network 10.27.221.0 0.0.0.255 area 2
+ network 10.27.222.0 0.0.0.255 area 2
+ network 10.27.223.0 0.0.0.255 area 2
+ network 10.27.224.0 0.0.3.255 area 2
+ network 10.27.228.0 0.0.3.255 area 2
+ network 10.27.232.0 0.0.3.255 area 2
+ network 10.27.236.0 0.0.3.255 area 2
+ network 10.27.240.0 0.0.15.255 area 2
+ network 10.166.1.52 0.0.0.3 area 2
+ network 10.166.1.192 0.0.0.3 area 2
+ network 10.166.2.52 0.0.0.3 area 2
+ network 10.166.3.4 0.0.0.3 area 2
+ network 10.166.3.52 0.0.0.3 area 2
+ network 10.255.255.110 0.0.0.0 area 2
+ network 202.28.166.96 0.0.0.31 area 2
+!
+ip forward-protocol nd
+no ip http server
+ip http authentication local
+no ip http secure-server
+ip route 10.95.180.244 255.255.255.255 10.42.167.20
+ip ssh bulk-mode 131072
+!
+!
+ip access-list extended BLOCK_VIRUS_SA1
+ 10 permit ip 10.27.104.0 0.0.0.255 202.28.167.0 0.0.0.255
+ 20 permit ip 202.28.167.0 0.0.0.255 10.27.104.0 0.0.0.255
+ 30 permit ip 10.27.101.0 0.0.0.255 any
+ 40 permit ip any 10.27.101.0 0.0.0.255
+ 50 permit ip host 10.27.22.246 10.27.101.0 0.0.0.255
+ 60 permit ip 10.27.101.0 0.0.0.255 host 10.27.22.246
+ 70 permit ip 10.41.50.0 0.0.0.255 any
+ 80 permit ip any 10.41.50.0 0.0.0.255
+ 90 permit ip host 10.41.101.155 any
+ 100 permit ip any host 10.41.101.155
+ 110 permit ip 10.27.20.0 0.0.0.255 any
+ 120 permit ip any 10.27.20.0 0.0.0.255
+ 130 permit ip 10.41.10.0 0.0.0.255 any
+ 140 permit ip any 10.41.10.0 0.0.0.255
+ 150 permit udp any host 10.22.1.123 eq netbios-ns
+ 160 permit udp host 10.22.1.123 any eq netbios-ns
+ 170 permit tcp any host 10.22.1.123 eq 139
+ 180 permit tcp host 10.22.1.123 any eq 139
+ 190 permit tcp host 10.22.1.150 any eq 139
+ 200 permit tcp any host 10.22.1.150 eq 139
+ 210 permit udp host 10.22.1.150 any eq netbios-ns
+ 220 permit udp any host 10.22.1.150 eq netbios-ns
+ 230 permit tcp host 10.41.4.242 10.22.1.0 0.0.0.255 eq 139
+ 240 permit tcp 10.22.1.0 0.0.0.255 host 10.41.4.242 eq 139
+ 250 permit udp host 10.41.4.242 10.22.1.0 0.0.0.255 eq netbios-ns
+ 260 permit udp 10.22.1.0 0.0.0.255 host 10.41.4.242 eq netbios-ns
+ 270 permit tcp host 10.41.1.209 10.22.1.0 0.0.0.255 eq 139
+ 280 permit tcp 10.22.1.0 0.0.0.255 host 10.41.1.209 eq 139
+ 290 permit udp host 10.41.1.209 10.22.1.0 0.0.0.255 eq netbios-ns
+ 300 permit udp 10.22.1.0 0.0.0.255 host 10.41.1.209 eq netbios-ns
+ 310 permit tcp host 10.27.1.198 10.22.1.0 0.0.0.255 eq 139
+ 320 permit tcp 10.22.1.0 0.0.0.255 host 10.27.1.198 eq 139
+ 330 permit udp host 10.27.1.198 10.22.1.0 0.0.0.255 eq netbios-ns
+ 340 permit udp 10.22.1.0 0.0.0.255 host 10.27.1.198 eq netbios-ns
+ 350 permit tcp host 10.27.1.228 10.22.1.0 0.0.0.255 eq 139
+ 360 permit tcp 10.22.1.0 0.0.0.255 host 10.27.1.228 eq 139
+ 370 permit udp host 10.27.1.228 10.22.1.0 0.0.0.255 eq netbios-ns
+ 380 permit udp 10.22.1.0 0.0.0.255 host 10.27.1.228 eq netbios-ns
+ 390 permit tcp host 10.41.6.105 10.22.1.0 0.0.0.255 eq 139
+ 400 permit tcp 10.22.1.0 0.0.0.255 host 10.41.6.105 eq 139
+ 410 permit udp host 10.41.6.105 10.22.1.0 0.0.0.255 eq netbios-ns
+ 420 permit udp 10.22.1.0 0.0.0.255 host 10.41.6.105 eq netbios-ns
+ 430 permit tcp host 10.22.103.249 10.41.3.100 0.0.0.3 eq 139
+ 440 permit tcp 10.41.3.100 0.0.0.3 host 10.22.103.249 eq 139
+ 450 permit udp host 10.22.103.249 10.41.3.100 0.0.0.3 eq netbios-ns
+ 460 permit udp 10.41.3.100 0.0.0.3 host 10.22.103.249 eq netbios-ns
+ 470 permit tcp host 10.41.3.101 host 10.22.103.249 eq 139
+ 480 permit tcp host 10.22.103.249 host 10.41.3.101 eq 139
+ 490 permit udp host 10.41.3.101 host 10.22.103.249 eq netbios-ns
+ 500 permit udp host 10.41.3.101 host 10.22.103.249 eq netbios-ss
+ 510 permit udp host 10.22.103.249 host 10.41.3.101 eq netbios-ns
+ 520 permit udp host 10.22.103.249 host 10.41.3.101 eq netbios-ss
+ 530 permit tcp host 10.24.101.10 any eq www
+ 540 permit tcp host 10.24.101.10 any eq domain
+ 550 permit tcp host 10.24.101.10 any eq 1611
+ 560 permit tcp host 10.24.101.10 any eq 8000
+ 570 permit udp host 10.24.101.10 any eq 80
+ 580 permit udp host 10.24.101.10 any eq 1611
+ 590 permit udp host 10.24.101.10 any eq 800
+ 600 permit udp host 10.24.101.10 any eq domain
+ 610 permit tcp any host 10.24.101.10 eq www
+ 620 permit tcp any host 10.24.101.10 eq domain
+ 630 permit tcp any host 10.24.101.10 eq 1611
+ 640 permit tcp any host 10.24.101.10 eq 8000
+ 650 permit udp any host 10.24.101.10 eq domain
+ 660 permit udp any host 10.24.101.10 eq 80
+ 670 permit udp any host 10.24.101.10 eq 1611
+ 680 permit udp any host 10.24.101.10 eq 8000
+ 690 permit tcp 202.28.128.0 0.0.63.255 any eq www
+ 700 permit tcp any 10.0.0.0 0.255.255.255 eq www
+ 710 permit tcp any 202.28.128.0 0.0.63.255 eq www
+ 720 permit tcp 10.22.1.0 0.0.0.255 any eq domain
+ 730 permit tcp any 10.0.0.0 0.255.255.255 eq domain
+ 740 permit tcp any 202.28.128.0 0.0.63.255 eq domain
+ 750 deny tcp any any eq domain
+ 760 permit udp 10.22.1.0 0.0.0.255 any eq domain
+ 770 permit udp any 10.0.0.0 0.255.255.255 eq domain
+ 780 permit udp any 202.28.128.0 0.0.63.255 eq domain
+ 790 permit tcp 10.0.0.0 0.255.255.255 10.0.0.0 0.255.255.255 eq smtp
+ 800 permit tcp 10.0.0.0 0.255.255.255 202.28.0.0 0.0.255.255 eq smtp
+ 810 permit tcp 202.28.0.0 0.0.255.255 any eq smtp
+ 820 deny udp any any eq 32769
+ 830 deny tcp any any eq smtp
+ 840 deny udp any any eq domain
+ 850 deny udp any any eq 135
+ 860 deny udp any any eq netbios-ns
+ 870 deny udp any any eq 1434
+ 880 deny udp any any eq 445
+ 890 deny udp any any eq 4444
+ 900 deny udp any any eq 539
+ 910 deny udp any any eq 990
+ 920 deny udp any any eq 999
+ 930 deny udp any any eq 8998
+ 940 deny udp any any eq 6777
+ 950 deny tcp any any eq msrpc
+ 960 deny tcp any any eq 139
+ 970 deny tcp any any eq 445
+ 980 deny tcp any any eq 539
+ 990 deny tcp any any eq 4444
+ 1000 deny tcp any any eq ident
+ 1010 deny tcp any any eq 593
+ 1020 deny tcp any any eq 6777
+ 1030 deny tcp any any eq 3127
+ 1040 deny tcp any any eq 8866
+ 1050 deny tcp any any eq 2556
+ 1060 deny tcp any any eq 1080
+ 1070 deny tcp any any eq 4751
+ 1080 deny tcp any any eq 6789
+ 1090 deny tcp any any eq 81
+ 1100 deny tcp any any eq 82
+ 1110 deny tcp any any eq 5554
+ 1120 deny tcp any any eq 9996
+ 1130 deny tcp any any eq 2110
+ 1140 deny tcp any any eq 1034
+ 1150 permit tcp any any
+ 1160 permit udp any any
+ 1170 deny 53 any any
+ 1180 deny 55 any any
+ 1190 deny 77 any any
+ 1200 deny pim any any
+ 1210 permit icmp 10.22.5.0 0.0.0.255 any
+ 1220 permit icmp any 10.22.5.0 0.0.0.255
+ 1230 permit icmp 202.28.164.0 0.0.0.255 any
+ 1240 permit icmp any 202.28.164.0 0.0.0.255
+ 1250 permit icmp 202.28.166.0 0.0.0.255 any
+ 1260 permit icmp any 202.28.166.0 0.0.0.255
+ 1270 permit icmp 10.22.1.0 0.0.0.255 any
+ 1280 permit icmp any 10.22.1.0 0.0.0.255
+ 1290 permit icmp 10.22.253.0 0.0.0.255 any
+ 1300 permit icmp any 10.22.253.0 0.0.0.255
+ 1310 permit icmp 202.28.128.0 0.0.0.255 any
+ 1320 permit icmp any 202.28.128.0 0.0.0.255
+ 1330 permit icmp host 10.41.3.100 any
+ 1340 permit icmp any host 10.41.3.100
+ 1350 permit icmp host 10.41.3.101 any
+ 1360 permit icmp any host 10.41.3.101
+ 1370 permit icmp host 10.41.17.10 any
+ 1380 permit icmp any host 10.41.17.10
+ 1390 deny icmp any any
+ 1400 permit ip any any
+ip access-list extended BLOCK_VIRUS_SA6
+ 10 permit ip 10.27.98.0 0.0.1.255 any
+ 20 permit ip any 10.27.98.0 0.0.1.255
+ 30 permit ip 10.27.201.0 0.0.0.255 10.42.167.0 0.0.0.255
+ 40 permit ip 10.42.167.0 0.0.0.255 10.27.201.0 0.0.0.255
+ 50 permit ip 10.27.104.0 0.0.0.255 202.28.167.0 0.0.0.255
+ 60 permit ip 202.28.167.0 0.0.0.255 10.27.104.0 0.0.0.255
+ 70 permit ip 10.27.101.0 0.0.0.255 any
+ 80 permit ip any 10.27.101.0 0.0.0.255
+ 90 permit ip 10.27.20.0 0.0.0.255 any
+ 100 permit ip any 10.27.20.0 0.0.0.255
+ 110 permit ip host 10.27.22.246 10.27.101.0 0.0.0.255
+ 120 permit ip 10.27.101.0 0.0.0.255 host 10.27.22.246
+ 130 permit ip 10.27.22.0 0.0.0.255 any
+ 140 permit ip any 10.27.22.0 0.0.0.255
+ 150 remark Admin-Main------------------------------------>Policy
+ 150 permit ip 10.41.50.0 0.0.0.255 any
+ 160 permit ip 10.27.9.0 0.0.0.255 any
+ 170 permit ip any 10.27.9.0 0.0.0.255
+ 180 permit ip any 10.41.50.0 0.0.0.255
+ 190 permit ip host 10.41.101.155 any
+ 200 permit ip any host 10.41.101.155
+ 210 permit ip host 10.41.101.41 any
+ 220 permit ip any host 10.41.101.41
+ 230 permit tcp 10.0.0.0 0.255.255.255 any eq www
+ 240 permit tcp any 10.0.0.0 0.255.255.255 eq www
+ 250 permit tcp 10.0.0.0 0.255.255.255 any eq 8080
+ 260 permit tcp any 10.0.0.0 0.255.255.255 eq 8080
+ 270 permit udp 10.0.0.0 0.255.255.255 any eq 80
+ 280 permit udp any 10.0.0.0 0.255.255.255 eq 80
+ 290 permit udp 10.0.0.0 0.255.255.255 any eq 8080
+ 300 permit udp any 10.0.0.0 0.255.255.255 eq 8080
+ 310 permit icmp 202.28.166.0 0.0.0.255 any
+ 320 permit icmp any 202.28.166.0 0.0.0.255
+ 330 remark ERP-Main---------------------------------------->Policy--IC
+ 330 permit ip 10.27.180.0 0.0.0.255 10.41.20.0 0.0.0.255
+ 340 permit ip 10.41.20.0 0.0.0.255 10.27.180.0 0.0.0.255
+ 350 permit ip 10.27.180.0 0.0.0.255 10.41.101.0 0.0.0.255
+ 360 permit ip 10.41.101.0 0.0.0.255 10.27.180.0 0.0.0.255
+ 370 permit ip 202.28.0.0 0.0.255.255 10.27.180.0 0.0.0.255
+ 380 permit ip 10.27.180.0 0.0.0.255 202.28.0.0 0.0.255.255
+ 390 permit ip 10.27.180.0 0.0.0.255 host 10.22.2.149
+ 400 permit ip host 10.22.2.149 10.27.180.0 0.0.0.255
+ 410 permit ip 10.27.180.0 0.0.0.255 host 10.2.2.219
+ 420 permit ip host 10.2.2.219 10.27.180.0 0.0.0.255
+ 430 permit ip 10.27.180.0 0.0.0.255 10.27.180.0 0.0.0.255
+ 440 remark Internet----------------------------------->
+ 440 permit ip host 10.27.24.1 10.27.180.0 0.0.0.255
+ 450 permit ip 10.27.180.0 0.0.0.255 host 10.27.24.1
+ 460 permit ip host 10.27.24.12 10.27.180.0 0.0.0.255
+ 470 permit ip 10.27.180.0 0.0.0.255 host 10.27.24.12
+ 480 permit ip host 10.27.24.2 10.27.180.0 0.0.0.255
+ 490 permit ip 10.27.180.0 0.0.0.255 host 10.27.24.2
+ 500 remark Internet----------------------------------->ERP_Server-IC
+ 500 permit ip host 10.27.24.1 10.41.20.0 0.0.0.255
+ 510 permit ip 10.41.20.0 0.0.0.255 host 10.27.24.1
+ 520 permit ip host 10.27.24.12 10.41.20.0 0.0.0.255
+ 530 permit ip 10.41.20.0 0.0.0.255 host 10.27.24.12
+ 540 permit ip host 10.27.24.2 10.41.20.0 0.0.0.255
+ 550 permit ip 10.41.20.0 0.0.0.255 host 10.27.24.2
+ 560 remark Policy--Basic------------------------------>Policy--Basic
+ 560 permit ip 10.22.5.0 0.0.0.255 any
+ 570 permit ip any 10.22.5.0 0.0.0.255
+ 580 permit ip 10.41.10.0 0.0.0.255 any
+ 590 permit ip any 10.41.10.0 0.0.0.255
+ 600 permit udp any host 10.22.1.123 eq netbios-ns
+ 610 permit udp host 10.22.1.123 any eq netbios-ns
+ 620 permit tcp any host 10.22.1.123 eq 139
+ 630 permit tcp host 10.22.1.123 any eq 139
+ 640 permit tcp host 10.22.1.150 any eq 139
+ 650 permit tcp any host 10.22.1.150 eq 139
+ 660 permit udp host 10.22.1.150 any eq netbios-ns
+ 670 permit udp any host 10.22.1.150 eq netbios-ns
+ 680 permit tcp host 10.41.4.242 10.22.1.0 0.0.0.255 eq 139
+ 690 permit tcp 10.22.1.0 0.0.0.255 host 10.41.4.242 eq 139
+ 700 permit udp host 10.41.4.242 10.22.1.0 0.0.0.255 eq netbios-ns
+ 710 permit udp 10.22.1.0 0.0.0.255 host 10.41.4.242 eq netbios-ns
+ 720 permit tcp host 10.41.1.209 10.22.1.0 0.0.0.255 eq 139
+ 730 permit tcp 10.22.1.0 0.0.0.255 host 10.41.1.209 eq 139
+ 740 permit udp host 10.41.1.209 10.22.1.0 0.0.0.255 eq netbios-ns
+ 750 permit udp 10.22.1.0 0.0.0.255 host 10.41.1.209 eq netbios-ns
+ 760 permit tcp host 10.27.1.198 10.22.1.0 0.0.0.255 eq 139
+ 770 permit tcp 10.22.1.0 0.0.0.255 host 10.27.1.198 eq 139
+ 780 permit udp host 10.27.1.198 10.22.1.0 0.0.0.255 eq netbios-ns
+ 790 permit udp 10.22.1.0 0.0.0.255 host 10.27.1.198 eq netbios-ns
+ 800 permit tcp host 10.27.1.228 10.22.1.0 0.0.0.255 eq 139
+ 810 permit tcp 10.22.1.0 0.0.0.255 host 10.27.1.228 eq 139
+ 820 permit udp host 10.27.1.228 10.22.1.0 0.0.0.255 eq netbios-ns
+ 830 permit udp 10.22.1.0 0.0.0.255 host 10.27.1.228 eq netbios-ns
+ 840 permit tcp host 10.41.6.105 10.22.1.0 0.0.0.255 eq 139
+ 850 permit tcp 10.22.1.0 0.0.0.255 host 10.41.6.105 eq 139
+ 860 permit udp host 10.41.6.105 10.22.1.0 0.0.0.255 eq netbios-ns
+ 870 permit udp 10.22.1.0 0.0.0.255 host 10.41.6.105 eq netbios-ns
+ 880 permit tcp host 10.22.103.249 10.41.3.100 0.0.0.3 eq 139
+ 890 permit tcp 10.41.3.100 0.0.0.3 host 10.22.103.249 eq 139
+ 900 permit udp host 10.22.103.249 10.41.3.100 0.0.0.3 eq netbios-ns
+ 910 permit udp 10.41.3.100 0.0.0.3 host 10.22.103.249 eq netbios-ns
+ 920 permit tcp host 10.41.3.101 host 10.22.103.249 eq 139
+ 930 permit tcp host 10.22.103.249 host 10.41.3.101 eq 139
+ 940 permit udp host 10.41.3.101 host 10.22.103.249 eq netbios-ns
+ 950 permit udp host 10.41.3.101 host 10.22.103.249 eq netbios-ss
+ 960 permit udp host 10.22.103.249 host 10.41.3.101 eq netbios-ns
+ 970 permit udp host 10.22.103.249 host 10.41.3.101 eq netbios-ss
+ 980 permit tcp host 10.24.101.10 any eq www
+ 990 permit tcp host 10.24.101.10 any eq domain
+ 1000 permit tcp host 10.24.101.10 any eq 1611
+ 1010 permit tcp host 10.24.101.10 any eq 8000
+ 1020 permit udp host 10.24.101.10 any eq 80
+ 1030 permit udp host 10.24.101.10 any eq 1611
+ 1040 permit udp host 10.24.101.10 any eq 800
+ 1050 permit udp host 10.24.101.10 any eq domain
+ 1060 permit tcp any host 10.24.101.10 eq www
+ 1070 permit tcp any host 10.24.101.10 eq domain
+ 1080 permit tcp any host 10.24.101.10 eq 1611
+ 1090 permit tcp any host 10.24.101.10 eq 8000
+ 1100 permit udp any host 10.24.101.10 eq domain
+ 1110 permit udp any host 10.24.101.10 eq 80
+ 1120 permit udp any host 10.24.101.10 eq 1611
+ 1130 permit udp any host 10.24.101.10 eq 8000
+ 1140 permit tcp 202.28.128.0 0.0.63.255 any eq www
+ 1150 permit tcp any 202.28.128.0 0.0.63.255 eq www
+ 1160 permit tcp 10.22.1.0 0.0.0.255 any eq domain
+ 1170 permit tcp any 10.0.0.0 0.255.255.255 eq domain
+ 1180 permit tcp any 202.28.128.0 0.0.63.255 eq domain
+ 1190 permit udp 10.22.1.0 0.0.0.255 any eq domain
+ 1200 permit udp any 10.0.0.0 0.255.255.255 eq domain
+ 1210 permit udp any 202.28.128.0 0.0.63.255 eq domain
+ 1220 permit udp 10.0.0.0 0.255.255.255 10.41.41.0 0.0.0.15 eq domain
+ 1230 permit udp 10.41.41.0 0.0.0.15 10.0.0.0 0.255.255.255 eq domain
+ 1240 permit udp 10.0.0.0 0.255.255.255 10.22.44.0 0.0.0.15 eq domain
+ 1250 permit udp 10.22.44.0 0.0.0.15 10.0.0.0 0.255.255.255 eq domain
+ 1260 permit tcp 10.0.0.0 0.255.255.255 10.41.41.0 0.0.0.15 eq domain
+ 1270 permit tcp 10.41.41.0 0.0.0.15 10.0.0.0 0.255.255.255 eq domain
+ 1280 permit tcp 10.0.0.0 0.255.255.255 10.22.44.0 0.0.0.15 eq domain
+ 1290 permit tcp 10.22.44.0 0.0.0.15 10.0.0.0 0.255.255.255 eq domain
+ 1300 permit tcp 10.0.0.0 0.255.255.255 10.0.0.0 0.255.255.255 eq smtp
+ 1310 permit tcp 10.0.0.0 0.255.255.255 202.28.0.0 0.0.255.255 eq smtp
+ 1320 permit tcp 202.28.0.0 0.0.255.255 any eq smtp
+ 1330 deny tcp any any eq domain
+ 1340 deny udp any any eq 32769
+ 1350 deny tcp any any eq smtp
+ 1360 deny udp any any eq domain
+ 1370 deny udp any any eq 135
+ 1380 deny udp any any eq netbios-ns
+ 1390 deny udp any any eq 1434
+ 1400 deny udp any any eq 445
+ 1410 deny udp any any eq 4444
+ 1420 deny udp any any eq 539
+ 1430 deny udp any any eq 990
+ 1440 deny udp any any eq 999
+ 1450 deny udp any any eq 8998
+ 1460 deny udp any any eq 6777
+ 1470 deny tcp any any eq msrpc
+ 1480 deny tcp any any eq 139
+ 1490 deny tcp any any eq 445
+ 1500 deny tcp any any eq 539
+ 1510 deny tcp any any eq 4444
+ 1520 deny tcp any any eq ident
+ 1530 deny tcp any any eq 593
+ 1540 deny tcp any any eq 6777
+ 1550 deny tcp any any eq 3127
+ 1560 deny tcp any any eq 8866
+ 1570 deny tcp any any eq 2556
+ 1580 deny tcp any any eq 1080
+ 1590 deny tcp any any eq 4751
+ 1600 deny tcp any any eq 6789
+ 1610 deny tcp any any eq 81
+ 1620 deny tcp any any eq 82
+ 1630 deny tcp any any eq 5554
+ 1640 deny tcp any any eq 9996
+ 1650 deny tcp any any eq 2110
+ 1660 deny tcp any any eq 1034
+ 1670 permit tcp any any
+ 1680 permit udp any any
+ 1690 deny 53 any any
+ 1700 deny 55 any any
+ 1710 deny 77 any any
+ 1720 deny pim any any
+ 1730 permit icmp 10.22.5.0 0.0.0.255 any
+ 1740 permit icmp any 10.22.5.0 0.0.0.255
+ 1750 permit icmp 10.255.255.0 0.0.0.255 any
+ 1760 permit icmp any 10.255.255.0 0.0.0.255
+ 1770 permit icmp 10.166.1.0 0.0.0.255 any
+ 1780 permit icmp any 10.166.1.0 0.0.0.255
+ 1790 permit icmp 10.166.2.0 0.0.0.255 any
+ 1800 permit icmp any 10.166.2.0 0.0.0.255
+ 1810 permit icmp 10.166.3.0 0.0.0.255 any
+ 1820 permit icmp any 10.166.3.0 0.0.0.255
+ 1830 permit icmp 202.28.164.0 0.0.0.255 any
+ 1840 permit icmp any 202.28.164.0 0.0.0.255
+ 1850 permit icmp 10.22.1.0 0.0.0.255 any
+ 1860 permit icmp any 10.22.1.0 0.0.0.255
+ 1870 permit icmp 10.22.253.0 0.0.0.255 any
+ 1880 permit icmp any 10.22.253.0 0.0.0.255
+ 1890 permit icmp 202.28.128.0 0.0.0.255 any
+ 1900 permit icmp any 202.28.128.0 0.0.0.255
+ 1910 permit icmp host 10.41.3.100 any
+ 1920 permit icmp any host 10.41.3.100
+ 1930 permit icmp host 10.41.3.101 any
+ 1940 permit icmp any host 10.41.3.101
+ 1950 permit icmp host 10.41.17.10 any
+ 1960 permit icmp any host 10.41.17.10
+ 1970 deny icmp any any
+ 1980 permit ip any any
+ip access-list extended ERP_IC3
+ 10 permit ip 10.27.104.0 0.0.0.255 202.28.167.0 0.0.0.255
+ 20 permit ip 202.28.167.0 0.0.0.255 10.27.104.0 0.0.0.255
+ 30 permit ip host 10.27.22.246 10.27.101.0 0.0.0.255
+ 40 permit ip 10.27.101.0 0.0.0.255 host 10.27.22.246
+ 50 remark Admin-Main------------------------------------>Policy
+ 50 permit ip 10.41.50.0 0.0.0.255 any
+ 60 permit ip any 10.41.50.0 0.0.0.255
+ 70 permit ip host 10.41.101.155 any
+ 80 permit ip any host 10.41.101.155
+ 90 permit ip host 10.41.101.41 any
+ 100 permit ip any host 10.41.101.41
+ 110 permit tcp 10.0.0.0 0.255.255.255 any eq www
+ 120 permit tcp any 10.0.0.0 0.255.255.255 eq www
+ 130 permit tcp 10.0.0.0 0.255.255.255 any eq 8080
+ 140 permit tcp any 10.0.0.0 0.255.255.255 eq 8080
+ 150 permit udp 10.0.0.0 0.255.255.255 any eq 80
+ 160 permit udp any 10.0.0.0 0.255.255.255 eq 80
+ 170 permit udp 10.0.0.0 0.255.255.255 any eq 8080
+ 180 permit udp any 10.0.0.0 0.255.255.255 eq 8080
+ 190 permit icmp 202.28.166.0 0.0.0.255 any
+ 200 permit icmp any 202.28.166.0 0.0.0.255
+ 210 remark ERP-Main---------------------------------------->Policy--IC
+ 210 permit ip 10.27.180.0 0.0.0.255 10.41.20.0 0.0.0.255
+ 220 permit ip 10.41.20.0 0.0.0.255 10.27.180.0 0.0.0.255
+ 230 permit ip 10.27.180.0 0.0.0.255 10.41.101.0 0.0.0.255
+ 240 permit ip 10.41.101.0 0.0.0.255 10.27.180.0 0.0.0.255
+ 250 permit ip 10.27.180.0 0.0.0.255 10.41.102.0 0.0.0.255
+ 260 permit ip 10.41.102.0 0.0.0.255 10.27.180.0 0.0.0.255
+ 270 permit ip 202.28.0.0 0.0.255.255 10.27.180.0 0.0.0.255
+ 280 permit ip 10.27.180.0 0.0.0.255 202.28.0.0 0.0.255.255
+ 290 permit ip 10.27.0.0 0.0.255.255 10.41.41.0 0.0.0.15
+ 300 permit ip 10.41.41.0 0.0.0.15 10.27.0.0 0.0.255.255
+ 310 permit ip 10.27.0.0 0.0.255.255 10.22.44.0 0.0.0.15
+ 320 permit ip 10.22.44.0 0.0.0.15 10.27.0.0 0.0.255.255
+ 330 permit ip 10.27.180.0 0.0.0.255 host 10.22.2.149
+ 340 permit ip host 10.22.2.149 10.27.180.0 0.0.0.255
+ 350 permit ip 10.27.180.0 0.0.0.255 host 10.2.2.219
+ 360 permit ip host 10.2.2.219 10.27.180.0 0.0.0.255
+ 370 permit ip 10.27.180.0 0.0.0.255 10.27.180.0 0.0.0.255
+ 380 remark Internet----------------------------------->ERP_Client-IC
+ 380 permit ip host 10.27.24.1 10.27.180.0 0.0.0.255
+ 390 permit ip 10.27.180.0 0.0.0.255 host 10.27.24.1
+ 400 permit ip host 10.27.24.12 10.27.180.0 0.0.0.255
+ 410 permit ip 10.27.180.0 0.0.0.255 host 10.27.24.12
+ 420 permit ip host 10.27.24.2 10.27.180.0 0.0.0.255
+ 430 permit ip 10.27.180.0 0.0.0.255 host 10.27.24.2
+ 440 remark Internet----------------------------------->ERP_Server-IC
+ 440 permit ip host 10.27.24.1 10.41.20.0 0.0.0.255
+ 450 permit ip 10.41.20.0 0.0.0.255 host 10.27.24.1
+ 460 permit ip host 10.27.24.12 10.41.20.0 0.0.0.255
+ 470 permit ip 10.41.20.0 0.0.0.255 host 10.27.24.12
+ 480 permit ip host 10.27.24.2 10.41.20.0 0.0.0.255
+ 490 permit ip 10.41.20.0 0.0.0.255 host 10.27.24.2
+ 500 deny ip 10.27.180.0 0.0.0.255 any
+ 510 deny ip any 10.27.180.0 0.0.0.255
+ 520 permit ip any any
+ip access-list extended LimitMgmtSW
+ 10 permit udp any eq bootpc any eq bootps
+ 20 permit ip 10.27.201.0 0.0.0.255 host 10.95.180.244
+ 30 permit ip host 10.95.180.244 10.27.201.0 0.0.0.255
+ 40 permit ip 10.27.201.0 0.0.0.255 10.42.167.0 0.0.0.255
+ 50 permit ip 10.42.167.0 0.0.0.255 10.27.201.0 0.0.0.255
+ 60 permit ip 10.27.100.0 0.0.0.255 10.27.100.0 0.0.0.255
+ 70 permit ip 10.27.201.0 0.0.0.255 10.27.201.0 0.0.0.255
+ 80 permit ip 10.27.100.0 0.0.0.255 10.27.201.0 0.0.0.255
+ 90 permit ip 10.27.201.0 0.0.0.255 10.27.100.0 0.0.0.255
+ 100 permit ip 10.27.100.0 0.0.0.255 host 10.27.101.167
+ 110 permit ip host 10.27.101.167 10.27.100.0 0.0.0.255
+ 120 permit ip 10.27.201.0 0.0.0.255 host 10.27.101.167
+ 130 permit ip host 10.27.101.167 10.27.201.0 0.0.0.255
+ 140 permit ip 10.41.17.0 0.0.0.255 any
+ 150 permit ip any 10.41.17.0 0.0.0.255
+ 160 permit ip 10.90.10.0 0.0.0.255 any
+ 170 permit ip any 10.90.10.0 0.0.0.255
+ip access-list extended LimitVlan100
+ 10 permit ip 10.27.106.0 0.0.0.255 10.27.106.0 0.0.0.255
+ 20 permit ip 10.27.106.0 0.0.0.255 10.27.100.0 0.0.0.255
+ 30 permit ip 10.27.100.0 0.0.0.255 10.27.106.0 0.0.0.255
+ 40 permit ip 10.27.106.0 0.0.0.255 10.27.201.0 0.0.0.255
+ 50 permit ip 10.27.201.0 0.0.0.255 10.27.106.0 0.0.0.255
+ 60 permit ip 10.27.106.0 0.0.0.255 host 10.27.101.167
+ 70 permit ip host 10.27.101.167 10.27.106.0 0.0.0.255
+ 80 permit udp any eq bootpc any eq bootps
+ip access-list extended network-admin
+ 10 permit ip 10.41.17.0 0.0.0.255 any
+ 20 permit ip any 10.41.17.0 0.0.0.255
+ 30 permit ip 10.90.10.0 0.0.0.255 any
+ 40 permit ip any 10.90.10.0 0.0.0.255
+snmp-server community publicX RO
+snmp-server enable traps tty
+!
+!
+control-plane
+ service-policy input system-cpp-policy
+!
+!
+banner motd ^C
+==========================================================================
+                               [WARNING]
+   This system is owned by Mahidol University.
+ If you are not authorized to access this system, exit immediately.
+ Unauthorized access to this system is forbidden by company policies,
+ national,and international laws.
+          
+==========================================================================^C
+!
+line con 0
+ stopbits 1
+line vty 0 4
+ login local
+ transport input ssh
+line vty 5 15
+ login local
+ transport input ssh
+line vty 16 31
+ login
+ transport input ssh
+!
+ntp server 202.28.138.4
+!
+!
+!         
+!
+!
+!
+end
+
+IC_Core#            
+IC_Core#
+IC_Core#sh int statu
+IC_Core#sh int status 
+
+Port         Name               Status       Vlan       Duplex  Speed Type
+Gi1/0/1                         notconnect   1            full   1000 10/100/1000BaseTX
+Gi1/0/2                         notconnect   1            full   1000 10/100/1000BaseTX
+Gi1/0/3                         connected    21         a-full a-1000 10/100/1000BaseTX
+Gi1/0/4                         notconnect   21           auto   auto 10/100/1000BaseTX
+Gi1/0/5      SA-(3560E)IC       connected    trunk      a-full a-1000 10/100/1000BaseTX
+Gi1/0/6      == Link To B1-B3-M notconnect   1            auto   auto 10/100/1000BaseTX
+Gi1/0/7                         disabled     1            auto   auto 10/100/1000BaseTX
+Gi1/0/8                         disabled     1            auto   auto 10/100/1000BaseTX
+Gi1/0/9                         disabled     1            auto   auto 10/100/1000BaseTX
+Gi1/0/10                        disabled     1            auto   auto 10/100/1000BaseTX
+Gi1/0/11                        disabled     1            auto   auto 10/100/1000BaseTX
+Gi1/0/12                        disabled     1            auto   auto 10/100/1000BaseTX
+Gi1/0/13                        disabled     1            auto   auto 10/100/1000BaseTX
+Gi1/0/14                        disabled     1            auto   auto 10/100/1000BaseTX
+Gi1/0/15                        disabled     1            auto   auto 10/100/1000BaseTX
+Gi1/0/16                        disabled     1            auto   auto 10/100/1000BaseTX
+Gi1/0/17                        disabled     1            auto   auto 10/100/1000BaseTX
+Gi1/0/18                        disabled     1            auto   auto 10/100/1000BaseTX
+Gi1/0/19                        disabled     1            auto   auto 10/100/1000BaseTX
+Gi1/0/20                        disabled     1            auto   auto 10/100/1000BaseTX
+Gi1/0/21                        disabled     1            auto   auto 10/100/1000BaseTX
+Gi1/0/22                        disabled     1            auto   auto 10/100/1000BaseTX
+Gi1/0/23                        disabled     1            auto   auto 10/100/1000BaseTX
+Gi1/0/24                        disabled     1            auto   auto 10/100/1000BaseTX
+Te1/1/1      **Route-IC-CoreSA* connected    routed       full    10G SFP-10GBase-LR
+Te1/1/2      Link-to-Aditayatho connected    trunk        full    10G SFP-10GBase-LR
+Te1/1/3      Link-to-Aditayatho connected    trunk        full    10G SFP-10GBase-LR
+Te1/1/4      IC-OP-Backup       connected    routed       full    10G SFP-10GBase-LR
+Te1/1/5      IC-SH-Backup       connected    routed       full   1000 1000BaseLX SFP
+Te1/1/6                         connected    trunk        full    10G SFP-10GBase-LR
+Te1/1/7      == Link To B1-B3-M notconnect   1            auto   auto unknown
+Te1/1/8                         notconnect   1            full   1000 1000BaseSX SFP
+Ap1/0/1                         connected    1          a-full a-1000 App-hosting port
+Po1          Link-to-IC-Core450 notconnect   unassigned   auto   auto N/A
+Po5          Link-to-Kitimas    connected    trunk      a-full  a-10G N/A
+IC_Core#
+IC_Core#
+IC_Core#
+IC_Core#
+IC_Core#sh cdpn e
+IC_Core#sh cdp ne
+IC_Core#sh cdp neighbors 
+Capability Codes: R - Router, T - Trans Bridge, B - Source Route Bridge
+                  S - Switch, H - Host, I - IGMP, r - Repeater, P - Phone, 
+                  D - Remote, C - CVTA, M - Two-port Mac Relay 
+
+Device ID        Local Intrfce     Holdtme    Capability  Platform  Port ID
+MUIC-Core-SW-01  Ten 1/1/3         153             R S I  WS-C4506- Ten 2/1/1
+MUIC-Core-SW-01  Ten 1/1/2         148             R S I  WS-C4506- Ten 1/1/1
+C9600-SA1.mahidol.ac.th
+                 Ten 1/1/6         176             R S I  C9606R    Twe 2/5/0/11
+SH_Core.mahidol.ac.th
+                 Ten 1/1/5         175             R S I  WS-C4503- Ten 1/7
+SA-(3560E)IC.mahidol.ac.th
+                 Gig 1/0/5         160              S I   WS-C3560X Gig 0/24
+
+Total cdp entries displayed : 5
+IC_Core#
+IC_Core#
+IC_Core#
+IC_Core#
+IC_Core#sh lldp ne
+IC_Core#sh lldp neighbors 
+Capability codes:
+    (R) Router, (B) Bridge, (T) Telephone, (C) DOCSIS Cable Device
+    (W) WLAN Access Point, (P) Repeater, (S) Station, (O) Other
+
+Device ID           Local Intf     Hold-time  Capability      Port ID
+FGT-Salaya03-B      Te1/1/4        120        R               IN-IC
+FGT-Salaya03-A      Te1/1/1        120        R               IN-IC
+SH_Core.mahidol.ac.tTe1/1/5        120        B,R             Te1/7
+C9600-SA1.mahidol.acTe1/1/6        120        B,R             Twe2/5/0/11
+C9600-SA1.mahidol.acTe1/1/1        120        B,R             Twe1/2/0/12
+
+Total entries displayed: 5
+
+IC_Core#
+IC_Core#
+IC_Core#
+IC_Core#
+IC_Core#
+IC_Core#
+IC_Core#
+IC_Core#sh etherc
+IC_Core#sh etherchannel su
+IC_Core#sh etherchannel summary 
+Flags:  D - down        P - bundled in port-channel
+        I - stand-alone s - suspended
+        H - Hot-standby (LACP only)
+        R - Layer3      S - Layer2
+        U - in use      f - failed to allocate aggregator
+
+        M - not in use, minimum links not met
+        u - unsuitable for bundling
+        w - waiting to be aggregated
+        d - default port
+
+        A - formed by Auto LAG
+
+
+Number of channel-groups in use: 2
+Number of aggregators:           2
+
+Group  Port-channel  Protocol    Ports
+------+-------------+-----------+-----------------------------------------------
+1      Po1(SD)          -          Gi1/0/1(D)      Gi1/0/2(D)      
+5      Po5(SU)          -          Te1/1/2(P)      Te1/1/3(P)      
+
+IC_Core#
+IC_Core#
+IC_Core#
+IC_Core#
+IC_Core#sh ver
+IC_Core#sh version 
+Cisco IOS XE Software, Version 17.15.03
+Cisco IOS Software [IOSXE], Catalyst L3 Switch Software (CAT9K_IOSXE), Version 17.15.3, RELEASE SOFTWARE (fc1)
+Technical Support: http://www.cisco.com/techsupport
+Copyright (c) 1986-2025 by Cisco Systems, Inc.
+Compiled Tue 25-Mar-25 23:38 by mcpre
+
+
+Cisco IOS-XE software, Copyright (c) 2005-2025 by cisco Systems, Inc.
+All rights reserved.  Certain components of Cisco IOS-XE software are
+licensed under the GNU General Public License ("GPL") Version 2.0.  The
+software code licensed under GPL Version 2.0 is free software that comes
+with ABSOLUTELY NO WARRANTY.  You can redistribute and/or modify such
+GPL code under the terms of GPL Version 2.0.  For more details, see the
+documentation or "License Notice" file accompanying the IOS-XE software,
+or the applicable URL provided on the flyer accompanying the IOS-XE
+software.
+
+
+ROM: IOS-XE ROMMON
+BOOTLDR: System Bootstrap, Version 17.15.1r, RELEASE SOFTWARE (P)
+
+IC_Core uptime is 1 hour, 47 minutes
+Uptime for this control processor is 1 hour, 50 minutes
+System returned to ROM by PowerOn
+System restarted at 13:06:36 UTC Fri Oct 24 2025
+System image file is "flash:packages.conf"
+Last reload reason: PowerOn
+
+
+
+This product contains cryptographic features and is subject to United
+States and local country laws governing import, export, transfer and
+use. Delivery of Cisco cryptographic products does not imply
+third-party authority to import, export, distribute or use encryption.
+Importers, exporters, distributors and users are responsible for
+compliance with U.S. and local country laws. By using this product you
+agree to comply with applicable laws and regulations. If you are unable
+to comply with U.S. and local laws, return this product immediately.
+
+A summary of U.S. laws governing Cisco cryptographic products may be found at:
+http://www.cisco.com/wwl/export/crypto/tool/stqrg.html
+
+If you require further assistance please contact us by sending email to
+export@cisco.com.
+
+
+Technology Package License Information: 
+
+------------------------------------------------------------------------------
+Technology-package                                     Technology-package
+Current                        Type                       Next reboot  
+------------------------------------------------------------------------------
+network-advantage       Smart License                    network-advantage   
+dna-advantage           Subscription Smart License       dna-advantage                 
+AIR License Level: AIR Network Advantage addon AIR DNA Advantage
+Next reload AIR License Level: AIR Network Advantage addon AIR DNA Advantage
+Cisco Wireless License Level: Cisco Wireless Advantage
+Next reload Cisco Wireless License Level: Cisco Wireless Advantage
+
+
+Smart Licensing Status: Smart Licensing Using Policy
+
+cisco C9300-24T (X86) processor with 1049992K/6147K bytes of memory.
+Processor board ID FVH2933L1WY
+44 Virtual Ethernet interfaces
+28 Gigabit Ethernet interfaces
+8 Ten Gigabit Ethernet interfaces
+2 TwentyFive Gigabit Ethernet interfaces
+2 Forty Gigabit Ethernet interfaces
+2048K bytes of non-volatile configuration memory.
+8388608K bytes of physical memory.
+1638400K bytes of Crash Files at crashinfo:.
+11264000K bytes of Flash at flash:.
+0K bytes of Cloud S3 Storage at cloudfs:.
+
+Base Ethernet MAC Address          : 08:0f:e5:af:0f:00
+Motherboard Assembly Number        : 73-19911-06
+Motherboard Serial Number          : FVH29320R82
+Model Revision Number              : J0
+Motherboard Revision Number        : D0
+Model Number                       : C9300-24T
+System Serial Number               : FVH2933L1WY
+CLEI Code Number                   : INM2X10ARH
+
+
+Switch Ports Model              SW Version        SW Image              Mode   
+------ ----- -----              ----------        ----------            ----   
+*    1 41    C9300-24T          17.15.03          CAT9K_IOSXE           INSTALL
+
+
+IC_Core#     
+IC_Core#
+IC_Core#wr
+Building configuration...
+Compressed configuration from 40730 bytes to 14356 bytes[OK]

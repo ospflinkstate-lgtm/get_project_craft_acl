@@ -1,0 +1,136 @@
+================================================================
+  Dedicated Report: WAF-2 (10.27.101.41) + Backend (10.27.101.165)
+  Network  : 10.27.101.0/24
+  Scan time: 2026-05-19 00:25:56 UTC
+  Generated: 2026-05-19
+================================================================
+
+  Topology:
+    [Internet / Internal clients]
+           |
+    10.27.101.41  (Safeline WAF)  :80 -> :443, :8001
+           |
+    10.27.101.165 (Backend)       :8881
+
+
+----------------------------------------------------------------
+  WAF  10.27.101.41
+----------------------------------------------------------------
+
+  Status   : UP (ICMP responding)
+  Role     : Safeline WAF / reverse proxy
+
+  [Open ports]
+  Port   Protocol  HTTP Status  HTTP Version  Server Banner
+  ------ --------- ------------ ------------- ----------------
+  :22    SSH       --           --            (service port)
+  :80    HTTP      301          HTTP/1.1      none (stripped)
+  :443   HTTPS     200          HTTP/2        none (stripped)
+  :8001  HTTP      200          HTTP/1.1      none (stripped)
+
+  [Closed ports checked]
+  :21 FTP, :23 Telnet, :25 SMTP, :53 DNS, :110 POP3, :143 IMAP,
+  :389 LDAP, :445 SMB, :1433 MSSQL, :1521 Oracle, :3306 MySQL,
+  :3389 RDP, :5432 PostgreSQL, :5900 VNC, :6379 Redis, :27017 MongoDB
+
+  [Behaviour]
+  - Port :80 issues a 301 permanent redirect to HTTPS (:443)
+  - Port :443 serves HTTP/2, returns 200 -- WAF frontend active
+  - Port :8001 is the dedicated reverse proxy port for the backend
+    application on 10.27.101.165:8881
+  - All Server headers suppressed by WAF -- no version leakage
+  - No PHP, Express, or framework headers visible
+
+  [Security posture]
+  - Strong header hardening -- no banner leakage on any port
+  - HTTP/2 enabled on :443 -- good
+  - 80->443 redirect in place -- good
+  - SSH :22 open -- management access
+    Action: confirm PasswordAuthentication no in /etc/ssh/sshd_config
+    Action: restrict :22 to management VLAN via firewall/ACL
+
+  [Risk rating]  LOW
+  The WAF itself is well-hardened. No unexpected ports or services.
+  Primary risk is SSH management access -- ensure key-only auth.
+
+
+----------------------------------------------------------------
+  Backend  10.27.101.165
+----------------------------------------------------------------
+
+  Status   : UP (ICMP responding)
+  Role     : Application backend (Apache 2.4.58)
+
+  [Open ports]
+  Port   Protocol  HTTP Status  HTTP Version  Server Banner
+  ------ --------- ------------ ------------- ----------------------
+  :22    SSH       --           --            (service port)
+  :8881  HTTP      200          HTTP/1.1      Apache/2.4.58 (Ubuntu)
+
+  [Closed ports checked]
+  :80 HTTP, :443 HTTPS, :8000, :8080, :8443, :8888,
+  :21 FTP, :23 Telnet, :25 SMTP, :53 DNS, :110 POP3, :143 IMAP,
+  :389 LDAP, :445 SMB, :1433 MSSQL, :1521 Oracle, :3306 MySQL,
+  :3389 RDP, :5432 PostgreSQL, :5900 VNC, :6379 Redis, :27017 MongoDB
+
+  [Behaviour]
+  - Only port :8881 serves HTTP -- non-standard port, not exposed
+    directly to clients (only reachable via WAF-2 :8001)
+  - Standard ports :80/:443 are closed -- correct backend posture
+  - No database ports exposed on the network
+  - Apache/2.4.58 (Ubuntu) -- current and supported
+
+  [Apache version note]
+  Apache 2.4.58 is a current stable release (Ubuntu 24.04 LTS).
+  Server banner exposes exact version on direct connections to :8881.
+  Since :8881 is only reachable via WAF, exposure is low -- but
+  consider adding ServerTokens Prod to /etc/apache2/apache2.conf
+  as defence-in-depth.
+
+  [Security posture]
+  - Clean and minimal attack surface
+  - No database or service ports exposed
+  - Not directly reachable from outside (WAF-gated)
+  - SSH :22 open -- management access
+    Action: confirm PasswordAuthentication no in /etc/ssh/sshd_config
+    Action: restrict :22 to management VLAN via firewall/ACL
+
+  [Risk rating]  LOW
+  Well-configured backend. Only improvement is suppressing the
+  Apache version banner on :8881 as defence-in-depth.
+
+
+----------------------------------------------------------------
+  COMBINED TOPOLOGY ASSESSMENT
+----------------------------------------------------------------
+
+  Traffic flow:
+    Client -> WAF :443 (HTTP/2, headers stripped)
+           -> WAF :8001 (internal proxy)
+           -> Backend :8881 (Apache/2.4.58)
+
+  Strengths:
+  + WAF strips all server identity headers -- no version leakage to clients
+  + HTTP/2 enabled on WAF frontend
+  + HTTP->HTTPS redirect enforced
+  + Backend not directly internet/subnet exposed on standard ports
+  + Current Apache version on backend
+  + No database ports exposed on either host
+
+  Gaps:
+  - SSH on both hosts should be restricted to management VLAN
+  - Backend :8881 exposes Apache version on direct LAN access
+  - No X-Frame-Options, X-Content-Type-Options, or CSP headers
+    visible from WAF (recommend auditing WAF security headers config)
+
+  Recommended actions:
+  1. Restrict SSH on both hosts to management VLAN (firewall ACL)
+  2. Confirm SSH key-only auth on both hosts
+  3. Add ServerTokens Prod to backend Apache config
+  4. Review WAF security response headers (CSP, HSTS, X-Frame-Options)
+
+  [Risk rating]  LOW overall -- best-configured pair in the subnet
+
+================================================================
+  END OF REPORT
+================================================================

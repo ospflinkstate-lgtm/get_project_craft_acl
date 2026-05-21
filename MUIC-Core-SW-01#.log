@@ -1,0 +1,2979 @@
+=~=~=~=~=~=~=~=~=~=~=~= PuTTY log 2026.05.18 15:45:48 =~=~=~=~=~=~=~=~=~=~=~=
+
+------------------------------------
+ICINFRA MGMT
+AT 7/2567
+UPDATE : username,pass
+------------------------------------  
+
+
+User Access Verification
+
+Username: admin
+Password: 
+B1F5DCR3-CORESW#telnet 10.27.201.120
+Trying 10.27.201.120 ... Open
+
+
+User Access Verification
+
+Username: admin
+Password: 
+MUIC-Core-SW-01>en
+Password: 
+MUIC-Core-SW-01#sh run
+MUIC-Core-SW-01#sh running-config 
+Building configuration...
+
+Current configuration : 34673 bytes
+!
+! Last configuration change at 10:38:14 TH Wed Apr 29 2026 by admin
+! NVRAM config last updated at 10:38:30 TH Wed Apr 29 2026 by admin
+!
+version 15.2
+no service pad
+service timestamps debug datetime msec localtime show-timezone
+service timestamps log datetime msec localtime show-timezone
+service password-encryption
+service compress-config
+!
+hostname MUIC-Core-SW-01
+!
+boot-start-marker
+boot system flash bootflash:cat4500es8-universalk9.SPA.03.11.10.E.152-7.E10.bin
+boot-end-marker
+!
+!
+vrf definition mgmtVrf
+ !
+ address-family ipv4
+ --More--          exit-address-family
+ !
+ address-family ipv6
+ exit-address-family
+!
+logging buffered 512000
+enable secret 5 $1$9Lay$27RLY6TR.dzJUs7aDa7L11
+!
+username netone privilege 15 secret 5 $1$TaZH$hsIRgS8eusrHCJUCh23/r1
+username admin secret 5 $1$5Fv3$MXc4VViDxAtTeiHAkntIs/
+no aaa new-model
+clock timezone TH 7 0
+!
+switch virtual domain 100
+ switch mode virtual
+ mac-address use-virtual
+!
+!
+!
+!
+!
+!
+!
+ --More--         !
+!
+!
+!
+!
+!
+!
+vtp mode transparent
+!
+flow record Netflow-In
+ match ipv4 tos
+ match ipv4 protocol
+ match ipv4 source address
+ match ipv4 destination address
+ match transport source-port
+ match transport destination-port
+ match interface input
+ collect interface output
+ collect counter bytes
+ collect counter packets
+!
+!
+flow record Netflow-Out
+ --More--          match ipv4 tos
+ match ipv4 protocol
+ match ipv4 source address
+ match ipv4 destination address
+ match transport source-port
+ match transport destination-port
+ match interface output
+ collect interface input
+ collect counter bytes
+ collect counter packets
+!
+!
+flow record FLOW-MUIC-CORE-SWv21
+ match datalink dot1q vlan input
+ match ipv4 protocol
+ match ipv4 source address
+ match ipv4 destination address
+ match transport source-port
+ match transport destination-port
+ match interface input
+ collect counter bytes long
+ collect counter packets long
+ collect timestamp sys-uptime first
+ --More--          collect timestamp sys-uptime last
+!
+!
+flow exporter flowwug
+ destination 10.27.101.225
+ source Vlan201
+ transport udp 9999
+!
+!
+flow exporter TO_MY_COLLECTOR
+ destination 10.27.100.209
+ source Vlan21
+ transport udp 2100
+ template data timeout 60
+!
+!
+flow monitor Netflow-Monitor-In
+ exporter flowwug
+ cache timeout inactive 10
+ cache timeout active 60
+ record Netflow-In
+!
+!
+ --More--         flow monitor Netflow-Monitor-Out
+ exporter flowwug
+ cache timeout inactive 10
+ cache timeout active 60
+ record Netflow-Out
+!
+!
+flow monitor FLOW-CORE-SW-MONITOR
+ exporter TO_MY_COLLECTOR
+ cache timeout active 60
+ record FLOW-MUIC-CORE-SWv21
+!
+!
+!
+power redundancy-mode redundant
+!
+mac access-list extended VSL-BPDU
+ permit any 0180.c200.0000 0000.0000.0003
+mac access-list extended VSL-CDP
+ permit any host 0100.0ccc.cccc
+mac access-list extended VSL-DOT1x
+ permit any any 0x888E
+mac access-list extended VSL-GARP
+ --More--          permit any host 0180.c200.0020
+mac access-list extended VSL-LLDP
+ permit any host 0180.c200.000e
+mac access-list extended VSL-MGMT
+ permit any 0022.bdcd.d200 0000.0000.00ff
+ permit 0022.bdcd.d200 0000.0000.00ff any
+mac access-list extended VSL-SSTP
+ permit any host 0100.0ccc.cccd
+!
+spanning-tree mode rapid-pvst
+spanning-tree extend system-id
+!
+redundancy
+ mode sso
+!
+!
+vlan configuration 21
+ip flow monitor FLOW-CORE-SW-MONITOR input
+vlan internal allocation policy ascending
+!
+vlan 2
+ name ComalabB1
+!
+ --More--         vlan 3
+ name Old_CCTV
+!
+vlan 4
+ name office_b1
+!
+vlan 5
+ name lab_1409
+!
+vlan 7
+ name vlan7-classroom-B1AD
+!
+vlan 9
+ name Old_IPPhone
+!
+vlan 10
+ name Test-WiFi-POC
+!
+vlan 11
+ name IC Client User
+!
+vlan 12
+ name office_b2
+ --More--         !
+vlan 21
+ name SRV-MGMT
+!
+vlan 22
+ name network deive
+!
+vlan 23
+ name office_pc
+!
+vlan 32
+ name @MUIC-WiFi8K
+!
+vlan 72
+ name Vlan72
+!
+vlan 74
+ name Vlan74_@MUIC_WiFi
+!
+vlan 87
+ name TRUE-REAL-IP
+!
+vlan 88
+ --More--          name temp-wifi-openhouse
+!
+vlan 91
+ name New ComLab
+!
+vlan 92-94 
+!
+vlan 99
+ name IP Phone Management
+!
+vlan 100
+ name IC-Internal
+!
+vlan 104
+ name MU-WiFi
+!
+vlan 109
+ name AP Management
+!
+vlan 120
+ name MU-Virtual-Classroom
+!
+vlan 122
+ --More--          name @MUIC-WiFi
+!
+vlan 160
+ name Vlan160_Projector
+!
+vlan 168
+ name TrueMove_Route
+!
+vlan 192
+ name Client Zone-Wifi_192
+!
+vlan 201 
+!
+vlan 203
+ name Public 
+!
+vlan 212
+ name ComLab&ClassRoomNews
+!
+vlan 221
+ name Client User
+!
+vlan 222
+ --More--          name TruewifibyMUIT
+!
+vlan 223
+ name ComLab&Class Room#2
+!
+vlan 227
+ name Client IC WiFi_227
+!
+vlan 231
+ name Client IC WiFi_231
+!
+vlan 235
+ name Client IC Wifi 235
+!
+vlan 298
+ name TrueMove_H
+!
+vlan 320
+ name @MUIC-WiFi-B1
+!
+vlan 321
+ name @MUIC-WiFi-AD
+!
+ --More--         vlan 800
+ name AIS_Super_WiFi
+!
+vlan 801
+ name AIS_Smart_WiFi_Trafi
+!
+vlan 802
+ name AIS_Smart_WiFi_MGMT
+!
+vlan 999
+ name mgmt-newSRV
+!
+!
+class-map match-any VSL-MGMT-PACKETS
+ match access-group name VSL-MGMT
+class-map match-any VSL-DATA-PACKETS
+ match any 
+class-map match-any VSL-L2-CONTROL-PACKETS
+ match access-group name VSL-DOT1x
+ match access-group name VSL-BPDU
+ match access-group name VSL-CDP
+ match access-group name VSL-LLDP
+ match access-group name VSL-SSTP
+ --More--          match access-group name VSL-GARP
+class-map match-any VSL-L3-CONTROL-PACKETS
+ match access-group name VSL-IPV4-ROUTING
+ match access-group name VSL-BFD
+ match access-group name VSL-DHCP-CLIENT-TO-SERVER
+ match access-group name VSL-DHCP-SERVER-TO-CLIENT
+ match access-group name VSL-DHCP-SERVER-TO-SERVER
+ match access-group name VSL-IPV6-ROUTING
+class-map match-any VSL-MULTIMEDIA-TRAFFIC
+ match dscp af41 
+ match dscp af42 
+ match dscp af43 
+ match dscp af31 
+ match dscp af32 
+ match dscp af33 
+ match dscp af21 
+ match dscp af22 
+ match dscp af23 
+class-map match-any VSL-VOICE-VIDEO-TRAFFIC
+ match dscp ef 
+ match dscp cs4 
+ match dscp cs5 
+class-map match-any VSL-SIGNALING-NETWORK-MGMT
+ --More--          match dscp cs2 
+ match dscp cs3 
+ match dscp cs6 
+ match dscp cs7 
+!
+policy-map VSL-Queuing-Policy
+ class VSL-MGMT-PACKETS
+  bandwidth percent 5 
+ class VSL-L2-CONTROL-PACKETS
+  bandwidth percent 5 
+ class VSL-L3-CONTROL-PACKETS
+  bandwidth percent 5 
+ class VSL-VOICE-VIDEO-TRAFFIC
+  bandwidth percent 30 
+ class VSL-SIGNALING-NETWORK-MGMT
+  bandwidth percent 10 
+ class VSL-MULTIMEDIA-TRAFFIC
+  bandwidth percent 20 
+ class VSL-DATA-PACKETS
+  bandwidth percent 20 
+ class class-default
+  bandwidth percent 5 
+policy-map VSL-40G-Queuing-Policy
+ --More--          class VSL-MGMT-PACKETS
+  bandwidth 500000
+ class VSL-L2-CONTROL-PACKETS
+  bandwidth 500000
+ class VSL-L3-CONTROL-PACKETS
+  bandwidth 500000
+ class VSL-VOICE-VIDEO-TRAFFIC
+  bandwidth 3000000
+ class VSL-SIGNALING-NETWORK-MGMT
+  bandwidth 1000000
+ class VSL-MULTIMEDIA-TRAFFIC
+  bandwidth 2000000
+ class VSL-DATA-PACKETS
+  bandwidth 2000000
+ class class-default
+  bandwidth 500000
+!
+! 
+!
+!
+!
+!
+!
+ --More--         !
+!
+!
+!
+!
+!
+!
+!
+interface Port-channel1
+ switchport
+ switchport mode trunk
+ switchport nonegotiate
+ switch virtual link 1
+!
+interface Port-channel2
+ switchport
+ switchport mode trunk
+ switchport nonegotiate
+ switch virtual link 2
+!
+interface Port-channel3
+ switchport
+ switchport mode trunk
+ --More--         !
+interface Port-channel4
+ description ### MUIC-SRV-SW-01 ###
+ switchport
+ switchport mode trunk
+!
+interface Port-channel5
+ description ### MUIC-WLC-01 ###
+ switchport
+ switchport trunk allowed vlan 74,109,192,227,231,235
+ switchport mode trunk
+!
+interface Port-channel6
+ description ### MUIC-WLC-02 ###
+ switchport
+ switchport trunk allowed vlan 74,88,109,168,192,222,227,231,235,298,800-802
+ switchport trunk allowed vlan add 1099
+ switchport mode trunk
+!
+interface Port-channel7
+ description ### MUIC-B1B-SW-01 ###
+ switchport
+ switchport mode trunk
+ --More--         !
+interface Port-channel8
+ description ### MUIC-B1C-SW-01 ###
+ switchport
+ switchport mode trunk
+!
+interface Port-channel9
+ description ### MUIC-B2B-SW-01 ###
+ switchport
+ switchport mode trunk
+!
+interface Port-channel10
+ description ### MUIC-B2C-SW-01 ###
+ switchport
+ switchport mode trunk
+!
+interface Port-channel11
+ description ### MUIC-B3B-SW-01 ###
+ switchport
+ switchport mode trunk
+!
+interface Port-channel12
+ description ### MUIC-B3C-SW-01 ###
+ --More--          switchport
+ switchport mode trunk
+!
+interface Port-channel13
+ description ### MUIC-GA-SW-01 ###
+ switchport
+ switchport mode trunk
+!
+interface Port-channel14
+ description ### MUIC-GB-SW-01 ###
+ switchport
+ switchport mode trunk
+!
+interface Port-channel15
+ description ### MUIC-GC-SW-01 ###
+ switchport
+ switchport mode trunk
+!
+interface Port-channel16
+ description ### MUIC-GD-SW-01 ###
+ switchport
+ switchport mode trunk
+!
+ --More--         interface Port-channel17
+ description ### MUIC-2A-SW-01 ###
+ switchport
+ switchport mode trunk
+!
+interface Port-channel18
+ description ### MUIC-2B-SW-01 ###
+ switchport
+ switchport mode trunk
+!
+interface Port-channel19
+ description ### MUIC-2C-SW-01 ###
+ switchport
+ switchport mode trunk
+!
+interface Port-channel20
+ description ### MUIC-2D-SW-01 ###
+ switchport
+ switchport mode trunk
+!
+interface Port-channel21
+ description ### MUIC-2B-COM1-SW-01 ###
+ switchport
+ --More--          switchport mode trunk
+!
+interface Port-channel22
+ description ### MUIC-2B-COM2-SW-01 ###
+ switchport
+ switchport mode trunk
+!
+interface Port-channel23
+ description ### MUIC-2B-COM3-SW-01 ###
+ switchport
+ switchport mode trunk
+!
+interface Port-channel24
+ description ### MUIC-2B-COM4-SW-01 ###
+ switchport
+ switchport mode trunk
+!
+interface Port-channel25
+ description ### MUIC-2B-FR1-SW-01 ###
+ switchport
+ switchport mode trunk
+!
+interface Port-channel26
+ --More--          description ### MUIC-2B-FR2-SW-01 ###
+ switchport
+ switchport mode trunk
+!
+interface Port-channel27
+ description ### MUIC-2B-SO2-SW-01 ###
+ switchport
+ switchport mode trunk
+!
+interface Port-channel28
+ description ### MUIC-3A-SW-01 ###
+ switchport
+ switchport mode trunk
+!
+interface Port-channel29
+ description ### MUIC-3B-SW-01 ###
+ switchport
+ switchport mode trunk
+!
+interface Port-channel30
+ description ### MUIC-3C-SW-01 ###
+ switchport
+ switchport mode trunk
+ --More--         !
+interface Port-channel31
+ description ### MUIC-3D-SW-01 ###
+ switchport
+ switchport mode trunk
+!
+interface Port-channel32
+ description ### MUIC-4A-SW-01 ###
+ switchport
+ switchport mode trunk
+!
+interface Port-channel33
+ description ### MUIC-4B-SW-01 ###
+ switchport
+ switchport mode trunk
+!
+interface Port-channel34
+ description ### MUIC-4C-SW-01 ###
+ switchport
+ switchport mode trunk
+!
+interface Port-channel35
+ description ### MUIC-4D-SW-01 ###
+ --More--          switchport
+ switchport mode trunk
+!
+interface Port-channel36
+ description ### MUIC-5A-SW-01 ###
+ switchport
+ switchport mode trunk
+!
+interface Port-channel37
+ description ### MUIC-5C-SW-01 ###
+ switchport
+ switchport mode trunk
+!
+interface Port-channel38
+ description ### MUIC-5D-SW-01 ###
+ switchport
+ switchport mode trunk
+!
+interface Port-channel39
+ description ### MUIC-6A-SW-01 ###
+ switchport
+ switchport mode trunk
+!
+ --More--         interface Port-channel40
+ description ### MUIC-6C-SW-01 ###
+ switchport
+ switchport mode trunk
+!
+interface Port-channel41
+ description ### MUIC-6D-SW-01 ###
+ switchport
+ switchport mode trunk
+!
+interface Port-channel42
+ switchport
+ switchport mode trunk
+!
+interface Port-channel49
+ description = UPLINK=SW-TOPRACKB2-DC-DSW(TRUE) =
+ switchport
+ switchport trunk allowed vlan 72,74,87,88,160,192,201
+ switchport mode trunk
+!
+interface Port-channel51
+ description VLAN74=>TO MK(51)
+ switchport
+ --More--          switchport access vlan 74
+ switchport mode access
+!
+interface Port-channel52
+ description VLAN320=>TO MK(52)
+ switchport
+ switchport access vlan 320
+ switchport mode access
+!
+interface Port-channel90
+ description # Connect to McAfee NS7100  to  MUIC-SRV-SW-01 #
+ switchport
+ switchport mode trunk
+!
+interface Port-channel99
+ description ** Connect to MUIC_CUCM **
+ switchport
+ switchport access vlan 99
+ switchport mode access
+!
+interface Port-channel100
+ description = UPLINK B1F5DCR3-MKT =
+ switchport
+ --More--          switchport trunk allowed vlan 1-5,7,9-12,21-23,32,72,74,91-94,99,104,109,160
+ switchport trunk allowed vlan add 201,800-802
+ switchport mode trunk
+!
+interface Port-channel143
+ description ### UPLINK-SW-COMLAB ###
+ switchport
+ switchport mode trunk
+!
+interface Port-channel144
+ description UPLINK-PJ-COMPLEASE
+ switchport
+ switchport mode trunk
+!
+interface FastEthernet1
+ vrf forwarding mgmtVrf
+ no ip address
+ speed auto
+ duplex auto
+!
+interface TenGigabitEthernet1/1/1
+ description ### MUIT Core Switch ###
+ switchport mode trunk
+ --More--          channel-group 3 mode on
+!
+interface TenGigabitEthernet1/1/2
+ switchport mode trunk
+!
+interface TenGigabitEthernet1/1/3
+ switchport mode trunk
+ switchport nonegotiate
+ no cdp enable
+ no lldp transmit
+ no lldp receive
+ channel-group 1 mode on
+ service-policy output VSL-Queuing-Policy
+!
+interface TenGigabitEthernet1/1/4
+ switchport mode trunk
+ switchport nonegotiate
+ no cdp enable
+ no lldp transmit
+ no lldp receive
+ channel-group 1 mode on
+ service-policy output VSL-Queuing-Policy
+!
+ --More--         interface TenGigabitEthernet1/1/5
+!
+interface TenGigabitEthernet1/1/6
+!
+interface TenGigabitEthernet1/1/7
+!
+interface TenGigabitEthernet1/1/8
+!
+interface TenGigabitEthernet1/2/1
+ description ### MUIC-SRV-SW-01 ###
+ switchport mode trunk
+ channel-group 4 mode on
+!
+interface TenGigabitEthernet1/2/2
+ description ### MUIC-WLC-01 ###
+ switchport trunk allowed vlan 74,109,192,227,231,235
+ switchport mode trunk
+ channel-group 5 mode on
+!
+interface TenGigabitEthernet1/2/3
+ description ### MUIC-WLC-02 ###
+ switchport trunk allowed vlan 74,88,109,168,192,222,227,231,235,298,800-802
+ switchport trunk allowed vlan add 1099
+ --More--          switchport mode trunk
+ channel-group 6 mode on
+!
+interface TenGigabitEthernet1/2/4
+ switchport access vlan 74
+ switchport mode access
+ shutdown
+!
+interface TenGigabitEthernet1/2/5
+ description = UPLINK B1F5DCR3-MKT =
+ switchport trunk allowed vlan 1-5,7,9-12,21-23,32,72,74,91-94,99,104,109,160
+ switchport trunk allowed vlan add 201,800-802
+ switchport mode trunk
+ channel-group 100 mode passive
+!
+interface TenGigabitEthernet1/2/6
+ description = UPLINK B1F5DCR3-MKT =
+ switchport trunk allowed vlan 1-5,7,9-12,21-23,32,72,74,91-94,99,104,109,160
+ switchport trunk allowed vlan add 201,800-802
+ switchport mode trunk
+ channel-group 100 mode passive
+!
+interface TenGigabitEthernet1/2/7
+ --More--         !
+interface TenGigabitEthernet1/2/8
+!
+interface TenGigabitEthernet1/2/9
+!
+interface TenGigabitEthernet1/2/10
+!
+interface TenGigabitEthernet1/2/11
+!
+interface TenGigabitEthernet1/2/12
+ description POC-HUAWEI
+ switchport trunk allowed vlan 74,109
+ switchport mode trunk
+!
+interface GigabitEthernet1/3/1
+ description ### MUIC-B1B-SW-01 ###
+ switchport mode trunk
+ channel-group 7 mode on
+!
+interface GigabitEthernet1/3/2
+ description ### MUIC-B1C-SW-01 ###
+ switchport mode trunk
+ channel-group 8 mode on
+ --More--         !
+interface GigabitEthernet1/3/3
+ description ### MUIC-B2B-SW-01 ###
+ switchport mode trunk
+ channel-group 9 mode on
+!
+interface GigabitEthernet1/3/4
+ description ### MUIC-B2C-SW-01 ###
+ switchport mode trunk
+ channel-group 10 mode on
+!
+interface GigabitEthernet1/3/5
+ description ### MUIC-B3B-SW-01 ###
+ switchport mode trunk
+ channel-group 11 mode on
+!
+interface GigabitEthernet1/3/6
+ description ### MUIC-B3C-SW-01 ###
+ switchport mode trunk
+ channel-group 12 mode on
+!
+interface GigabitEthernet1/3/7
+ description ### MUIC-GA-SW-01 ###
+ --More--          switchport mode trunk
+ channel-group 13 mode on
+!
+interface GigabitEthernet1/3/8
+ description ### MUIC-GB-SW-01 ###
+ switchport mode trunk
+ channel-group 14 mode on
+!
+interface GigabitEthernet1/3/9
+ description ### MUIC-GC-SW-01 ###
+ switchport mode trunk
+ channel-group 15 mode on
+!
+interface GigabitEthernet1/3/10
+ description ### MUIC-GD-SW-01 ###
+ switchport mode trunk
+ channel-group 16 mode on
+!
+interface GigabitEthernet1/3/11
+ description ### MUIC-2A-SW-01 ###
+ switchport mode trunk
+ channel-group 17 mode on
+!
+ --More--         interface GigabitEthernet1/3/12
+ description ### MUIC-2B-SW-01 ###
+ switchport mode trunk
+ channel-group 18 mode on
+!
+interface GigabitEthernet1/3/13
+ description ### MUIC-2C-SW-01 ###
+ switchport mode trunk
+ channel-group 19 mode on
+!
+interface GigabitEthernet1/3/14
+ description ### MUIC-2D-SW-01 ###
+ switchport mode trunk
+ channel-group 20 mode on
+!
+interface GigabitEthernet1/3/15
+ description ### MUIC-2B-COM1-SW-01 ###
+ switchport mode trunk
+ channel-group 21 mode on
+!
+interface GigabitEthernet1/3/16
+ description ### MUIC-2B-COM2-SW-01 ###
+ switchport mode trunk
+ --More--          channel-group 22 mode on
+!
+interface GigabitEthernet1/3/17
+ description ### MUIC-2B-COM3-SW-01 ###
+ switchport mode trunk
+ channel-group 23 mode on
+!
+interface GigabitEthernet1/3/18
+ description ### MUIC-2B-COM4-SW-01 ###
+ switchport mode trunk
+ channel-group 24 mode on
+!
+interface GigabitEthernet1/3/19
+ description ### MUIC-2B-FR1-SW-01 ###
+ switchport mode trunk
+ channel-group 25 mode on
+!
+interface GigabitEthernet1/3/20
+ description ### MUIC-2B-FR2-SW-01 ###
+ switchport mode trunk
+ channel-group 26 mode on
+!
+interface GigabitEthernet1/3/21
+ --More--          description ### MUIC-2B-SO2-SW-01 ###
+ switchport mode trunk
+ channel-group 27 mode on
+!
+interface GigabitEthernet1/3/22
+ description ### MUIC-3A-SW-01 ###
+ switchport mode trunk
+ channel-group 28 mode on
+!
+interface GigabitEthernet1/3/23
+ description ### MUIC-3B-SW-01 ###
+ switchport mode trunk
+ channel-group 29 mode on
+!
+interface GigabitEthernet1/3/24
+ description ### MUIC-3C-SW-01 ###
+ switchport mode trunk
+ channel-group 30 mode on
+!
+interface GigabitEthernet1/3/25
+ description ### MUIC-3D-SW-01 ###
+ switchport mode trunk
+ channel-group 31 mode on
+ --More--         !
+interface GigabitEthernet1/3/26
+ description ### MUIC-4A-SW-01 ###
+ switchport mode trunk
+ channel-group 32 mode on
+!
+interface GigabitEthernet1/3/27
+ description ### MUIC-4B-SW-01 ###
+ switchport mode trunk
+ channel-group 33 mode on
+!
+interface GigabitEthernet1/3/28
+ description ### MUIC-4C-SW-01 ###
+ switchport mode trunk
+ channel-group 34 mode on
+!
+interface GigabitEthernet1/3/29
+ description ### MUIC-4D-SW-01 ###
+ switchport mode trunk
+ channel-group 35 mode on
+!
+interface GigabitEthernet1/3/30
+ description ### MUIC-5A-SW-01 ###
+ --More--          switchport mode trunk
+ channel-group 36 mode on
+!
+interface GigabitEthernet1/3/31
+ description ### MUIC-5C-SW-01 ###
+ switchport mode trunk
+ channel-group 37 mode on
+!
+interface GigabitEthernet1/3/32
+ description ### MUIC-5D-SW-01 ###
+ switchport mode trunk
+ channel-group 38 mode on
+!
+interface GigabitEthernet1/3/33
+ description ### MUIC-6A-SW-01 ###
+ switchport mode trunk
+ channel-group 39 mode on
+!
+interface GigabitEthernet1/3/34
+ description ### MUIC-6C-SW-01 ###
+ switchport mode trunk
+ channel-group 40 mode on
+!
+ --More--         interface GigabitEthernet1/3/35
+ description ### MUIC-6D-SW-01 ###
+ switchport mode trunk
+ channel-group 41 mode on
+!
+interface GigabitEthernet1/3/36
+!
+interface GigabitEthernet1/3/37
+ description @@@ MUIC-NOC-SW01 @@@
+ switchport mode trunk
+!
+interface GigabitEthernet1/3/38
+!
+interface GigabitEthernet1/3/39
+ switchport mode trunk
+!
+interface GigabitEthernet1/3/40
+!
+interface GigabitEthernet1/3/41
+ description ### MUIC-5B-SW-01 ###
+ switchport trunk allowed vlan 11,99,109,201,221
+ switchport mode trunk
+!
+ --More--         interface GigabitEthernet1/3/42
+!
+interface GigabitEthernet1/3/43
+!
+interface GigabitEthernet1/3/44
+!
+interface GigabitEthernet1/3/45
+!
+interface GigabitEthernet1/3/46
+!
+interface GigabitEthernet1/3/47
+!
+interface GigabitEthernet1/3/48
+!
+interface GigabitEthernet1/4/1
+ description # Connect to McAfee NS7100  to  MUIC-SRV-SW-01 #
+ switchport mode trunk
+ channel-group 90 mode on
+!
+interface GigabitEthernet1/4/2
+ description ### test internet true ###
+ switchport access vlan 21
+ switchport mode access
+ --More--         !
+interface GigabitEthernet1/4/3
+ switchport access vlan 192
+ switchport mode access
+ switchport voice vlan 99
+!
+interface GigabitEthernet1/4/4
+ switchport access vlan 192
+!
+interface GigabitEthernet1/4/5
+ switchport access vlan 221
+ switchport voice vlan 99
+!
+interface GigabitEthernet1/4/6
+!
+interface GigabitEthernet1/4/7
+!
+interface GigabitEthernet1/4/8
+ description test
+ switchport access vlan 212
+ switchport mode access
+!
+interface GigabitEthernet1/4/9
+ --More--          switchport access vlan 99
+ switchport mode access
+!
+interface GigabitEthernet1/4/10
+!
+interface GigabitEthernet1/4/11
+!
+interface GigabitEthernet1/4/12
+ switchport access vlan 74
+ switchport mode access
+!
+interface GigabitEthernet1/4/13
+ description UPLINK-temp-wifi-openhouse-vlan88
+ switchport access vlan 88
+ switchport mode access
+!
+interface GigabitEthernet1/4/14
+ switchport access vlan 88
+ switchport mode access
+!
+interface GigabitEthernet1/4/15
+ description temp-lan-openhouse-222
+ switchport trunk allowed vlan 88,89,201,221,222
+ --More--          switchport mode trunk
+!
+interface GigabitEthernet1/4/16
+ description temp-lan-openhouse-224
+ switchport trunk allowed vlan 88,89,201,221,222
+ switchport mode trunk
+!
+interface GigabitEthernet1/4/17
+ description temp-lan-openhouse-226
+ switchport trunk allowed vlan 88,89,201,221,222
+ switchport mode trunk
+!
+interface GigabitEthernet1/4/18
+ switchport trunk allowed vlan 88,89,201,221,222
+ switchport mode trunk
+!
+interface GigabitEthernet1/4/19
+ switchport trunk allowed vlan 88,89,201,221,222
+ switchport mode trunk
+!
+interface GigabitEthernet1/4/20
+ switchport trunk allowed vlan 88,89,201,221,222
+ switchport mode trunk
+ --More--         !
+interface GigabitEthernet1/4/21
+ switchport access vlan 91
+ switchport mode access
+!
+interface GigabitEthernet1/4/22
+ switchport access vlan 74
+ switchport mode access
+!
+interface GigabitEthernet1/4/23
+ description NW-TO-MUIC-DCRB1-ASWc1000-FOR-NEWSRV
+ switchport trunk allowed vlan 2,21,22,74,100,201,999
+ switchport mode trunk
+!
+interface GigabitEthernet1/4/24
+ description TEST-RADIUS
+ switchport mode access
+ shutdown
+!
+interface GigabitEthernet1/4/25
+!
+interface GigabitEthernet1/4/26
+ description VLAN21=>TO MK
+ --More--          switchport access vlan 21
+ switchport mode access
+!
+interface GigabitEthernet1/4/27
+ description = UPLINK=SW-TOPRACKB2-DC-DSW(TRUE) =
+ switchport trunk allowed vlan 72,74,87,88,160,192,201
+ switchport mode trunk
+ channel-group 49 mode on
+!
+interface GigabitEthernet1/4/28
+ description = UPLINK=SW-TOPRACKB2-DC-DSW(TRUE) =
+ switchport trunk allowed vlan 72,74,87,88,160,192,201
+ switchport mode trunk
+ channel-group 49 mode on
+!
+interface GigabitEthernet1/4/29
+ switchport access vlan 160
+ switchport mode access
+!
+interface GigabitEthernet1/4/30
+ description VLAN160<=MKT
+ switchport access vlan 160
+ switchport mode access
+ --More--         !
+interface GigabitEthernet1/4/31
+ description VLAN74=>SWHW
+ switchport access vlan 74
+ switchport mode access
+!
+interface GigabitEthernet1/4/32
+ description VLAN72=>TO MK
+ switchport access vlan 72
+ switchport mode access
+!
+interface GigabitEthernet1/4/33
+ description @## Connect to Rack B3 ##@
+ switchport trunk allowed vlan 1,3,11,21,22,74,201
+ switchport mode trunk
+!
+interface GigabitEthernet1/4/34
+ description VLAN320=>TO MK(52)
+ switchport access vlan 320
+ switchport mode access
+ channel-group 52 mode passive
+!
+interface GigabitEthernet1/4/35
+ --More--          description VLAN321=>TO MK
+ switchport access vlan 321
+ switchport mode access
+!
+interface GigabitEthernet1/4/36
+ description VLAN320=>TO MK(52)
+ switchport access vlan 320
+ switchport mode access
+ channel-group 52 mode passive
+!
+interface GigabitEthernet1/4/37
+ description VLAN74=>TO MK(51)
+ switchport access vlan 74
+ switchport mode access
+ channel-group 51 mode passive
+!
+interface GigabitEthernet1/4/38
+ description VLAN74=>TO MK(51)
+ switchport access vlan 74
+ switchport mode access
+ channel-group 51 mode passive
+!
+interface GigabitEthernet1/4/39
+ --More--          switchport access vlan 122
+!
+interface GigabitEthernet1/4/40
+ description UPLINK-DCRB4-Dell1
+ switchport trunk allowed vlan 3,201
+ switchport mode trunk
+!
+interface GigabitEthernet1/4/41
+ description ### Rack B4-B1 ###
+ switchport trunk allowed vlan 3,10-12,21,22,74,94,201
+ switchport mode trunk
+!
+interface GigabitEthernet1/4/42
+ description @## Connect to Rack A2 ##@
+ switchport mode trunk
+!
+interface GigabitEthernet1/4/43
+ description ### UPLINK-SW-COMLAB ###
+ switchport mode trunk
+ channel-group 143 mode on
+!
+interface GigabitEthernet1/4/44
+ description ### UPLINK-SW-COMLAB ###
+ --More--          switchport mode trunk
+ channel-group 143 mode on
+!
+interface GigabitEthernet1/4/45
+ description ### Trunk to Switch PoE Cisco SF300-24 ###
+ switchport mode trunk
+!
+interface GigabitEthernet1/4/46
+ description ### MUIC-CUCM ###
+ switchport access vlan 99
+ switchport mode access
+ channel-group 99 mode on
+!
+interface GigabitEthernet1/4/47
+ description ### True Link ###
+ switchport access vlan 87
+ switchport mode access
+!
+interface GigabitEthernet1/4/48
+ description ### Fast-Hello ###
+ dual-active fast-hello
+!
+interface TenGigabitEthernet2/1/1
+ --More--          description ### MUIT Core Switch ###
+ switchport mode trunk
+ channel-group 3 mode on
+!
+interface TenGigabitEthernet2/1/2
+!
+interface TenGigabitEthernet2/1/3
+ switchport mode trunk
+ switchport nonegotiate
+ no cdp enable
+ no lldp transmit
+ no lldp receive
+ channel-group 2 mode on
+ service-policy output VSL-Queuing-Policy
+!
+interface TenGigabitEthernet2/1/4
+ switchport mode trunk
+ switchport nonegotiate
+ no cdp enable
+ no lldp transmit
+ no lldp receive
+ channel-group 2 mode on
+ service-policy output VSL-Queuing-Policy
+ --More--         !
+interface TenGigabitEthernet2/1/5
+!
+interface TenGigabitEthernet2/1/6
+!
+interface TenGigabitEthernet2/1/7
+!
+interface TenGigabitEthernet2/1/8
+!
+interface TenGigabitEthernet2/2/1
+ description ### MUIC-SRV-SW-01 ###
+ switchport mode trunk
+ channel-group 4 mode on
+!
+interface TenGigabitEthernet2/2/2
+ description ### MUIC-WLC-01 ###
+ switchport trunk allowed vlan 74,109,192,227,231,235
+ switchport mode trunk
+ channel-group 5 mode on
+!
+interface TenGigabitEthernet2/2/3
+ description ### MUIC-WLC-02 ###
+ switchport trunk allowed vlan 74,88,109,168,192,222,227,231,235,298,800-802
+ --More--          switchport trunk allowed vlan add 1099
+ switchport mode trunk
+ channel-group 6 mode on
+!
+interface TenGigabitEthernet2/2/4
+ switchport access vlan 74
+ switchport mode access
+ shutdown
+!
+interface TenGigabitEthernet2/2/5
+!
+interface TenGigabitEthernet2/2/6
+!
+interface TenGigabitEthernet2/2/7
+!
+interface TenGigabitEthernet2/2/8
+!
+interface TenGigabitEthernet2/2/9
+!
+interface TenGigabitEthernet2/2/10
+!
+interface TenGigabitEthernet2/2/11
+!
+ --More--         interface TenGigabitEthernet2/2/12
+!
+interface GigabitEthernet2/3/1
+ description ### MUIC-B1B-SW-01 ###
+ switchport mode trunk
+ channel-group 7 mode on
+!
+interface GigabitEthernet2/3/2
+ description ### MUIC-B1C-SW-01 ###
+ switchport mode trunk
+ channel-group 8 mode on
+!
+interface GigabitEthernet2/3/3
+ description ### MUIC-B2B-SW-01 ###
+ switchport mode trunk
+ channel-group 9 mode on
+!
+interface GigabitEthernet2/3/4
+ description ### MUIC-B2C-SW-01 ###
+ switchport mode trunk
+ channel-group 10 mode on
+!
+interface GigabitEthernet2/3/5
+ --More--          description ### MUIC-B3B-SW-01 ###
+ switchport mode trunk
+ channel-group 11 mode on
+!
+interface GigabitEthernet2/3/6
+ description ### MUIC-B3C-SW-01 ###
+ switchport mode trunk
+ channel-group 12 mode on
+!
+interface GigabitEthernet2/3/7
+ description ### MUIC-GA-SW-01 ###
+ switchport mode trunk
+ channel-group 13 mode on
+!
+interface GigabitEthernet2/3/8
+ description ### MUIC-GB-SW-01 ###
+ switchport mode trunk
+ channel-group 14 mode on
+!
+interface GigabitEthernet2/3/9
+ description ### MUIC-GC-SW-01 ###
+ switchport mode trunk
+ channel-group 15 mode on
+ --More--         !
+interface GigabitEthernet2/3/10
+ description ### MUIC-GD-SW-01 ###
+ switchport mode trunk
+ channel-group 16 mode on
+!
+interface GigabitEthernet2/3/11
+ description ### MUIC-2A-SW-01 ###
+ switchport mode trunk
+ channel-group 17 mode on
+!
+interface GigabitEthernet2/3/12
+ description ### MUIC-2B-SW-01 ###
+ switchport mode trunk
+ channel-group 18 mode on
+!
+interface GigabitEthernet2/3/13
+ description ### MUIC-2C-SW-01 ###
+ switchport mode trunk
+ channel-group 19 mode on
+!
+interface GigabitEthernet2/3/14
+ description ### MUIC-2D-SW-01 ###
+ --More--          switchport mode trunk
+ channel-group 20 mode on
+!
+interface GigabitEthernet2/3/15
+ description ### MUIC-2B-COM1-SW-01 ###
+ switchport mode trunk
+ channel-group 21 mode on
+!
+interface GigabitEthernet2/3/16
+ description ### MUIC-2B-COM2-SW-01 ###
+ switchport mode trunk
+ channel-group 22 mode on
+!
+interface GigabitEthernet2/3/17
+ description ### MUIC-2B-COM3-SW-01 ###
+ switchport mode trunk
+ channel-group 23 mode on
+!
+interface GigabitEthernet2/3/18
+ description ### MUIC-2B-COM4-SW-01 ###
+ switchport mode trunk
+ channel-group 24 mode on
+!
+ --More--         interface GigabitEthernet2/3/19
+ description ### MUIC-2B-FR1-SW-01 ###
+ switchport mode trunk
+ channel-group 25 mode on
+!
+interface GigabitEthernet2/3/20
+ description ### MUIC-2B-FR2-SW-01 ###
+ switchport mode trunk
+ channel-group 26 mode on
+!
+interface GigabitEthernet2/3/21
+ description ### MUIC-2B-SO2-SW-01 ###
+ switchport mode trunk
+ channel-group 27 mode on
+!
+interface GigabitEthernet2/3/22
+ description ### MUIC-3A-SW-01 ###
+ switchport mode trunk
+ channel-group 28 mode on
+!
+interface GigabitEthernet2/3/23
+ description ### MUIC-3B-SW-01 ###
+ switchport mode trunk
+ --More--          channel-group 29 mode on
+!
+interface GigabitEthernet2/3/24
+ description ### MUIC-3C-SW-01 ###
+ switchport mode trunk
+ channel-group 30 mode on
+!
+interface GigabitEthernet2/3/25
+ description ### MUIC-3D-SW-01 ###
+ switchport mode trunk
+ channel-group 31 mode on
+!
+interface GigabitEthernet2/3/26
+ description ### MUIC-4A-SW-01 ###
+ switchport mode trunk
+ channel-group 32 mode on
+!
+interface GigabitEthernet2/3/27
+ description ### MUIC-4B-SW-01 ###
+ switchport mode trunk
+ channel-group 33 mode on
+!
+interface GigabitEthernet2/3/28
+ --More--          description ### MUIC-4C-SW-01 ###
+ switchport mode trunk
+ channel-group 34 mode on
+!
+interface GigabitEthernet2/3/29
+ description ### MUIC-4D-SW-01 ###
+ switchport mode trunk
+ channel-group 35 mode on
+!
+interface GigabitEthernet2/3/30
+ description ### MUIC-5A-SW-01 ###
+ switchport mode trunk
+ channel-group 36 mode on
+!
+interface GigabitEthernet2/3/31
+ description ### MUIC-5C-SW-01 ###
+ switchport mode trunk
+ channel-group 37 mode on
+!
+interface GigabitEthernet2/3/32
+ description ### MUIC-5D-SW-01 ###
+ switchport mode trunk
+ channel-group 38 mode on
+ --More--         !
+interface GigabitEthernet2/3/33
+ description ### MUIC-6A-SW-01 ###
+ switchport mode trunk
+ channel-group 39 mode on
+!
+interface GigabitEthernet2/3/34
+ description ### MUIC-6C-SW-01 ###
+ switchport mode trunk
+ channel-group 40 mode on
+!
+interface GigabitEthernet2/3/35
+ description ### MUIC-6D-SW-01 ###
+ switchport mode trunk
+ channel-group 41 mode on
+!
+interface GigabitEthernet2/3/36
+!
+interface GigabitEthernet2/3/37
+!
+interface GigabitEthernet2/3/38
+!
+interface GigabitEthernet2/3/39
+ --More--         !
+interface GigabitEthernet2/3/40
+!
+interface GigabitEthernet2/3/41
+!
+interface GigabitEthernet2/3/42
+!
+interface GigabitEthernet2/3/43
+!
+interface GigabitEthernet2/3/44
+!
+interface GigabitEthernet2/3/45
+!
+interface GigabitEthernet2/3/46
+!
+interface GigabitEthernet2/3/47
+!
+interface GigabitEthernet2/3/48
+!
+interface GigabitEthernet2/4/1
+ description # Connect to McAfee NS7100  to  MUIC-SRV-SW-01 #
+ switchport mode trunk
+ channel-group 90 mode on
+ --More--         !
+interface GigabitEthernet2/4/2
+ switchport trunk native vlan 109
+ switchport mode trunk
+!
+interface GigabitEthernet2/4/3
+ switchport trunk native vlan 109
+ switchport mode trunk
+!
+interface GigabitEthernet2/4/4
+ switchport access vlan 109
+ switchport mode access
+!
+interface GigabitEthernet2/4/5
+!
+interface GigabitEthernet2/4/6
+!
+interface GigabitEthernet2/4/7
+!
+interface GigabitEthernet2/4/8
+!
+interface GigabitEthernet2/4/9
+!
+ --More--         interface GigabitEthernet2/4/10
+!
+interface GigabitEthernet2/4/11
+!
+interface GigabitEthernet2/4/12
+!
+interface GigabitEthernet2/4/13
+!
+interface GigabitEthernet2/4/14
+!
+interface GigabitEthernet2/4/15
+!
+interface GigabitEthernet2/4/16
+!
+interface GigabitEthernet2/4/17
+!
+interface GigabitEthernet2/4/18
+!
+interface GigabitEthernet2/4/19
+!
+interface GigabitEthernet2/4/20
+!
+interface GigabitEthernet2/4/21
+ --More--         !
+interface GigabitEthernet2/4/22
+!
+interface GigabitEthernet2/4/23
+!
+interface GigabitEthernet2/4/24
+!
+interface GigabitEthernet2/4/25
+!
+interface GigabitEthernet2/4/26
+!
+interface GigabitEthernet2/4/27
+!
+interface GigabitEthernet2/4/28
+!
+interface GigabitEthernet2/4/29
+!
+interface GigabitEthernet2/4/30
+!
+interface GigabitEthernet2/4/31
+!
+interface GigabitEthernet2/4/32
+!
+ --More--         interface GigabitEthernet2/4/33
+!
+interface GigabitEthernet2/4/34
+!
+interface GigabitEthernet2/4/35
+!
+interface GigabitEthernet2/4/36
+!
+interface GigabitEthernet2/4/37
+ switchport access vlan 21
+ switchport mode access
+!
+interface GigabitEthernet2/4/38
+ switchport access vlan 21
+ switchport mode access
+!
+interface GigabitEthernet2/4/39
+!
+interface GigabitEthernet2/4/40
+!
+interface GigabitEthernet2/4/41
+ description # MUIC-SERVER # 
+ switchport trunk native vlan 21
+ --More--          switchport mode trunk
+!
+interface GigabitEthernet2/4/42
+ description # MUIC-SERVER # 
+ switchport trunk native vlan 21
+ switchport mode trunk
+!
+interface GigabitEthernet2/4/43
+ description # MUIC-SERVER # 
+ switchport trunk native vlan 21
+ switchport mode trunk
+!
+interface GigabitEthernet2/4/44
+ description # MUIC-SERVER # 
+ switchport trunk native vlan 21
+ switchport mode trunk
+!
+interface GigabitEthernet2/4/45
+ switchport access vlan 99
+ switchport mode access
+!
+interface GigabitEthernet2/4/46
+ description ### MUIC-CUCM ###
+ --More--          switchport access vlan 99
+ switchport mode access
+ channel-group 99 mode on
+!
+interface GigabitEthernet2/4/47
+ description ### MUIC-VoiceGW_True ###
+ switchport access vlan 99
+ switchport mode access
+!
+interface GigabitEthernet2/4/48
+ description ### Fast-Hello ###
+ dual-active fast-hello
+!
+interface Vlan1
+ no ip address
+ shutdown
+!
+interface Vlan21
+ description SRV-MGMT
+ ip address 10.27.101.8 255.255.255.0
+!
+interface Vlan22
+ ip address 10.27.100.199 255.255.255.0
+ --More--         !
+interface Vlan168
+ ip address 10.42.167.23 255.255.255.0
+!
+interface Vlan201
+ ip address 10.27.201.120 255.255.255.0
+!
+interface Vlan1668
+ no ip address
+ shutdown
+!
+ip default-gateway 10.27.201.254
+ip forward-protocol nd
+no ip http server
+no ip http secure-server
+!
+ip route 10.0.0.0 255.0.0.0 10.27.201.254
+ip route 10.95.180.244 255.255.255.255 10.42.167.20
+!
+ip access-list extended VSL-BFD
+ permit udp any any eq 3784
+ip access-list extended VSL-DHCP-CLIENT-TO-SERVER
+ permit udp any eq bootpc any eq bootps
+ --More--         ip access-list extended VSL-DHCP-SERVER-TO-CLIENT
+ permit udp any eq bootps any eq bootpc
+ip access-list extended VSL-DHCP-SERVER-TO-SERVER
+ permit udp any eq bootps any eq bootps
+ip access-list extended VSL-IPV4-ROUTING
+ permit ip any 224.0.0.0 0.0.0.255
+!
+!
+!
+snmp-server community muicwug RW
+!
+!
+ipv6 access-list VSL-IPV6-ROUTING
+ permit ipv6 any FF02::/124
+!
+line con 0
+ stopbits 1
+line vty 0 4
+ login local
+ transport input telnet ssh
+!
+!
+module provision switch 1
+ --More--          chassis-type 51 base-mac A0E0.AF2A.52C0
+ slot 1 slot-type 404 base-mac A0E0.AF2A.52C0
+ slot 2 slot-type 387 base-mac 286F.7F57.91B8
+ slot 3 slot-type 408 base-mac A0E0.AF5D.114C
+ slot 4 slot-type 399 base-mac 286F.7FE9.B910
+ !
+module provision switch 2
+ chassis-type 51 base-mac A0E0.AF2A.3F80
+ slot 1 slot-type 404 base-mac A0E0.AF2A.3F80
+ slot 2 slot-type 387 base-mac 286F.7F57.91C4
+ slot 3 slot-type 408 base-mac A0E0.AF5D.0F9C
+ slot 4 slot-type 399 base-mac 286F.7FE9.B8B0
+ 
+!
+
+ ntp server 202.28.138.4
+ !
+end
+
+MUIC-Core-SW-01#      sh ver
+MUIC-Core-SW-01#sh version 
+Cisco IOS Software, IOS-XE Software, Catalyst 4500 L3 Switch  Software (cat4500es8-UNIVERSALK9-M), Version 03.11.10.E RELEASE SOFTWARE (fc3)
+Technical Support: http://www.cisco.com/techsupport
+Copyright (c) 1986-2024 by Cisco Systems, Inc.
+Compiled Tue 12-Mar-24 13:03 by mcpre
+
+
+
+Cisco IOS-XE software, Copyright (c) 2005-2015 by cisco Systems, Inc.
+All rights reserved.  Certain components of Cisco IOS-XE software are
+licensed under the GNU General Public License ("GPL") Version 2.0.  The
+software code licensed under GPL Version 2.0 is free software that comes
+with ABSOLUTELY NO WARRANTY.  You can redistribute and/or modify such
+GPL code under the terms of GPL Version 2.0.
+(http://www.gnu.org/licenses/gpl-2.0.html) For more details, see the
+documentation or "License Notice" file accompanying the IOS-XE software,
+or the applicable URL provided on the flyer accompanying the IOS-XE
+software.
+
+
+
+ROM: 15.1(1r)SG5
+MUIC-Core-SW-01 uptime is 1 year, 44 weeks, 6 days, 22 hours, 36 minutes
+ --More--         Uptime for this control processor is 1 year, 44 weeks, 6 days, 22 hours, 36 minutes
+System returned to ROM by SSO Switchover
+System restarted at 17:12:36 TH Sun Jul 7 2024
+System image file is "bootflash:cat4500es8-universalk9.SPA.03.11.10.E.152-7.E10.bin"
+Jawa Revision 3, RadTrooper Revision 0x0.0x41, Conan Revision 0x1658
+
+
+Last reload reason: Reload Shelf CLI
+
+
+
+This product contains cryptographic features and is subject to United
+States and local country laws governing import, export, transfer and
+use. Delivery of Cisco cryptographic products does not imply
+third-party authority to import, export, distribute or use encryption.
+Importers, exporters, distributors and users are responsible for
+compliance with U.S. and local country laws. By using this product you
+agree to comply with applicable laws and regulations. If you are unable
+to comply with U.S. and local laws, return this product immediately.
+
+A summary of U.S. laws governing Cisco cryptographic products may be found at:
+ --More--         http://www.cisco.com/wwl/export/crypto/tool/stqrg.html
+
+If you require further assistance please contact us by sending email to
+export@cisco.com.
+
+
+License Information for 'WS-X45-SUP8-E'
+    License Level: entservices   Type: Permanent
+    Next reboot license Level: entservices
+
+cisco WS-C4506-E (P5040) processor (revision 2) with 4194304K bytes of physical memory.
+Processor board ID FXS2047Q0DJ
+P5040 CPU at 2.2GHz, Supervisor 8-E
+Last reset from Reload
+6 Virtual Ethernet interfaces
+192 Gigabit Ethernet interfaces
+40 Ten Gigabit Ethernet interfaces
+511K bytes of non-volatile configuration memory.
+
+Configuration register is 0x2102
+
+MUIC-Core-SW-01#sh inv
+MUIC-Core-SW-01#sh inventory 
+NAME: "Switch1 System", DESCR: "Cisco Systems, Inc. WS-C4506-E 6 slot switch "
+PID: WS-C4506-E        , VID: V04  , SN: FXS2047Q0DJ
+
+NAME: "Switch1 Supervisor 1 (virtual slot 1)", DESCR: "Sup 8-E 10GE (SFP+), 1000BaseX (SFP) with 8 SFP+ Ports"
+PID: WS-X45-SUP8-E     , VID: V06  , SN: CAT2044L4T6
+
+NAME: "TenGigabitEthernet1/1/1", DESCR: "SFP-10Gbase-LR"
+PID: SFP-10G-LR-S      , VID: V01  , SN: FNS2041114D
+
+NAME: "TenGigabitEthernet1/1/3", DESCR: "SFP-10Gbase-SR"
+PID: SFP-10G-SR-S      , VID: V01  , SN: AVD2039D9VT
+
+NAME: "TenGigabitEthernet1/1/4", DESCR: "SFP-10Gbase-SR"
+PID: SFP-10G-SR-S      , VID: V01  , SN: AVD2039DCET
+
+NAME: "Switch1 Linecard 2 (virtual slot 2)", DESCR: "10GE SFP+ with 12 SFP+ ports"
+PID: WS-X4712-SFP+E    , VID: V03  , SN: CAT2047L7RQ
+
+NAME: "TenGigabitEthernet1/2/1", DESCR: "SFP-10Gbase-SR"
+PID: SFP-10G-SR-S      , VID: V01  , SN: AVD2039DCFE
+
+ --More--         NAME: "TenGigabitEthernet1/2/2", DESCR: "SFP-10Gbase-SR"
+PID: SFP-10G-SR-S      , VID: V01  , SN: AVD2039D8BL
+
+NAME: "TenGigabitEthernet1/2/3", DESCR: "SFP-10Gbase-SR"
+PID: SFP-10G-SR-S      , VID: V01  , SN: AVD2039D9VY
+
+NAME: "TenGigabitEthernet1/2/5", DESCR: "SFP-10Gbase-LR"
+PID: SFP-10G-LR-S      , VID: V01  , SN: FNS200400TU
+
+NAME: "TenGigabitEthernet1/2/6", DESCR: "SFP-10Gbase-LR"
+PID: SFP-10G-LR-S      , VID: V01  , SN: FNS200400WW
+
+NAME: "TenGigabitEthernet1/2/12", DESCR: "SFP-10Gbase-SR"
+PID: SFP-10G-SR        , VID: V03  , SN: FNS16071JH7
+
+NAME: "Switch1 Linecard 3 (virtual slot 3)", DESCR: "1000BaseX (SFP) with 48 SFP Ports Jumbo Frame Support"
+PID: WS-X4748-SFP-E    , VID: V01  , SN: CAT2045L10K
+
+NAME: "GigabitEthernet1/3/1", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333VZY
+
+NAME: "GigabitEthernet1/3/2", DESCR: "1000BaseLH"
+ --More--         PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333WAP
+
+NAME: "GigabitEthernet1/3/3", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333PLL
+
+NAME: "GigabitEthernet1/3/4", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333CYZ
+
+NAME: "GigabitEthernet1/3/5", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333W0S
+
+NAME: "GigabitEthernet1/3/6", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333XLB
+
+NAME: "GigabitEthernet1/3/7", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333VZS
+
+NAME: "GigabitEthernet1/3/8", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333XL9
+
+NAME: "GigabitEthernet1/3/9", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333CZ0
+
+ --More--         NAME: "GigabitEthernet1/3/10", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333CY7
+
+NAME: "GigabitEthernet1/3/11", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333WAL
+
+NAME: "GigabitEthernet1/3/12", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333XLH
+
+NAME: "GigabitEthernet1/3/13", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333CZE
+
+NAME: "GigabitEthernet1/3/14", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333PKC
+
+NAME: "GigabitEthernet1/3/15", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333W13
+
+NAME: "GigabitEthernet1/3/17", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333HZG
+
+NAME: "GigabitEthernet1/3/18", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333PKU
+ --More--         
+NAME: "GigabitEthernet1/3/19", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333W0X
+
+NAME: "GigabitEthernet1/3/20", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333WAU
+
+NAME: "GigabitEthernet1/3/21", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333W0R
+
+NAME: "GigabitEthernet1/3/22", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333W0C
+
+NAME: "GigabitEthernet1/3/23", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333W12
+
+NAME: "GigabitEthernet1/3/24", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333W0W
+
+NAME: "GigabitEthernet1/3/25", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333W0U
+
+NAME: "GigabitEthernet1/3/26", DESCR: "1000BaseLH"
+ --More--         PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333W0P
+
+NAME: "GigabitEthernet1/3/27", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333VZT
+
+NAME: "GigabitEthernet1/3/28", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333W0D
+
+NAME: "GigabitEthernet1/3/29", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333W0Z
+
+NAME: "GigabitEthernet1/3/30", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333W08
+
+NAME: "GigabitEthernet1/3/31", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333PJZ
+
+NAME: "GigabitEthernet1/3/32", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333PK4
+
+NAME: "GigabitEthernet1/3/33", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333PKD
+
+ --More--         NAME: "GigabitEthernet1/3/34", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333PK2
+
+NAME: "GigabitEthernet1/3/35", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333PKL
+
+NAME: "GigabitEthernet1/3/37", DESCR: "1000BaseSX"
+PID: Unspecified       , VID:      , SN: FNS11251LKU
+
+NAME: "GigabitEthernet1/3/39", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333XL4
+
+NAME: "GigabitEthernet1/3/41", DESCR: "1000BaseLH"
+PID: MGBLH1            , VID: V01  , SN: FSZ22040668
+
+NAME: "Switch1 Linecard 4 (virtual slot 4)", DESCR: "10/100/1000BaseT (RJ45) with 4810/100/1000 BaseT  EEE ports"
+PID: WS-X4748-RJ45-E   , VID: V03  , SN: CAT2047L8RM
+
+NAME: "Switch1 FanTray 1", DESCR: "FanTray"
+PID: WS-X4596-E        , VID: V05  , SN: FXS2046Q5LC
+
+NAME: "Switch1 Power Supply 1", DESCR: "Power Supply ( AC 1400W )"
+ --More--         PID: PWR-C45-1400AC    , VID: V04  , SN: ART2039F97J
+
+NAME: "Switch1 Power Supply 2", DESCR: "Power Supply ( AC 1400W )"
+PID: PWR-C45-1400AC    , VID: V04  , SN: ART2039F97H
+
+NAME: "Switch2 System", DESCR: "Cisco Systems, Inc. WS-C4506-E 6 slot switch "
+PID: WS-C4506-E        , VID: V04  , SN: FXS2047Q0CT
+
+NAME: "Switch2 Linecard 2 (virtual slot 12)", DESCR: "10GE SFP+ with 12 SFP+ ports"
+PID: WS-X4712-SFP+E    , VID: V03  , SN: CAT2047L7UH
+
+NAME: "TenGigabitEthernet2/2/1", DESCR: "SFP-10Gbase-SR"
+PID: SFP-10G-SR-S      , VID: V01  , SN: AVD2039DCF1
+
+NAME: "TenGigabitEthernet2/2/2", DESCR: "SFP-10Gbase-SR"
+PID: SFP-10G-SR-S      , VID: V01  , SN: AVD2039D8B1
+
+NAME: "TenGigabitEthernet2/2/3", DESCR: "SFP-10Gbase-SR"
+PID: SFP-10G-SR-S      , VID: V01  , SN: AVD2039D8B0
+
+NAME: "Switch2 Linecard 3 (virtual slot 13)", DESCR: "1000BaseX (SFP) with 48 SFP Ports Jumbo Frame Support"
+ --More--         PID: WS-X4748-SFP-E    , VID: V01  , SN: CAT2045L0ZV
+
+NAME: "GigabitEthernet2/3/1", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333W0E
+
+NAME: "GigabitEthernet2/3/2", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333UEE
+
+NAME: "GigabitEthernet2/3/3", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333HZB
+
+NAME: "GigabitEthernet2/3/4", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333RS1
+
+NAME: "GigabitEthernet2/3/5", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333J00
+
+NAME: "GigabitEthernet2/3/6", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333PKH
+
+NAME: "GigabitEthernet2/3/7", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333W06
+
+ --More--         NAME: "GigabitEthernet2/3/8", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333J0A
+
+NAME: "GigabitEthernet2/3/9", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333WAV
+
+NAME: "GigabitEthernet2/3/10", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333PJX
+
+NAME: "GigabitEthernet2/3/11", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333WAY
+
+NAME: "GigabitEthernet2/3/12", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333PJN
+
+NAME: "GigabitEthernet2/3/13", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333PK1
+
+NAME: "GigabitEthernet2/3/14", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333VZZ
+
+NAME: "GigabitEthernet2/3/15", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333HZC
+ --More--         
+NAME: "GigabitEthernet2/3/16", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333CY8
+
+NAME: "GigabitEthernet2/3/17", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333W11
+
+NAME: "GigabitEthernet2/3/18", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333PL8
+
+NAME: "GigabitEthernet2/3/19", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333PL7
+
+NAME: "GigabitEthernet2/3/20", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333PL0
+
+NAME: "GigabitEthernet2/3/21", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333PL5
+
+NAME: "GigabitEthernet2/3/22", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333PKX
+
+NAME: "GigabitEthernet2/3/23", DESCR: "1000BaseLH"
+ --More--         PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333HZV
+
+NAME: "GigabitEthernet2/3/24", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333PL6
+
+NAME: "GigabitEthernet2/3/25", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333J07
+
+NAME: "GigabitEthernet2/3/26", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333PLK
+
+NAME: "GigabitEthernet2/3/27", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333J02
+
+NAME: "GigabitEthernet2/3/28", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333UF2
+
+NAME: "GigabitEthernet2/3/29", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333PGP
+
+NAME: "GigabitEthernet2/3/30", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333W0K
+
+ --More--         NAME: "GigabitEthernet2/3/31", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333W0N
+
+NAME: "GigabitEthernet2/3/32", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333VZW
+
+NAME: "GigabitEthernet2/3/33", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333W07
+
+NAME: "GigabitEthernet2/3/34", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333W0V
+
+NAME: "GigabitEthernet2/3/35", DESCR: "1000BaseLH"
+PID: GLC-LH-SMD        , VID: V01  , SN: AVJ20333W0A
+
+NAME: "Switch2 Linecard 4 (virtual slot 14)", DESCR: "10/100/1000BaseT (RJ45) with 4810/100/1000 BaseT  EEE ports"
+PID: WS-X4748-RJ45-E   , VID: V03  , SN: CAT2047L8UH
+
+NAME: "Switch2 FanTray 1", DESCR: "FanTray"
+PID: WS-X4596-E        , VID: V05  , SN: FXS2046Q5H5
+
+NAME: "Switch2 Power Supply 1", DESCR: "Power Supply ( AC 1400W )"
+ --More--         PID: PWR-C45-1400AC    , VID: V04  , SN: ART2039F975
+
+NAME: "Switch2 Power Supply 2", DESCR: "Power Supply ( AC 1400W )"
+PID: PWR-C45-1400AC    , VID: V04  , SN: ART2039F97G
+
+NAME: "Switch2 Supervisor 1 (virtual slot 11)", DESCR: "Sup 8-E 10GE (SFP+), 1000BaseX (SFP) with 8 SFP+ Ports"
+PID: WS-X45-SUP8-E     , VID: V06  , SN: CAT2042L1XL
+
+NAME: "TenGigabitEthernet2/1/1", DESCR: "SFP-10Gbase-LR"
+PID: SFP-10G-LR-S      , VID: V01  , SN: FNS204110XP
+
+NAME: "TenGigabitEthernet2/1/3", DESCR: "SFP-10Gbase-SR"
+PID: SFP-10G-SR-S      , VID: V01  , SN: AVD2039D9WA
+
+NAME: "TenGigabitEthernet2/1/4", DESCR: "SFP-10Gbase-SR"
+PID: SFP-10G-SR-S      , VID: V01  , SN: AVD2039D896
+
+
+MUIC-Core-SW-01#sh in
+MUIC-Core-SW-01#sh int
+MUIC-Core-SW-01#sh interfaces sat  tatu
+MUIC-Core-SW-01#sh interfaces status 
+
+Port      Name               Status       Vlan       Duplex  Speed Type 
+Te1/1/1   ### MUIT Core Swit connected    trunk        full  a-10G 10GBase-LR
+Te1/1/2                      notconnect   1            full   auto No XCVR
+Te1/1/3                      connected    trunk        full  a-10G 10GBase-SR
+Te1/1/4                      connected    trunk        full  a-10G 10GBase-SR
+Te1/1/5                      notconnect   1            full   auto No XCVR
+Te1/1/6                      notconnect   1            full   auto No XCVR
+Te1/1/7                      notconnect   1            full   auto No XCVR
+Te1/1/8                      notconnect   1            full   auto No XCVR
+Te1/2/1   ### MUIC-SRV-SW-01 connected    trunk        full  a-10G 10GBase-SR
+Te1/2/2   ### MUIC-WLC-01 ## notconnect   1            full   auto 10GBase-SR
+Te1/2/3   ### MUIC-WLC-02 ## connected    trunk        full  a-10G 10GBase-SR
+Te1/2/4                      disabled     74           full   auto No XCVR
+Te1/2/5   = UPLINK B1F5DCR3- connected    trunk        full  a-10G 10GBase-LR
+Te1/2/6   = UPLINK B1F5DCR3- connected    trunk        full  a-10G 10GBase-LR
+Te1/2/7                      notconnect   1            full   auto No XCVR
+Te1/2/8                      notconnect   1            full   auto No XCVR
+Te1/2/9                      notconnect   1            full   auto No XCVR
+Te1/2/10                     notconnect   1            full   auto No XCVR
+Te1/2/11                     notconnect   1            full   auto No XCVR
+Te1/2/12  POC-HUAWEI         notconnect   1            full   auto 10GBase-SR
+Gi1/3/1   ### MUIC-B1B-SW-01 connected    trunk        full a-1000 1000BaseLH
+ --More--         
+Port      Name               Status       Vlan       Duplex  Speed Type 
+Gi1/3/2   ### MUIC-B1C-SW-01 connected    trunk        full a-1000 1000BaseLH
+Gi1/3/3   ### MUIC-B2B-SW-01 connected    trunk        full a-1000 1000BaseLH
+Gi1/3/4   ### MUIC-B2C-SW-01 connected    trunk        full a-1000 1000BaseLH
+Gi1/3/5   ### MUIC-B3B-SW-01 connected    trunk        full a-1000 1000BaseLH
+Gi1/3/6   ### MUIC-B3C-SW-01 connected    trunk        full a-1000 1000BaseLH
+Gi1/3/7   ### MUIC-GA-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi1/3/8   ### MUIC-GB-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi1/3/9   ### MUIC-GC-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi1/3/10  ### MUIC-GD-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi1/3/11  ### MUIC-2A-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi1/3/12  ### MUIC-2B-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi1/3/13  ### MUIC-2C-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi1/3/14  ### MUIC-2D-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi1/3/15  ### MUIC-2B-COM1-S notconnect   1            full   auto 1000BaseLH
+Gi1/3/16  ### MUIC-2B-COM2-S notconnect   1            full   auto No Gbic
+Gi1/3/17  ### MUIC-2B-COM3-S notconnect   1            full   auto 1000BaseLH
+Gi1/3/18  ### MUIC-2B-COM4-S connected    trunk        full a-1000 1000BaseLH
+Gi1/3/19  ### MUIC-2B-FR1-SW connected    trunk        full a-1000 1000BaseLH
+Gi1/3/20  ### MUIC-2B-FR2-SW notconnect   1            full   auto 1000BaseLH
+Gi1/3/21  ### MUIC-2B-SO2-SW notconnect   1            full   auto 1000BaseLH
+Gi1/3/22  ### MUIC-3A-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi1/3/23  ### MUIC-3B-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi1/3/24  ### MUIC-3C-SW-01  connected    trunk        full a-1000 1000BaseLH
+ --More--         
+Port      Name               Status       Vlan       Duplex  Speed Type 
+Gi1/3/25  ### MUIC-3D-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi1/3/26  ### MUIC-4A-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi1/3/27  ### MUIC-4B-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi1/3/28  ### MUIC-4C-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi1/3/29  ### MUIC-4D-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi1/3/30  ### MUIC-5A-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi1/3/31  ### MUIC-5C-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi1/3/32  ### MUIC-5D-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi1/3/33  ### MUIC-6A-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi1/3/34  ### MUIC-6C-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi1/3/35  ### MUIC-6D-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi1/3/36                     notconnect   1            full   auto No Gbic
+Gi1/3/37  @@@ MUIC-NOC-SW01  connected    trunk        full a-1000 1000BaseSX
+Gi1/3/38                     notconnect   1            full   auto No Gbic
+Gi1/3/39                     notconnect   1            full   auto 1000BaseLH
+Gi1/3/40                     notconnect   1            full   auto No Gbic
+Gi1/3/41  ### MUIC-5B-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi1/3/42                     notconnect   1            full   auto No Gbic
+Gi1/3/43                     notconnect   1            full   auto No Gbic
+Gi1/3/44                     notconnect   1            full   auto No Gbic
+Gi1/3/45                     notconnect   1            full   auto No Gbic
+Gi1/3/46                     notconnect   1            full   auto No Gbic
+Gi1/3/47                     notconnect   1            full   auto No Gbic
+ --More--         
+Port      Name               Status       Vlan       Duplex  Speed Type 
+Gi1/3/48                     notconnect   1            full   auto No Gbic
+Gi1/4/1   # Connect to McAfe notconnect   1            auto   auto 10/100/1000-TX
+Gi1/4/2   ### test internet  notconnect   21           auto   auto 10/100/1000-TX
+Gi1/4/3                      notconnect   192          auto   auto 10/100/1000-TX
+Gi1/4/4                      notconnect   192          auto   auto 10/100/1000-TX
+Gi1/4/5                      notconnect   221          auto   auto 10/100/1000-TX
+Gi1/4/6                      notconnect   1            auto   auto 10/100/1000-TX
+Gi1/4/7                      notconnect   1            auto   auto 10/100/1000-TX
+Gi1/4/8   test               notconnect   212          auto   auto 10/100/1000-TX
+Gi1/4/9                      connected    99         a-full a-1000 10/100/1000-TX
+Gi1/4/10                     notconnect   1            auto   auto 10/100/1000-TX
+Gi1/4/11                     notconnect   1            auto   auto 10/100/1000-TX
+ --More--         
+Port      Name               Status       Vlan       Duplex  Speed Type 
+Gi1/4/12                     notconnect   74           auto   auto 10/100/1000-TX
+Gi1/4/13  UPLINK-temp-wifi-o notconnect   88           auto   auto 10/100/1000-TX
+Gi1/4/14                     notconnect   88           auto   auto 10/100/1000-TX
+Gi1/4/15  temp-lan-openhouse notconnect   1            auto   auto 10/100/1000-TX
+Gi1/4/16  temp-lan-openhouse notconnect   1            auto   auto 10/100/1000-TX
+Gi1/4/17  temp-lan-openhouse notconnect   1            auto   auto 10/100/1000-TX
+Gi1/4/18                     notconnect   1            auto   auto 10/100/1000-TX
+Gi1/4/19                     notconnect   1            auto   auto 10/100/1000-TX
+Gi1/4/20                     notconnect   1            auto   auto 10/100/1000-TX
+Gi1/4/21                     notconnect   91           auto   auto 10/100/1000-TX
+Gi1/4/22                     notconnect   74           auto   auto 10/100/1000-TX
+Gi1/4/23  NW-TO-MUIC-DCRB1-A connected    trunk      a-full a-1000 10/100/1000-TX
+ --More--         
+Port      Name               Status       Vlan       Duplex  Speed Type 
+Gi1/4/24  TEST-RADIUS        disabled     1            auto   auto 10/100/1000-TX
+Gi1/4/25                     notconnect   1            auto   auto 10/100/1000-TX
+Gi1/4/26  VLAN21=>TO MK      connected    21         a-full a-1000 10/100/1000-TX
+Gi1/4/27  = UPLINK=SW-TOPRAC connected    trunk      a-full a-1000 10/100/1000-TX
+Gi1/4/28  = UPLINK=SW-TOPRAC connected    trunk      a-full a-1000 10/100/1000-TX
+Gi1/4/29                     notconnect   160          auto   auto 10/100/1000-TX
+Gi1/4/30  VLAN160<=MKT       connected    160        a-full a-1000 10/100/1000-TX
+Gi1/4/31  VLAN74=>SWHW       connected    74         a-full a-1000 10/100/1000-TX
+Gi1/4/32  VLAN72=>TO MK      connected    72         a-full a-1000 10/100/1000-TX
+Gi1/4/33  @## Connect to Rac connected    trunk      a-full a-1000 10/100/1000-TX
+Gi1/4/34  VLAN320=>TO MK(52) connected    320        a-full a-1000 10/100/1000-TX
+Gi1/4/35  VLAN321=>TO MK     connected    321        a-full a-1000 10/100/1000-TX
+ --More--         
+Port      Name               Status       Vlan       Duplex  Speed Type 
+Gi1/4/36  VLAN320=>TO MK(52) connected    320        a-full a-1000 10/100/1000-TX
+Gi1/4/37  VLAN74=>TO MK(51)  connected    74         a-full a-1000 10/100/1000-TX
+Gi1/4/38  VLAN74=>TO MK(51)  connected    74         a-full a-1000 10/100/1000-TX
+Gi1/4/39                     connected    122        a-full a-1000 10/100/1000-TX
+Gi1/4/40  UPLINK-DCRB4-Dell1 connected    trunk      a-full a-1000 10/100/1000-TX
+Gi1/4/41  ### Rack B4-B1 ### connected    trunk      a-full a-1000 10/100/1000-TX
+Gi1/4/42  @## Connect to Rac connected    trunk      a-full a-1000 10/100/1000-TX
+Gi1/4/43  ### UPLINK-SW-COML connected    trunk      a-full a-1000 10/100/1000-TX
+Gi1/4/44  ### UPLINK-SW-COML connected    trunk      a-full a-1000 10/100/1000-TX
+Gi1/4/45  ### Trunk to Switc notconnect   1            auto   auto 10/100/1000-TX
+Gi1/4/46  ### MUIC-CUCM ###  connected    99         a-full a-1000 10/100/1000-TX
+Gi1/4/47  ### True Link ###  connected    87         a-full a-1000 10/100/1000-TX
+ --More--         
+Port      Name               Status       Vlan       Duplex  Speed Type 
+Gi1/4/48  ### Fast-Hello ### connected    1          a-full a-1000 10/100/1000-TX
+Te2/1/1   ### MUIT Core Swit connected    trunk        full  a-10G 10GBase-LR
+Te2/1/2                      notconnect   1            full   auto No XCVR
+Te2/1/3                      connected    trunk        full  a-10G 10GBase-SR
+Te2/1/4                      connected    trunk        full  a-10G 10GBase-SR
+Te2/1/5                      notconnect   1            full   auto No XCVR
+Te2/1/6                      notconnect   1            full   auto No XCVR
+Te2/1/7                      notconnect   1            full   auto No XCVR
+Te2/1/8                      notconnect   1            full   auto No XCVR
+Te2/2/1   ### MUIC-SRV-SW-01 notconnect   1            full   auto 10GBase-SR
+Te2/2/2   ### MUIC-WLC-01 ## notconnect   1            full   auto 10GBase-SR
+Te2/2/3   ### MUIC-WLC-02 ## connected    trunk        full  a-10G 10GBase-SR
+Te2/2/4                      disabled     74           full   auto No XCVR
+Te2/2/5                      notconnect   1            full   auto No XCVR
+Te2/2/6                      notconnect   1            full   auto No XCVR
+Te2/2/7                      notconnect   1            full   auto No XCVR
+Te2/2/8                      notconnect   1            full   auto No XCVR
+Te2/2/9                      notconnect   1            full   auto No XCVR
+Te2/2/10                     notconnect   1            full   auto No XCVR
+Te2/2/11                     notconnect   1            full   auto No XCVR
+Te2/2/12                     notconnect   1            full   auto No XCVR
+Gi2/3/1   ### MUIC-B1B-SW-01 connected    trunk        full a-1000 1000BaseLH
+ --More--         
+Port      Name               Status       Vlan       Duplex  Speed Type 
+Gi2/3/2   ### MUIC-B1C-SW-01 connected    trunk        full a-1000 1000BaseLH
+Gi2/3/3   ### MUIC-B2B-SW-01 connected    trunk        full a-1000 1000BaseLH
+Gi2/3/4   ### MUIC-B2C-SW-01 connected    trunk        full a-1000 1000BaseLH
+Gi2/3/5   ### MUIC-B3B-SW-01 connected    trunk        full a-1000 1000BaseLH
+Gi2/3/6   ### MUIC-B3C-SW-01 connected    trunk        full a-1000 1000BaseLH
+Gi2/3/7   ### MUIC-GA-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi2/3/8   ### MUIC-GB-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi2/3/9   ### MUIC-GC-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi2/3/10  ### MUIC-GD-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi2/3/11  ### MUIC-2A-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi2/3/12  ### MUIC-2B-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi2/3/13  ### MUIC-2C-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi2/3/14  ### MUIC-2D-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi2/3/15  ### MUIC-2B-COM1-S notconnect   1            full   auto 1000BaseLH
+Gi2/3/16  ### MUIC-2B-COM2-S notconnect   1            full   auto 1000BaseLH
+Gi2/3/17  ### MUIC-2B-COM3-S notconnect   1            full   auto 1000BaseLH
+Gi2/3/18  ### MUIC-2B-COM4-S connected    trunk        full a-1000 1000BaseLH
+Gi2/3/19  ### MUIC-2B-FR1-SW notconnect   1            full   auto 1000BaseLH
+Gi2/3/20  ### MUIC-2B-FR2-SW connected    trunk        full a-1000 1000BaseLH
+Gi2/3/21  ### MUIC-2B-SO2-SW notconnect   1            full   auto 1000BaseLH
+Gi2/3/22  ### MUIC-3A-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi2/3/23  ### MUIC-3B-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi2/3/24  ### MUIC-3C-SW-01  connected    trunk        full a-1000 1000BaseLH
+ --More--         
+Port      Name               Status       Vlan       Duplex  Speed Type 
+Gi2/3/25  ### MUIC-3D-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi2/3/26  ### MUIC-4A-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi2/3/27  ### MUIC-4B-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi2/3/28  ### MUIC-4C-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi2/3/29  ### MUIC-4D-SW-01  notconnect   1            full   auto 1000BaseLH
+Gi2/3/30  ### MUIC-5A-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi2/3/31  ### MUIC-5C-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi2/3/32  ### MUIC-5D-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi2/3/33  ### MUIC-6A-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi2/3/34  ### MUIC-6C-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi2/3/35  ### MUIC-6D-SW-01  connected    trunk        full a-1000 1000BaseLH
+Gi2/3/36                     notconnect   1            full   auto No Gbic
+Gi2/3/37                     notconnect   1            full   auto No Gbic
+Gi2/3/38                     notconnect   1            full   auto No Gbic
+Gi2/3/39                     notconnect   1            full   auto No Gbic
+Gi2/3/40                     notconnect   1            full   auto No Gbic
+Gi2/3/41                     notconnect   1            full   auto No Gbic
+Gi2/3/42                     notconnect   1            full   auto No Gbic
+Gi2/3/43                     notconnect   1            full   auto No Gbic
+Gi2/3/44                     notconnect   1            full   auto No Gbic
+Gi2/3/45                     notconnect   1            full   auto No Gbic
+Gi2/3/46                     notconnect   1            full   auto No Gbic
+Gi2/3/47                     notconnect   1            full   auto No Gbic
+ --More--         
+Port      Name               Status       Vlan       Duplex  Speed Type 
+Gi2/3/48                     notconnect   1            full   auto No Gbic
+Gi2/4/1   # Connect to McAfe notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/2                      notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/3                      notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/4                      notconnect   109          auto   auto 10/100/1000-TX
+Gi2/4/5                      notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/6                      notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/7                      notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/8                      notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/9                      notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/10                     notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/11                     notconnect   1            auto   auto 10/100/1000-TX
+ --More--         
+Port      Name               Status       Vlan       Duplex  Speed Type 
+Gi2/4/12                     notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/13                     notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/14                     notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/15                     notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/16                     notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/17                     notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/18                     notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/19                     notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/20                     notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/21                     notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/22                     notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/23                     notconnect   1            auto   auto 10/100/1000-TX
+ --More--         
+Port      Name               Status       Vlan       Duplex  Speed Type 
+Gi2/4/24                     notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/25                     notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/26                     notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/27                     notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/28                     notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/29                     notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/30                     notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/31                     notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/32                     notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/33                     notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/34                     notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/35                     notconnect   1            auto   auto 10/100/1000-TX
+ --More--         
+Port      Name               Status       Vlan       Duplex  Speed Type 
+Gi2/4/36                     notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/37                     notconnect   21           auto   auto 10/100/1000-TX
+Gi2/4/38                     notconnect   21           auto   auto 10/100/1000-TX
+Gi2/4/39                     notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/40                     notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/41  # MUIC-SERVER #    notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/42  # MUIC-SERVER #    notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/43  # MUIC-SERVER #    notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/44  # MUIC-SERVER #    notconnect   1            auto   auto 10/100/1000-TX
+Gi2/4/45                     notconnect   99           auto   auto 10/100/1000-TX
+Gi2/4/46  ### MUIC-CUCM ###  connected    99         a-full a-1000 10/100/1000-TX
+Gi2/4/47  ### MUIC-VoiceGW_T connected    99         a-full a-1000 10/100/1000-TX
+ --More--         
+Port      Name               Status       Vlan       Duplex  Speed Type 
+Gi2/4/48  ### Fast-Hello ### connected    1          a-full a-1000 10/100/1000-TX
+Po1                          connected    trunk      a-full  a-10G 
+Po2                          connected    trunk      a-full  a-10G 
+Po3                          connected    trunk      a-full  a-10G 
+Po4       ### MUIC-SRV-SW-01 connected    trunk      a-full  a-10G 
+Po5       ### MUIC-WLC-01 ## notconnect   0            auto   auto 
+Po6       ### MUIC-WLC-02 ## connected    trunk      a-full  a-10G 
+Po7       ### MUIC-B1B-SW-01 connected    trunk      a-full a-1000 
+Po8       ### MUIC-B1C-SW-01 connected    trunk      a-full a-1000 
+Po9       ### MUIC-B2B-SW-01 connected    trunk      a-full a-1000 
+Po10      ### MUIC-B2C-SW-01 connected    trunk      a-full a-1000 
+Po11      ### MUIC-B3B-SW-01 connected    trunk      a-full a-1000 
+Po12      ### MUIC-B3C-SW-01 connected    trunk      a-full a-1000 
+Po13      ### MUIC-GA-SW-01  connected    trunk      a-full a-1000 
+Po14      ### MUIC-GB-SW-01  connected    trunk      a-full a-1000 
+Po15      ### MUIC-GC-SW-01  connected    trunk      a-full a-1000 
+Po16      ### MUIC-GD-SW-01  connected    trunk      a-full a-1000 
+Po17      ### MUIC-2A-SW-01  connected    trunk      a-full a-1000 
+Po18      ### MUIC-2B-SW-01  connected    trunk      a-full a-1000 
+Po19      ### MUIC-2C-SW-01  connected    trunk      a-full a-1000 
+Po20      ### MUIC-2D-SW-01  connected    trunk      a-full a-1000 
+Po21      ### MUIC-2B-COM1-S notconnect   0            auto   auto 
+ --More--         
+Port      Name               Status       Vlan       Duplex  Speed Type 
+Po22      ### MUIC-2B-COM2-S notconnect   0            auto   auto 
+Po23      ### MUIC-2B-COM3-S notconnect   0            auto   auto 
+Po24      ### MUIC-2B-COM4-S connected    trunk      a-full a-1000 
+Po25      ### MUIC-2B-FR1-SW connected    trunk      a-full a-1000 
+Po26      ### MUIC-2B-FR2-SW connected    trunk      a-full a-1000 
+Po27      ### MUIC-2B-SO2-SW notconnect   0            auto   auto 
+Po28      ### MUIC-3A-SW-01  connected    trunk      a-full a-1000 
+Po29      ### MUIC-3B-SW-01  connected    trunk      a-full a-1000 
+Po30      ### MUIC-3C-SW-01  connected    trunk      a-full a-1000 
+Po31      ### MUIC-3D-SW-01  connected    trunk      a-full a-1000 
+Po32      ### MUIC-4A-SW-01  connected    trunk      a-full a-1000 
+Po33      ### MUIC-4B-SW-01  connected    trunk      a-full a-1000 
+Po34      ### MUIC-4C-SW-01  connected    trunk      a-full a-1000 
+Po35      ### MUIC-4D-SW-01  connected    trunk      a-full a-1000 
+Po36      ### MUIC-5A-SW-01  connected    trunk      a-full a-1000 
+Po37      ### MUIC-5C-SW-01  connected    trunk      a-full a-1000 
+Po38      ### MUIC-5D-SW-01  connected    trunk      a-full a-1000 
+Po39      ### MUIC-6A-SW-01  connected    trunk      a-full a-1000 
+Po40      ### MUIC-6C-SW-01  connected    trunk      a-full a-1000 
+Po41      ### MUIC-6D-SW-01  connected    trunk      a-full a-1000 
+Po42                         notconnect   0            auto   auto 
+Po49      = UPLINK=SW-TOPRAC connected    trunk      a-full a-1000 
+Po51      VLAN74=>TO MK(51)  connected    74         a-full a-1000 
+ --More--         
+Port      Name               Status       Vlan       Duplex  Speed Type 
+Po52      VLAN320=>TO MK(52) connected    320        a-full a-1000 
+Po90      # Connect to McAfe notconnect   1            auto   auto 
+Po99      ** Connect to MUIC connected    99         a-full a-1000 
+Po100     = UPLINK B1F5DCR3- connected    trunk      a-full  a-10G 
+Po143     ### UPLINK-SW-COML connected    trunk      a-full a-1000 
+Po144     UPLINK-PJ-COMPLEAS notconnect   0            auto   auto 
+MUIC-Core-SW-01#  s  h vl
+MUIC-Core-SW-01#sh vlan
+
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Te1/1/2, Te1/1/5, Te1/1/6
+                                                Te1/1/7, Te1/1/8, Te1/2/2
+                                                Te1/2/7, Te1/2/8, Te1/2/9
+                                                Te1/2/10, Te1/2/11, Te1/2/12
+                                                Gi1/3/15, Gi1/3/16, Gi1/3/17
+                                                Gi1/3/20, Gi1/3/21, Gi1/3/36
+                                                Gi1/3/38, Gi1/3/39, Gi1/3/40
+                                                Gi1/3/42, Gi1/3/43, Gi1/3/44
+                                                Gi1/3/45, Gi1/3/46, Gi1/3/47
+                                                Gi1/3/48, Gi1/4/1, Gi1/4/6
+                                                Gi1/4/7, Gi1/4/10, Gi1/4/11
+                                                Gi1/4/15, Gi1/4/16, Gi1/4/17
+                                                Gi1/4/18, Gi1/4/19, Gi1/4/20
+                                                Gi1/4/24, Gi1/4/25, Gi1/4/45
+                                                Gi1/4/48, Te2/1/2, Te2/1/5
+                                                Te2/1/6, Te2/1/7, Te2/1/8
+                                                Te2/2/1, Te2/2/2, Te2/2/5
+                                                Te2/2/6, Te2/2/7, Te2/2/8
+                                                Te2/2/9, Te2/2/10, Te2/2/11
+                                                Te2/2/12, Gi2/3/15, Gi2/3/16
+ --More--         
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+                                                Gi2/3/17, Gi2/3/19, Gi2/3/21
+                                                Gi2/3/29, Gi2/3/36, Gi2/3/37
+                                                Gi2/3/38, Gi2/3/39, Gi2/3/40
+                                                Gi2/3/41, Gi2/3/42, Gi2/3/43
+                                                Gi2/3/44, Gi2/3/45, Gi2/3/46
+                                                Gi2/3/47, Gi2/3/48, Gi2/4/1
+                                                Gi2/4/2, Gi2/4/3, Gi2/4/5
+                                                Gi2/4/6, Gi2/4/7, Gi2/4/8
+                                                Gi2/4/9, Gi2/4/10, Gi2/4/11
+                                                Gi2/4/12, Gi2/4/13, Gi2/4/14
+                                                Gi2/4/15, Gi2/4/16, Gi2/4/17
+                                                Gi2/4/18, Gi2/4/19, Gi2/4/20
+                                                Gi2/4/21, Gi2/4/22, Gi2/4/23
+                                                Gi2/4/24, Gi2/4/25, Gi2/4/26
+                                                Gi2/4/27, Gi2/4/28, Gi2/4/29
+                                                Gi2/4/30, Gi2/4/31, Gi2/4/32
+                                                Gi2/4/33, Gi2/4/34, Gi2/4/35
+                                                Gi2/4/36, Gi2/4/39, Gi2/4/40
+                                                Gi2/4/41, Gi2/4/42, Gi2/4/43
+                                                Gi2/4/44, Gi2/4/48
+2    ComalabB1                        active    
+3    Old_CCTV                         active    
+4    office_b1                        active    
+ --More--         
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+5    lab_1409                         active    
+7    vlan7-classroom-B1AD             active    
+9    Old_IPPhone                      active    
+10   Test-WiFi-POC                    active    
+11   IC Client User                   active    
+12   office_b2                        active    
+21   SRV-MGMT                         active    Gi1/4/2, Gi1/4/26, Gi2/4/37
+                                                Gi2/4/38
+22   network deive                    active    
+23   office_pc                        active    
+32   @MUIC-WiFi8K                     active    
+72   Vlan72                           active    Gi1/4/32
+74   Vlan74_@MUIC_WiFi                active    Te1/2/4, Gi1/4/12, Gi1/4/22
+                                                Gi1/4/31, Te2/2/4, Po51
+87   TRUE-REAL-IP                     active    Gi1/4/47
+88   temp-wifi-openhouse              active    Gi1/4/13, Gi1/4/14
+91   New ComLab                       active    Gi1/4/21
+92   VLAN0092                         active    
+93   VLAN0093                         active    
+94   VLAN0094                         active    
+99   IP Phone Management              active    Gi1/4/3, Gi1/4/5, Gi1/4/9
+                                                Gi2/4/45, Gi2/4/47, Po99
+100  IC-Internal                      active    
+ --More--         
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+104  MU-WiFi                          active    
+109  AP Management                    active    Gi2/4/4
+120  MU-Virtual-Classroom             active    
+122  @MUIC-WiFi                       active    Gi1/4/39
+160  Vlan160_Projector                active    Gi1/4/29, Gi1/4/30
+168  TrueMove_Route                   active    
+192  Client Zone-Wifi_192             active    Gi1/4/3, Gi1/4/4
+201  VLAN0201                         active    
+203  Public                           active    
+212  ComLab&ClassRoomNews             active    Gi1/4/8
+221  Client User                      active    Gi1/4/5
+222  TruewifibyMUIT                   active    
+223  ComLab&Class Room#2              active    
+227  Client IC WiFi_227               active    
+231  Client IC WiFi_231               active    
+235  Client IC Wifi 235               active    
+298  TrueMove_H                       active    
+320  @MUIC-WiFi-B1                    active    Po52
+321  @MUIC-WiFi-AD                    active    Gi1/4/35
+800  AIS_Super_WiFi                   active    
+801  AIS_Smart_WiFi_Trafi             active    
+802  AIS_Smart_WiFi_MGMT              active    
+999  mgmt-newSRV                      active    
+ --More--         
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1002 fddi-default                     act/unsup 
+1003 token-ring-default               act/unsup 
+1004 fddinet-default                  act/unsup 
+1005 trnet-default                    act/unsup 
+
+VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
+---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
+1    enet  100001     1500  -      -      -        -    -        0      0   
+2    enet  100002     1500  -      -      -        -    -        0      0   
+3    enet  100003     1500  -      -      -        -    -        0      0   
+4    enet  100004     1500  -      -      -        -    -        0      0   
+5    enet  100005     1500  -      -      -        -    -        0      0   
+7    enet  100007     1500  -      -      -        -    -        0      0   
+9    enet  100009     1500  -      -      -        -    -        0      0   
+10   enet  100010     1500  -      -      -        -    -        0      0   
+11   enet  100011     1500  -      -      -        -    -        0      0   
+12   enet  100012     1500  -      -      -        -    -        0      0   
+21   enet  100021     1500  -      -      -        -    -        0      0   
+22   enet  100022     1500  -      -      -        -    -        0      0   
+23   enet  100023     1500  -      -      -        -    -        0      0   
+32   enet  100032     1500  -      -      -        -    -        0      0   
+72   enet  100072     1500  -      -      -        -    -        0      0   
+74   enet  100074     1500  -      -      -        -    -        0      0   
+ --More--         
+VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
+---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
+87   enet  100087     1500  -      -      -        -    -        0      0   
+88   enet  100088     1500  -      -      -        -    -        0      0   
+91   enet  100091     1500  -      -      -        -    -        0      0   
+92   enet  100092     1500  -      -      -        -    -        0      0   
+93   enet  100093     1500  -      -      -        -    -        0      0   
+94   enet  100094     1500  -      -      -        -    -        0      0   
+99   enet  100099     1500  -      -      -        -    -        0      0   
+100  enet  100100     1500  -      -      -        -    -        0      0   
+104  enet  100104     1500  -      -      -        -    -        0      0   
+109  enet  100109     1500  -      -      -        -    -        0      0   
+120  enet  100120     1500  -      -      -        -    -        0      0   
+122  enet  100122     1500  -      -      -        -    -        0      0   
+160  enet  100160     1500  -      -      -        -    -        0      0   
+168  enet  100168     1500  -      -      -        -    -        0      0   
+192  enet  100192     1500  -      -      -        -    -        0      0   
+201  enet  100201     1500  -      -      -        -    -        0      0   
+203  enet  100203     1500  -      -      -        -    -        0      0   
+212  enet  100212     1500  -      -      -        -    -        0      0   
+221  enet  100221     1500  -      -      -        -    -        0      0   
+222  enet  100222     1500  -      -      -        -    -        0      0   
+223  enet  100223     1500  -      -      -        -    -        0      0   
+227  enet  100227     1500  -      -      -        -    -        0      0   
+231  enet  100231     1500  -      -      -        -    -        0      0   
+ --More--         
+VLAN Type  SAID       MTU   Parent RingNo BridgeNo Stp  BrdgMode Trans1 Trans2
+---- ----- ---------- ----- ------ ------ -------- ---- -------- ------ ------
+235  enet  100235     1500  -      -      -        -    -        0      0   
+298  enet  100298     1500  -      -      -        -    -        0      0   
+320  enet  100320     1500  -      -      -        -    -        0      0   
+321  enet  100321     1500  -      -      -        -    -        0      0   
+800  enet  100800     1500  -      -      -        -    -        0      0   
+801  enet  100801     1500  -      -      -        -    -        0      0   
+802  enet  100802     1500  -      -      -        -    -        0      0   
+999  enet  100999     1500  -      -      -        -    -        0      0   
+1002 fddi  101002     1500  -      -      -        -    -        0      0   
+1003 tr    101003     1500  -      -      -        -    -        0      0   
+1004 fdnet 101004     1500  -      -      -        ieee -        0      0   
+1005 trnet 101005     1500  -      -      -        ibm  -        0      0   
+
+Remote SPAN VLANs
+------------------------------------------------------------------------------
+
+
+Primary Secondary Type              Ports
+------- --------- ----------------- ------------------------------------------
+
+MUIC-Core-SW-01#              sh ip in
+MUIC-Core-SW-01#sh ip interface v
+MUIC-Core-SW-01#sh ip interface vlan      b
+MUIC-Core-SW-01#sh ip interface b
+Interface              IP-Address      OK? Method Status                Protocol
+FastEthernet1          unassigned      YES unset  down                  down    
+Te1/1/1                unassigned      YES unset  up                    up      
+Te1/1/2                unassigned      YES unset  down                  down    
+Te1/1/3                unassigned      YES unset  up                    up      
+Te1/1/4                unassigned      YES unset  up                    up      
+Te1/1/5                unassigned      YES unset  down                  down    
+Te1/1/6                unassigned      YES unset  down                  down    
+Te1/1/7                unassigned      YES unset  down                  down    
+Te1/1/8                unassigned      YES unset  down                  down    
+Te1/2/1                unassigned      YES unset  up                    up      
+Te1/2/2                unassigned      YES unset  down                  down    
+Te1/2/3                unassigned      YES unset  up                    up      
+Te1/2/4                unassigned      YES unset  administratively down down    
+Te1/2/5                unassigned      YES unset  up                    up      
+Te1/2/6                unassigned      YES unset  up                    up      
+Te1/2/7                unassigned      YES unset  down                  down    
+Te1/2/8                unassigned      YES unset  down                  down    
+Te1/2/9                unassigned      YES unset  down                  down    
+Te1/2/10               unassigned      YES unset  down                  down    
+Te1/2/11               unassigned      YES unset  down                  down    
+Te1/2/12               unassigned      YES unset  down                  down    
+GigabitEthernet1/3/1   unassigned      YES unset  up                    up      
+ --More--         GigabitEthernet1/3/2   unassigned      YES unset  up                    up      
+GigabitEthernet1/3/3   unassigned      YES unset  up                    up      
+GigabitEthernet1/3/4   unassigned      YES unset  up                    up      
+GigabitEthernet1/3/5   unassigned      YES unset  up                    up      
+GigabitEthernet1/3/6   unassigned      YES unset  up                    up      
+GigabitEthernet1/3/7   unassigned      YES unset  up                    up      
+GigabitEthernet1/3/8   unassigned      YES unset  up                    up      
+GigabitEthernet1/3/9   unassigned      YES unset  up                    up      
+GigabitEthernet1/3/10  unassigned      YES unset  up                    up      
+GigabitEthernet1/3/11  unassigned      YES unset  up                    up      
+GigabitEthernet1/3/12  unassigned      YES unset  up                    up      
+GigabitEthernet1/3/13  unassigned      YES unset  up                    up      
+GigabitEthernet1/3/14  unassigned      YES unset  up                    up      
+GigabitEthernet1/3/15  unassigned      YES unset  down                  down    
+GigabitEthernet1/3/16  unassigned      YES unset  down                  down    
+GigabitEthernet1/3/17  unassigned      YES unset  down                  down    
+GigabitEthernet1/3/18  unassigned      YES unset  up                    up      
+GigabitEthernet1/3/19  unassigned      YES unset  up                    up      
+GigabitEthernet1/3/20  unassigned      YES unset  down                  down    
+GigabitEthernet1/3/21  unassigned      YES unset  down                  down    
+GigabitEthernet1/3/22  unassigned      YES unset  up                    up      
+GigabitEthernet1/3/23  unassigned      YES unset  up                    up      
+GigabitEthernet1/3/24  unassigned      YES unset  up                    up      
+ --More--         GigabitEthernet1/3/25  unassigned      YES unset  up                    up      
+GigabitEthernet1/3/26  unassigned      YES unset  up                    up      
+GigabitEthernet1/3/27  unassigned      YES unset  up                    up      
+GigabitEthernet1/3/28  unassigned      YES unset  up                    up      
+GigabitEthernet1/3/29  unassigned      YES unset  up                    up      
+GigabitEthernet1/3/30  unassigned      YES unset  up                    up      
+GigabitEthernet1/3/31  unassigned      YES unset  up                    up      
+GigabitEthernet1/3/32  unassigned      YES unset  up                    up      
+GigabitEthernet1/3/33  unassigned      YES unset  up                    up      
+GigabitEthernet1/3/34  unassigned      YES unset  up                    up      
+GigabitEthernet1/3/35  unassigned      YES unset  up                    up      
+GigabitEthernet1/3/36  unassigned      YES unset  down                  down    
+GigabitEthernet1/3/37  unassigned      YES unset  up                    up      
+GigabitEthernet1/3/38  unassigned      YES unset  down                  down    
+GigabitEthernet1/3/39  unassigned      YES unset  down                  down    
+GigabitEthernet1/3/40  unassigned      YES unset  down                  down    
+GigabitEthernet1/3/41  unassigned      YES unset  up                    up      
+GigabitEthernet1/3/42  unassigned      YES unset  down                  down    
+GigabitEthernet1/3/43  unassigned      YES unset  down                  down    
+GigabitEthernet1/3/44  unassigned      YES unset  down                  down    
+GigabitEthernet1/3/45  unassigned      YES unset  down                  down    
+GigabitEthernet1/3/46  unassigned      YES unset  down                  down    
+GigabitEthernet1/3/47  unassigned      YES unset  down                  down    
+ --More--         GigabitEthernet1/3/48  unassigned      YES unset  down                  down    
+GigabitEthernet1/4/1   unassigned      YES unset  down                  down    
+GigabitEthernet1/4/2   unassigned      YES unset  down                  down    
+GigabitEthernet1/4/3   unassigned      YES unset  down                  down    
+GigabitEthernet1/4/4   unassigned      YES unset  down                  down    
+GigabitEthernet1/4/5   unassigned      YES unset  down                  down    
+GigabitEthernet1/4/6   unassigned      YES unset  down                  down    
+GigabitEthernet1/4/7   unassigned      YES unset  down                  down    
+GigabitEthernet1/4/8   unassigned      YES unset  down                  down    
+GigabitEthernet1/4/9   unassigned      YES unset  up                    up      
+GigabitEthernet1/4/10  unassigned      YES unset  down                  down    
+GigabitEthernet1/4/11  unassigned      YES unset  down                  down    
+GigabitEthernet1/4/12  unassigned      YES unset  down                  down    
+GigabitEthernet1/4/13  unassigned      YES unset  down                  down    
+GigabitEthernet1/4/14  unassigned      YES unset  down                  down    
+GigabitEthernet1/4/15  unassigned      YES unset  down                  down    
+GigabitEthernet1/4/16  unassigned      YES unset  down                  down    
+GigabitEthernet1/4/17  unassigned      YES unset  down                  down    
+GigabitEthernet1/4/18  unassigned      YES unset  down                  down    
+GigabitEthernet1/4/19  unassigned      YES unset  down                  down    
+GigabitEthernet1/4/20  unassigned      YES unset  down                  down    
+GigabitEthernet1/4/21  unassigned      YES unset  down                  down    
+GigabitEthernet1/4/22  unassigned      YES unset  down                  down    
+ --More--         GigabitEthernet1/4/23  unassigned      YES unset  up                    up      
+GigabitEthernet1/4/24  unassigned      YES unset  administratively down down    
+GigabitEthernet1/4/25  unassigned      YES unset  down                  down    
+GigabitEthernet1/4/26  unassigned      YES unset  up                    up      
+GigabitEthernet1/4/27  unassigned      YES unset  up                    up      
+GigabitEthernet1/4/28  unassigned      YES unset  up                    up      
+GigabitEthernet1/4/29  unassigned      YES unset  down                  down    
+GigabitEthernet1/4/30  unassigned      YES unset  up                    up      
+GigabitEthernet1/4/31  unassigned      YES unset  up                    up      
+GigabitEthernet1/4/32  unassigned      YES unset  up                    up      
+GigabitEthernet1/4/33  unassigned      YES unset  up                    up      
+GigabitEthernet1/4/34  unassigned      YES unset  up                    up      
+GigabitEthernet1/4/35  unassigned      YES unset  up                    up      
+GigabitEthernet1/4/36  unassigned      YES unset  up                    up      
+GigabitEthernet1/4/37  unassigned      YES unset  up                    up      
+GigabitEthernet1/4/38  unassigned      YES unset  up                    up      
+GigabitEthernet1/4/39  unassigned      YES unset  up                    up      
+GigabitEthernet1/4/40  unassigned      YES unset  up                    up      
+GigabitEthernet1/4/41  unassigned      YES unset  up                    up      
+GigabitEthernet1/4/42  unassigned      YES unset  up                    up      
+GigabitEthernet1/4/43  unassigned      YES unset  up                    up      
+GigabitEthernet1/4/44  unassigned      YES unset  up                    up      
+GigabitEthernet1/4/45  unassigned      YES unset  down                  down    
+ --More--         GigabitEthernet1/4/46  unassigned      YES unset  up                    up      
+GigabitEthernet1/4/47  unassigned      YES unset  up                    up      
+GigabitEthernet1/4/48  unassigned      YES unset  up                    up      
+Te2/1/1                unassigned      YES unset  up                    up      
+Te2/1/2                unassigned      YES unset  down                  down    
+Te2/1/3                unassigned      YES unset  up                    up      
+Te2/1/4                unassigned      YES unset  up                    up      
+Te2/1/5                unassigned      YES unset  down                  down    
+Te2/1/6                unassigned      YES unset  down                  down    
+Te2/1/7                unassigned      YES unset  down                  down    
+Te2/1/8                unassigned      YES unset  down                  down    
+Te2/2/1                unassigned      YES unset  down                  down    
+Te2/2/2                unassigned      YES unset  down                  down    
+Te2/2/3                unassigned      YES unset  up                    up      
+Te2/2/4                unassigned      YES unset  administratively down down    
+Te2/2/5                unassigned      YES unset  down                  down    
+Te2/2/6                unassigned      YES unset  down                  down    
+Te2/2/7                unassigned      YES unset  down                  down    
+Te2/2/8                unassigned      YES unset  down                  down    
+Te2/2/9                unassigned      YES unset  down                  down    
+Te2/2/10               unassigned      YES unset  down                  down    
+Te2/2/11               unassigned      YES unset  down                  down    
+Te2/2/12               unassigned      YES unset  down                  down    
+ --More--         GigabitEthernet2/3/1   unassigned      YES unset  up                    up      
+GigabitEthernet2/3/2   unassigned      YES unset  up                    up      
+GigabitEthernet2/3/3   unassigned      YES unset  up                    up      
+GigabitEthernet2/3/4   unassigned      YES unset  up                    up      
+GigabitEthernet2/3/5   unassigned      YES unset  up                    up      
+GigabitEthernet2/3/6   unassigned      YES unset  up                    up      
+GigabitEthernet2/3/7   unassigned      YES unset  up                    up      
+GigabitEthernet2/3/8   unassigned      YES unset  up                    up      
+GigabitEthernet2/3/9   unassigned      YES unset  up                    up      
+GigabitEthernet2/3/10  unassigned      YES unset  up                    up      
+GigabitEthernet2/3/11  unassigned      YES unset  up                    up      
+GigabitEthernet2/3/12  unassigned      YES unset  up                    up      
+GigabitEthernet2/3/13  unassigned      YES unset  up                    up      
+GigabitEthernet2/3/14  unassigned      YES unset  up                    up      
+GigabitEthernet2/3/15  unassigned      YES unset  down                  down    
+GigabitEthernet2/3/16  unassigned      YES unset  down                  down    
+GigabitEthernet2/3/17  unassigned      YES unset  down                  down    
+GigabitEthernet2/3/18  unassigned      YES unset  up                    up      
+GigabitEthernet2/3/19  unassigned      YES unset  down                  down    
+GigabitEthernet2/3/20  unassigned      YES unset  up                    up      
+GigabitEthernet2/3/21  unassigned      YES unset  down                  down    
+GigabitEthernet2/3/22  unassigned      YES unset  up                    up      
+GigabitEthernet2/3/23  unassigned      YES unset  up                    up      
+ --More--         GigabitEthernet2/3/24  unassigned      YES unset  up                    up      
+GigabitEthernet2/3/25  unassigned      YES unset  up                    up      
+GigabitEthernet2/3/26  unassigned      YES unset  up                    up      
+GigabitEthernet2/3/27  unassigned      YES unset  up                    up      
+GigabitEthernet2/3/28  unassigned      YES unset  up                    up      
+GigabitEthernet2/3/29  unassigned      YES unset  down                  down    
+GigabitEthernet2/3/30  unassigned      YES unset  up                    up      
+GigabitEthernet2/3/31  unassigned      YES unset  up                    up      
+GigabitEthernet2/3/32  unassigned      YES unset  up                    up      
+GigabitEthernet2/3/33  unassigned      YES unset  up                    up      
+GigabitEthernet2/3/34  unassigned      YES unset  up                    up      
+GigabitEthernet2/3/35  unassigned      YES unset  up                    up      
+GigabitEthernet2/3/36  unassigned      YES unset  down                  down    
+GigabitEthernet2/3/37  unassigned      YES unset  down                  down    
+GigabitEthernet2/3/38  unassigned      YES unset  down                  down    
+GigabitEthernet2/3/39  unassigned      YES unset  down                  down    
+GigabitEthernet2/3/40  unassigned      YES unset  down                  down    
+GigabitEthernet2/3/41  unassigned      YES unset  down                  down    
+GigabitEthernet2/3/42  unassigned      YES unset  down                  down    
+GigabitEthernet2/3/43  unassigned      YES unset  down                  down    
+GigabitEthernet2/3/44  unassigned      YES unset  down                  down    
+GigabitEthernet2/3/45  unassigned      YES unset  down                  down    
+GigabitEthernet2/3/46  unassigned      YES unset  down                  down    
+ --More--         GigabitEthernet2/3/47  unassigned      YES unset  down                  down    
+GigabitEthernet2/3/48  unassigned      YES unset  down                  down    
+GigabitEthernet2/4/1   unassigned      YES unset  down                  down    
+GigabitEthernet2/4/2   unassigned      YES unset  down                  down    
+GigabitEthernet2/4/3   unassigned      YES unset  down                  down    
+GigabitEthernet2/4/4   unassigned      YES unset  down                  down    
+GigabitEthernet2/4/5   unassigned      YES unset  down                  down    
+GigabitEthernet2/4/6   unassigned      YES unset  down                  down    
+GigabitEthernet2/4/7   unassigned      YES unset  down                  down    
+GigabitEthernet2/4/8   unassigned      YES unset  down                  down    
+GigabitEthernet2/4/9   unassigned      YES unset  down                  down    
+GigabitEthernet2/4/10  unassigned      YES unset  down                  down    
+GigabitEthernet2/4/11  unassigned      YES unset  down                  down    
+GigabitEthernet2/4/12  unassigned      YES unset  down                  down    
+GigabitEthernet2/4/13  unassigned      YES unset  down                  down    
+GigabitEthernet2/4/14  unassigned      YES unset  down                  down    
+GigabitEthernet2/4/15  unassigned      YES unset  down                  down    
+GigabitEthernet2/4/16  unassigned      YES unset  down                  down    
+GigabitEthernet2/4/17  unassigned      YES unset  down                  down    
+GigabitEthernet2/4/18  unassigned      YES unset  down                  down    
+GigabitEthernet2/4/19  unassigned      YES unset  down                  down    
+GigabitEthernet2/4/20  unassigned      YES unset  down                  down    
+GigabitEthernet2/4/21  unassigned      YES unset  down                  down    
+ --More--         GigabitEthernet2/4/22  unassigned      YES unset  down                  down    
+GigabitEthernet2/4/23  unassigned      YES unset  down                  down    
+GigabitEthernet2/4/24  unassigned      YES unset  down                  down    
+GigabitEthernet2/4/25  unassigned      YES unset  down                  down    
+GigabitEthernet2/4/26  unassigned      YES unset  down                  down    
+GigabitEthernet2/4/27  unassigned      YES unset  down                  down    
+GigabitEthernet2/4/28  unassigned      YES unset  down                  down    
+GigabitEthernet2/4/29  unassigned      YES unset  down                  down    
+GigabitEthernet2/4/30  unassigned      YES unset  down                  down    
+GigabitEthernet2/4/31  unassigned      YES unset  down                  down    
+GigabitEthernet2/4/32  unassigned      YES unset  down                  down    
+GigabitEthernet2/4/33  unassigned      YES unset  down                  down    
+GigabitEthernet2/4/34  unassigned      YES unset  down                  down    
+GigabitEthernet2/4/35  unassigned      YES unset  down                  down    
+GigabitEthernet2/4/36  unassigned      YES unset  down                  down    
+GigabitEthernet2/4/37  unassigned      YES unset  down                  down    
+GigabitEthernet2/4/38  unassigned      YES unset  down                  down    
+GigabitEthernet2/4/39  unassigned      YES unset  down                  down    
+GigabitEthernet2/4/40  unassigned      YES unset  down                  down    
+GigabitEthernet2/4/41  unassigned      YES unset  down                  down    
+GigabitEthernet2/4/42  unassigned      YES unset  down                  down    
+GigabitEthernet2/4/43  unassigned      YES unset  down                  down    
+GigabitEthernet2/4/44  unassigned      YES unset  down                  down    
+ --More--         GigabitEthernet2/4/45  unassigned      YES unset  down                  down    
+GigabitEthernet2/4/46  unassigned      YES unset  up                    up      
+GigabitEthernet2/4/47  unassigned      YES unset  up                    up      
+GigabitEthernet2/4/48  unassigned      YES unset  up                    up      
+Port-channel1          unassigned      YES unset  up                    up      
+Port-channel2          unassigned      YES unset  up                    up      
+Port-channel3          unassigned      YES unset  up                    up      
+Port-channel4          unassigned      YES unset  up                    up      
+Port-channel5          unassigned      YES unset  down                  down    
+Port-channel6          unassigned      YES unset  up                    up      
+Port-channel7          unassigned      YES unset  up                    up      
+Port-channel8          unassigned      YES unset  up                    up      
+Port-channel9          unassigned      YES unset  up                    up      
+Port-channel10         unassigned      YES unset  up                    up      
+Port-channel11         unassigned      YES unset  up                    up      
+Port-channel12         unassigned      YES unset  up                    up      
+Port-channel13         unassigned      YES unset  up                    up      
+Port-channel14         unassigned      YES unset  up                    up      
+Port-channel15         unassigned      YES unset  up                    up      
+Port-channel16         unassigned      YES unset  up                    up      
+Port-channel17         unassigned      YES unset  up                    up      
+Port-channel18         unassigned      YES unset  up                    up      
+Port-channel19         unassigned      YES unset  up                    up      
+ --More--         Port-channel20         unassigned      YES unset  up                    up      
+Port-channel21         unassigned      YES unset  down                  down    
+Port-channel22         unassigned      YES unset  down                  down    
+Port-channel23         unassigned      YES unset  down                  down    
+Port-channel24         unassigned      YES unset  up                    up      
+Port-channel25         unassigned      YES unset  up                    up      
+Port-channel26         unassigned      YES unset  up                    up      
+Port-channel27         unassigned      YES unset  down                  down    
+Port-channel28         unassigned      YES unset  up                    up      
+Port-channel29         unassigned      YES unset  up                    up      
+Port-channel30         unassigned      YES unset  up                    up      
+Port-channel31         unassigned      YES unset  up                    up      
+Port-channel32         unassigned      YES unset  up                    up      
+Port-channel33         unassigned      YES unset  up                    up      
+Port-channel34         unassigned      YES unset  up                    up      
+Port-channel35         unassigned      YES unset  up                    up      
+Port-channel36         unassigned      YES unset  up                    up      
+Port-channel37         unassigned      YES unset  up                    up      
+Port-channel38         unassigned      YES unset  up                    up      
+Port-channel39         unassigned      YES unset  up                    up      
+Port-channel40         unassigned      YES unset  up                    up      
+Port-channel41         unassigned      YES unset  up                    up      
+Port-channel42         unassigned      YES unset  down                  down    
+ --More--         Port-channel49         unassigned      YES unset  up                    up      
+Port-channel51         unassigned      YES unset  up                    up      
+Port-channel52         unassigned      YES unset  up                    up      
+Port-channel90         unassigned      YES unset  down                  down    
+Port-channel99         unassigned      YES unset  up                    up      
+Port-channel100        unassigned      YES unset  up                    up      
+Port-channel143        unassigned      YES unset  up                    up      
+Port-channel144        unassigned      YES unset  down                  down    
+Vlan1                  unassigned      YES unset  administratively down down    
+Vlan21                 10.27.101.8     YES manual up                    up      
+Vlan22                 10.27.100.199   YES manual up                    up      
+Vlan168                10.42.167.23    YES manual up                    up      
+Vlan201                10.27.201.120   YES NVRAM  up                    up      
+Vlan1668               unassigned      YES unset  administratively down down    
+MUIC-Core-SW-01#  sh cdp ne
+MUIC-Core-SW-01#sh cdp neighbors 
+Capability Codes: R - Router, T - Trans Bridge, B - Source Route Bridge
+                  S - Switch, H - Host, I - IGMP, r - Repeater, P - Phone, 
+                  D - Remote, C - CVTA, M - Two-port Mac Relay 
+
+Device ID        Local Intrfce     Holdtme    Capability  Platform  Port ID
+MUIC-B2B-SW-01   Gig 2/3/3         179              S I   WS-C2960X Gig 1/0/26
+MUIC-B2B-SW-01   Gig 1/3/3         178              S I   WS-C2960X Gig 1/0/25
+MUIC-B3C-SW-01   Gig 2/3/6         157              S I   WS-C2960X Gig 1/0/26
+MUIC-B3C-SW-01   Gig 1/3/6         132              S I   WS-C2960X Gig 1/0/25
+MUIC-B2C-SW-01   Gig 2/3/4         178              S I   WS-C2960X Gig 1/0/26
+MUIC-B2C-SW-01   Gig 1/3/4         147              S I   WS-C2960X Gig 1/0/25
+MUIC-B3B-SW-01   Gig 2/3/5         151              S I   WS-C2960X Gig 1/0/26
+MUIC-B3B-SW-01   Gig 1/3/5         168              S I   WS-C2960X Gig 1/0/25
+MUIC-B1C-SW-01   Gig 2/3/2         164              S I   WS-C2960X Gig 1/0/26
+MUIC-B1C-SW-01   Gig 1/3/2         138              S I   WS-C2960X Gig 1/0/25
+MUIC-B1B-SW-01   Gig 2/3/1         141              S I   WS-C2960X Gig 1/0/26
+MUIC-B1B-SW-01   Gig 1/3/1         138              S I   WS-C2960X Gig 1/0/25
+MUIC-2B-COM4-SW-01
+                 Gig 1/3/18        124              S I   WS-C2960X Gig 2/0/50
+MUIC-2B-COM4-SW-01
+                 Gig 2/3/18        154              S I   WS-C2960X Gig 2/0/49
+MUIC-DCRB1-ASWc1000
+                 Gig 1/4/23        128              S I   C1000-24T Gig 1/0/22
+B1F5DCR3-MKT     Ten 1/2/6         119               R    MikroTik  vlan2
+B1F5DCR3-MKT     Ten 1/2/6         119               R    MikroTik  v1-bvlanlocal
+ --More--         
+Device ID        Local Intrfce     Holdtme    Capability  Platform  Port ID
+B1F5DCR3-MKT     Ten 1/2/6         117               R    MikroTik  v109-bvlanlocal
+B1F5DCR3-MKT     Ten 1/2/6         117               R    MikroTik  v802-bvlanlocal
+B1F5DCR3-MKT     Ten 1/2/6         117               R    MikroTik  v801-bvlanlocal
+B1F5DCR3-MKT     Ten 1/2/6         117               R    MikroTik  v800-bvlanlocal
+B1F5DCR3-MKT     Ten 1/2/6         117               R    MikroTik  v32-bvlanlocal
+B1F5DCR3-MKT     Ten 1/2/6         117               R    MikroTik  v160-bvlanlocal
+B1F5DCR3-MKT     Ten 1/2/6         117               R    MikroTik  v94-bvlanlocal
+B1F5DCR3-MKT     Ten 1/2/6         117               R    MikroTik  v93-bvlanlocal
+B1F5DCR3-MKT     Ten 1/2/6         117               R    MikroTik  v92-bvlanlocal
+B1F5DCR3-MKT     Ten 1/2/6         117               R    MikroTik  v91-bvlanlocal
+B1F5DCR3-MKT     Ten 1/2/6         117               R    MikroTik  v104-bvlanlocal
+B1F5DCR3-MKT     Ten 1/2/6         117               R    MikroTik  v23-bvlanlocal
+ --More--         
+Device ID        Local Intrfce     Holdtme    Capability  Platform  Port ID
+B1F5DCR3-MKT     Ten 1/2/6         117               R    MikroTik  v12-bvlanlocal
+B1F5DCR3-MKT     Ten 1/2/6         117               R    MikroTik  v21-bvlanlocal
+B1F5DCR3-MKT     Ten 1/2/6         117               R    MikroTik  v11-bvlanlocal
+B1F5DCR3-MKT     Ten 1/2/6         117               R    MikroTik  v9-bvlanlocal
+B1F5DCR3-MKT     Ten 1/2/6         117               R    MikroTik  v7-bvlanlocal
+B1F5DCR3-MKT     Ten 1/2/6         117               R    MikroTik  v5-bvlanlocal
+B1F5DCR3-MKT     Ten 1/2/6         117               R    MikroTik  v4-bvlanlocal
+B1F5DCR3-MKT     Ten 1/2/6         117               R    MikroTik  v3-bvlanlocal
+B1F5DCR3-MKT     Ten 1/2/6         117               R    MikroTik  v99-bvlanlocal
+B1F5DCR3-MKT     Ten 1/2/6         117               R    MikroTik  v74-bvlanlocal
+B1F5DCR3-MKT     Ten 1/2/6         117               R    MikroTik  v72-bvlanlocal
+B1F5DCR3-MKT     Ten 1/2/6         117               R    MikroTik  v10-bvlanlocal
+ --More--         
+Device ID        Local Intrfce     Holdtme    Capability  Platform  Port ID
+B1F5DCR3-MKT     Ten 1/2/6         116               R    MikroTik  v201-bvlanlocal
+B1F5DCR3-MKT     Ten 1/2/6         116               R    MikroTik  v22-bvlanlocal
+B1F5DCR3-MKT     Ten 1/2/6         116               R    MikroTik  bridge-Uplnik-Vlan-Local/bond
+B1F5DCR3-MKT     Ten 1/2/5         116               R    MikroTik  bridge-Uplnik-Vlan-Local/bond
+MUIC-CUCM        Gig 2/4/46        156               H    VMware    eth0
+IC_Core.mahidol.ac.th
+                 Ten 2/1/1         142             R S I  C9300-24T Ten 1/1/3
+IC_Core.mahidol.ac.th
+                 Ten 1/1/1         133             R S I  C9300-24T Ten 1/1/2
+MUIC-GD-SW-01    Gig 2/3/10        170              S I   WS-C2960X Gig 1/0/26
+MUIC-GD-SW-01    Gig 1/3/10        139              S I   WS-C2960X Gig 1/0/25
+MUIC-GA-SW-01    Gig 2/3/7         164              S I   WS-C2960X Gig 1/0/26
+MUIC-GA-SW-01    Gig 1/3/7         139              S I   WS-C2960X Gig 1/0/25
+MUIC-GC-SW-01    Gig 1/3/9         137              S I   WS-C2960X Gig 1/0/25
+MUIC-GC-SW-01    Gig 2/3/9         154              S I   WS-C2960X Gig 1/0/26
+MUIC-GB-SW-01    Gig 2/3/8         159              S I   WS-C2960X Gig 1/0/26
+MUIC-GB-SW-01    Gig 1/3/8         129              S I   WS-C2960X Gig 1/0/25
+MUIC-DCRB2-DSWc2960X.muicnetwork.local
+                 Gig 1/4/47        148              S I   WS-C2960X Gig 1/0/16
+ --More--         
+Device ID        Local Intrfce     Holdtme    Capability  Platform  Port ID
+MUIC-DCRB2-DSWc2960X.muicnetwork.local
+                 Gig 1/4/28        147              S I   WS-C2960X Gig 1/0/12
+MUIC-DCRB2-DSWc2960X.muicnetwork.local
+                 Gig 1/4/27        147              S I   WS-C2960X Gig 1/0/11
+MUIC-2B-FR2-SW-01
+                 Gig 1/3/19        146              S I   WS-C2960X Gig 2/0/49
+MUIC-DCRB1-NOC01c2960X
+                 Gig 1/3/37        137              S I   WS-C2960X Gig 1/0/25
+MUIC-2B-FR1-SW-01
+                 Gig 2/3/20        139              S I   WS-C2960X Gig 1/0/25
+KMUIC-UCCX.MUIC  Gig 2/4/46        143               H    VMware    eth0
+CUCMUIC          Gig 2/4/46        153               H    VMware    eth0
+MUIC-6D-SW-01    Gig 2/3/35        167              S I   WS-C2960X Gig 3/0/49
+MUIC-6D-SW-01    Gig 1/3/35        165              S I   WS-C2960X Gig 1/0/49
+MUIC-3A-SW-01    Gig 2/3/22        173              S I   WS-C2960X Gig 2/0/49
+MUIC-3A-SW-01    Gig 1/3/22        141              S I   WS-C2960X Gig 1/0/25
+MUIC-2A-SW-01    Gig 2/3/11        162              S I   WS-C2960X Gig 2/0/25
+MUIC-2A-SW-01    Gig 1/3/11        155              S I   WS-C2960X Gig 1/0/25
+MUIC-3C-SW-01    Gig 2/3/24        179              S I   WS-C2960X Gig 4/0/49
+MUIC-3C-SW-01    Gig 1/3/24        155              S I   WS-C2960X Gig 1/0/49
+MUIC-2B-SW-01    Gig 1/3/12        132              S I   WS-C2960X Gig 1/0/25
+MUIC-2B-SW-01    Gig 2/3/12        146              S I   WS-C2960X Gig 2/0/25
+MUIC-4D-SW-01    Gig 1/3/29        150              S I   WS-C2960X Gig 1/0/49
+ --More--         
+Device ID        Local Intrfce     Holdtme    Capability  Platform  Port ID
+MUIC-3B-SW-01    Gig 2/3/23        146              S I   WS-C2960X Gig 2/0/49
+MUIC-3B-SW-01    Gig 1/3/23        167              S I   WS-C2960X Gig 1/0/25
+MUIC-WLC-01      Ten 2/2/3         136               H    AIR-CT552 Ten 0/0/1
+MUIC-WLC-01      Ten 1/2/3         136               H    AIR-CT552 Ten 0/0/2
+MUIC-5D-SW-01    Gig 1/3/32        160              S I   WS-C2960X Gig 1/0/26
+MUIC-5D-SW-01    Gig 2/3/32        166              S I   WS-C2960X Gig 2/0/25
+MUIC-2C-SW-01    Gig 2/3/13        170              S I   WS-C2960X Gig 2/0/25
+MUIC-2C-SW-01    Gig 1/3/13        171              S I   WS-C2960X Gig 1/0/25
+MUIC-5C-SW-01    Gig 2/3/31        128              S I   WS-C2960X Gig 2/0/49
+MUIC-5C-SW-01    Gig 1/3/31        137              S I   WS-C2960X Gig 1/0/25
+MUIC-4B-SW-01    Gig 1/3/27        150              S I   WS-C2960X Gig 1/0/25
+MUIC-4B-SW-01    Gig 2/3/27        163              S I   WS-C2960X Gig 2/0/25
+MUIC-2D-SW-01    Gig 1/3/14        177              S I   WS-C2960X Gig 1/0/25
+MUIC-2D-SW-01    Gig 2/3/14        131              S I   WS-C2960X Gig 2/0/25
+MUIC-6A-SW-01    Gig 1/3/33        149              S I   WS-C2960X Gig 1/0/25
+MUIC-3D-SW-01    Gig 2/3/25        165              S I   WS-C2960X Gig 2/0/49
+MUIC-3D-SW-01    Gig 1/3/25        134              S I   WS-C2960X Gig 1/0/25
+MUIC-6A-SW-01    Gig 2/3/33        155              S I   WS-C2960X Gig 2/0/25
+MUIC-4C-SW-01    Gig 1/3/28        133              S I   WS-C2960X Gig 1/0/25
+MUIC-4C-SW-01    Gig 2/3/28        179              S I   WS-C2960X Gig 2/0/25
+MUIC-5A-SW-01    Gig 1/3/30        140              S I   WS-C2960X Gig 1/0/25
+MUIC-5A-SW-01    Gig 2/3/30        134              S I   WS-C2960X Gig 2/0/25
+MUIC-6C-SW-01    Gig 2/3/34        170              S I   WS-C2960X Gig 2/0/49
+ --More--         
+Device ID        Local Intrfce     Holdtme    Capability  Platform  Port ID
+MUIC-6C-SW-01    Gig 1/3/34        132              S I   WS-C2960X Gig 1/0/25
+MUIC-4A-SW-01    Gig 2/3/26        138              S I   WS-C2960X Gig 2/0/49
+MUIC-4A-SW-01    Gig 1/3/26        128              S I   WS-C2960X Gig 1/0/49
+f47470bdf2c4     Gig 1/3/41        139             R S I  C1300-48P te1/0/1
+B1F5DCR3-CORESW  Ten 1/2/6         140              S I   WS-C4506  Gig 4/4
+B1F5DCR3-CORESW  Ten 1/2/5         139              S I   WS-C4506  Gig 4/3
+MUIC-WiFi MKT    Gig 1/4/37        83                R    MikroTik  bridge-MUIC-WiFi/2Gb-TrafficV
+MUIC-WiFi MKT    Gig 1/4/38        83                R    MikroTik  bridge-MUIC-WiFi/2Gb-TrafficV
+MUIC-WiFi MKT    Gig 1/4/30        83                R    MikroTik  ether10
+MUIC-WiFi MKT    Gig 1/4/32        83                R    MikroTik  ether9
+MUIC-WiFi MKT    Gig 1/4/35        83                R    MikroTik  bridge-MUWAN-VLAN321/ether6
+MUIC-WiFi MKT    Gig 1/4/39        83                R    MikroTik  bridge-MUWAN/ether5
+MUIC-WiFi MKT    Gig 1/4/34        83                R    MikroTik  bridge-MUWAN-VLAN320/2Gb-Taff
+MUIC-WiFi MKT    Gig 1/4/36        83                R    MikroTik  bridge-MUWAN-VLAN320/2Gb-Taff
+MUIC-WiFi MKT    Gig 1/4/26        83                R    MikroTik  ether2
+MUIC-SRV-SW-01   Ten 1/2/1         130              S I   WS-C3850- Ten 1/1/3
+MUIC-AB-DSW-COMLAB
+ --More--         
+Device ID        Local Intrfce     Holdtme    Capability  Platform  Port ID
+                 Gig 1/4/44        133              S I   C1000-24P Gig 1/0/24
+MUIC-AB-DSW-COMLAB
+                 Gig 1/4/43        166              S I   C1000-24P Gig 1/0/23
+muic_voice_gw    Gig 2/4/47        171             R S I  ISR4351/K Gig 0/0/0
+
+Total cdp entries displayed : 117
+MUIC-Core-SW-01# 
