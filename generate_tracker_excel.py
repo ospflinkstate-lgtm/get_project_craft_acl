@@ -450,7 +450,7 @@ def autofit_columns(ws):
         ws.column_dimensions[col_letter].width = adjusted_width
 
 if __name__ == "__main__":
-    target_file = "Mikrotik-TP2.rsc"
+    target_file = "Mikrotik-TP3.rsc"
     if len(sys.argv) > 1:
         target_file = sys.argv[1]
         

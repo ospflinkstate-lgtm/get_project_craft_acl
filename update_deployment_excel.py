@@ -11,7 +11,7 @@ import openpyxl
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import PatternFill, Font, Alignment, Border, Side
 
-RSC_FILE = r"e:\vibe_code\get_project_craft_acl\Mikrotik-TP2.rsc"
+RSC_FILE = r"e:\vibe_code\get_project_craft_acl\Mikrotik-TP3.rsc"
 OUTPUT_FILE = r"e:\vibe_code\get_project_craft_acl\A-Draft - Mikrotik Deployment.xlsx"
 
 # ── Step 1: Read RSC and join continuation lines ──
